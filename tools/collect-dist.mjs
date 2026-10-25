@@ -1,0 +1,131 @@
+// Verifies the complete README-defined monorepo tree, then copies the web
+// app's build output to the repo root so Lovable's dist-check finds it.
+import { cpSync, existsSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { join, relative } from "node:path";
+
+const forbiddenLockfiles = ["bun.lock", "bun.lockb", "package-lock.json", "yarn.lock"];
+
+// Runtime/build state is not source structure. Secret .env files are also
+// intentionally absent from source control even where README documents their
+// runtime location.
+const ignoredNames = new Set([
+  ".git",
+  ".workspace",
+  "node_modules",
+  "dist",
+  ".output",
+  ".vinxi",
+  ".tanstack",
+  ".nitro",
+  ".turbo",
+  ".wrangler",
+]);
+
+function readReadmeManifest() {
+  const lines = readFileSync("README.md", "utf8").split(/\r?\n/);
+  const heading = lines.findIndex((line) => line.trim() === "## Repository structure");
+  const fenceStart = lines.findIndex((line, index) => index > heading && line.trim() === "```");
+  const fenceEnd = lines.findIndex((line, index) => index > fenceStart && line.trim() === "```");
+
+  if (heading < 0 || fenceStart < 0 || fenceEnd < 0) {
+    throw new Error("README.md must contain a fenced 'Repository structure' tree");
+  }
+
+  const stack = [];
+  const manifest = new Map();
+
+  for (const line of lines.slice(fenceStart + 1, fenceEnd)) {
+    if (line.trim() === "JOBRIO/") continue;
+    const branchIndex = [line.indexOf("├── "), line.indexOf("└── ")]
+      .filter((index) => index >= 0)
+      .sort((a, b) => a - b)[0];
+    if (branchIndex === undefined) continue;
+
+    const depth = Math.floor(branchIndex / 4);
+    const displayedName = line
+      .slice(branchIndex + 4)
+      .trim()
+      .split(/\s+/)[0];
+    const isDirectory = displayedName.endsWith("/");
+    // The README tree declares directories only (plus a non-path
+    // "(root-level files: ...)" note) — files are not part of the manifest.
+    if (!isDirectory) continue;
+    const name = displayedName.replace(/\/$/, "");
+    stack.length = depth;
+    const path = [...stack, name].join("/");
+
+    manifest.set(path, true);
+    stack.push(name);
+  }
+
+  return manifest;
+}
+
+function readActualManifest(directory = ".", manifest = new Map()) {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if (ignoredNames.has(entry.name) || entry.name.endsWith(".tsbuildinfo")) continue;
+    const absolutePath = join(directory, entry.name);
+    const path = relative(".", absolutePath).replaceAll("\\", "/");
+    const isDirectory = entry.isDirectory();
+    // Directories only — individual files are not README-declared structure.
+    if (!isDirectory) continue;
+    manifest.set(path, true);
+    readActualManifest(absolutePath, manifest);
+  }
+  return manifest;
+}
+
+function verifyStructure() {
+  // Some CI/hosting installers drop a non-pnpm lockfile at the root. Delete it
+  // instead of failing the build so the pnpm-only shape is self-healing.
+  for (const path of forbiddenLockfiles) {
+    if (!existsSync(path)) continue;
+    rmSync(path, { force: true });
+    console.warn(`[structure-check] removed stray lockfile: ${path} (pnpm-only)`);
+  }
+
+  const expected = readReadmeManifest();
+  const actual = readActualManifest();
+  const missing = [...expected].filter(
+    ([path, isDirectory]) => !actual.has(path) || actual.get(path) !== isDirectory,
+  );
+  const unexpected = [...actual].filter(
+    ([path, isDirectory]) => !expected.has(path) || expected.get(path) !== isDirectory,
+  );
+  const problems = [];
+
+  if (missing.length > 0) {
+    problems.push(`missing or wrong type:\n  ${missing.map(([path]) => path).join("\n  ")}`);
+  }
+  if (unexpected.length > 0) {
+    problems.push(`not declared in README.md:\n  ${unexpected.map(([path]) => path).join("\n  ")}`);
+  }
+
+  if (problems.length > 0) {
+    console.error(`[structure-check] README structure mismatch\n- ${problems.join("\n- ")}`);
+    process.exit(1);
+  }
+
+  console.log(`[structure-check] all ${expected.size} README paths are exact`);
+}
+
+verifyStructure();
+
+if (process.argv.includes("--check-structure")) process.exit(0);
+
+const candidates = ["dist", ".output"];
+let copied = false;
+
+for (const dir of candidates) {
+  const from = `apps/web/${dir}`;
+  if (!existsSync(from)) continue;
+  rmSync(dir, { recursive: true, force: true });
+  cpSync(from, dir, { recursive: true });
+  console.log(`[collect-dist] ${from} -> ${dir}`);
+  copied = true;
+}
+
+if (!copied) {
+  console.error(`[collect-dist] no build output found in apps/web (${candidates.join(", ")})`);
+  process.exit(1);
+}

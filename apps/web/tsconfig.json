@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@admin/*": ["../admin/src/*"],
+      "@jobrio/auth": ["../../packages/auth/src/index.ts"],
+      "@jobrio/auth/*": ["../../packages/auth/src/*"],
+      "@jobrio/config": ["../../packages/config/src/index.ts"],
+      "@jobrio/config/*": ["../../packages/config/src/*"],
+      "@jobrio/constants": ["../../packages/constants/src/index.ts"],
+      "@jobrio/constants/*": ["../../packages/constants/src/*"],
+      "@jobrio/database": ["../../packages/database/src/index.ts"],
+      "@jobrio/database/*": ["../../packages/database/src/*"],
+      "@jobrio/hooks": ["../../packages/hooks/src/index.ts"],
+      "@jobrio/hooks/*": ["../../packages/hooks/src/*"],
+      "@jobrio/sdk": ["../../packages/sdk/src/index.ts"],
+      "@jobrio/sdk/*": ["../../packages/sdk/src/*"],
+      "@jobrio/types": ["../../packages/types/src/index.ts"],
+      "@jobrio/types/*": ["../../packages/types/src/*"],
+      "@jobrio/ui": ["../../packages/ui/src/index.ts"],
+      "@jobrio/ui/*": ["../../packages/ui/src/*"],
+      "@jobrio/utils": ["../../packages/utils/src/index.ts"],
+      "@jobrio/utils/*": ["../../packages/utils/src/*"],
+      "@jobrio/validation": ["../../packages/validation/src/index.ts"],
+      "@jobrio/validation/*": ["../../packages/validation/src/*"]
+    },
+    "types": ["vite/client"]
+  },
+  "include": ["src", "tests", "../../packages/*/src"]
+}

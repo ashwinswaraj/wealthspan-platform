@@ -1,0 +1,19 @@
+{
+  "name": "@jobrio/utils",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.5.0",
+    "@jobrio/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "vitest": "^5.0.0"
+  },
+  "scripts": {
+    "test": "vitest run"
+  }
+}

@@ -1,0 +1,51 @@
+# Component Library
+
+> Status: Draft · Owner: TBD · Last updated: 2026-08-31
+
+## Purpose
+
+Inventory of what actually exists in `@jobrio/ui/design-system` today.
+
+## Details
+
+### `primitives/`
+`Button`, `Input`, `AuthInput`, `Avatar`, `Badge`, `ProgressBar`,
+`PasswordStrength`, `Skeleton`, `Spinner`, `JobrioToolbar`
+
+### `layout/`
+`Card`, `Container`, `PageHeader`, `StatCard`
+
+### `feedback/`
+`EmptyState`, `ErrorState`, `FieldError`, `LoadingState`, `PageSkeletons`,
+`SpinnerOverlay`, plus a `useSkeletonState` hook
+
+### `motion/`
+`transitions.ts` — shared transition definitions consumed alongside the
+`motion` tokens (see `48_Design_Tokens.md`)
+
+### `icons/`
+A single `index.ts` export surface
+
+Beyond the design system, `@jobrio/ui` has two more layers:
+- `packages/ui/src/components/` — the underlying shadcn/ui primitive layer
+  (49 components: `button`, `card`, `dialog`, `dropdown-menu`, `form`,
+  `calendar`, `chart`, etc.) that `design-system/primitives/` and
+  `layout/` are themselves built on top of.
+- `packages/ui/src/shared/` — higher-level shared components that don't
+  fit the core design-system surface: `ClientIdCard`/`ProfessionalIdCard`,
+  `AuditListPage`, `SidebarToggleIcon`, `LogoBriefcase`,
+  `NotificationBellIcon`, `MessagesInbox`, `ChatConversation`,
+  `QrScannerModal`, `AnimatedPlaceholder`.
+
+## Open Questions
+
+- [ ] No Storybook or visual catalog exists yet — this file is the only
+      current inventory
+- [ ] No documented criteria for what belongs in `design-system/` vs.
+      `shared/` vs. `components/` within `@jobrio/ui`
+
+## References
+
+- `packages/ui/src/design-system/`
+- `packages/ui/src/shared/`, `packages/ui/src/components/`
+- `45_Design_System.md`

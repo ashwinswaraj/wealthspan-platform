@@ -1,0 +1,9 @@
+# Default owners for everything in the repo
+*                       @jobrio/core
+
+/apps/web/         @jobrio/platform-team
+/apps/admin/            @jobrio/admin-team
+/apps/api/              @jobrio/backend-team
+/packages/              @jobrio/core
+/infrastructure/        @jobrio/devops
+/docs/                  @jobrio/product

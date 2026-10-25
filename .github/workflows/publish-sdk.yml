@@ -1,0 +1,40 @@
+name: publish-sdk
+
+# Runs on tags like sdk-v1.2.0. Requires the NPM_TOKEN secret.
+# @jobrio/sdk is currently "private": true, so the publish step is skipped until that is removed.
+on:
+  push:
+    tags: ["sdk-v*"]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck SDK
+        run: pnpm exec tsc --noEmit -p tsconfig.json
+      - name: Check package is publishable
+        id: check
+        run: echo "private=$(node -p \"require('./packages/sdk/package.json').private === true\")" >> "$GITHUB_OUTPUT"
+      - name: Publish to npm
+        if: steps.check.outputs.private != 'true'
+        run: pnpm --filter @jobrio/sdk publish --access public --no-git-checks --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+      - name: Skipped (package is private)
+        if: steps.check.outputs.private == 'true'
+        run: echo "::notice::@jobrio/sdk is private — publish skipped."

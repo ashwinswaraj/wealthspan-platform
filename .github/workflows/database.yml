@@ -1,0 +1,36 @@
+name: database
+
+on:
+  push:
+    branches: [main]
+    paths: ["packages/database/**", "infrastructure/database/**", "infrastructure/seed/**", ".github/workflows/database.yml"]
+  pull_request:
+    paths: ["packages/database/**", "infrastructure/database/**", "infrastructure/seed/**", ".github/workflows/database.yml"]
+
+jobs:
+  database:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck database client and types
+        run: pnpm exec tsc --noEmit -p tsconfig.json
+      - name: Validate local database config
+        run: |
+          test -f infrastructure/database/config.toml
+          python3 -c "import tomllib; tomllib.load(open('infrastructure/database/config.toml','rb')); print('config.toml OK')"
+      - name: Guard migrations (never edited without review)
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '(^|/)migrations/'; then
+            echo "::warning::This PR changes migration files — a human must review them."
+          fi

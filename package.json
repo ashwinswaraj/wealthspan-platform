@@ -1,0 +1,47 @@
+{
+  "name": "jobrio",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "predev": "pnpm check:structure",
+    "dev": "turbo run dev --filter=@jobrio/web --",
+    "build": "pnpm check:structure && turbo run build && node tools/collect-dist.mjs",
+    "build:dev": "pnpm check:structure && turbo run build:dev --filter=@jobrio/web && node tools/collect-dist.mjs",
+    "check:structure": "node tools/collect-dist.mjs --check-structure",
+    "lint": "pnpm check:structure && eslint .",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^22.16.5",
+    "@vitest/coverage-v8": "^5.0.0",
+    "eslint": "^9.32.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^15.15.0",
+    "jsdom": "^30.0.1",
+    "prettier": "^3.7.3",
+    "turbo": "^2.0.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.56.1",
+    "vitest": "^5.0.0"
+  },
+  "sideEffects": false,
+  "overrides": {
+    "js-yaml": "5.2.3"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}

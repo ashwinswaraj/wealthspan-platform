@@ -1,0 +1,12 @@
+# Jobrio
+
+> Workforce-as-a-Service. Jobrio replaces bidding marketplaces with an automated professional pipeline that delivers guaranteed outcomes.
+
+## Pages
+
+- [Home](/): What Jobrio is and how the automated workforce pipeline works.
+- [Services](/services): On-demand workforce services and execution pipeline categories.
+- [Professionals](/professionals): Vetted, tiered professionals with verified identities and live performance metrics.
+- [Clients](/clients): How clients submit outcomes and receive verified deliverables.
+- [Analytics](/analytics): Live analytics on throughput, quality tiers, and outcome performance.
+- [Our Story](/story): Why Jobrio replaces bidding marketplaces with guaranteed outcomes.

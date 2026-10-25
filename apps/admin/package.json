@@ -1,0 +1,53 @@
+{
+  "name": "@jobrio/admin",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Jobrio admin panel app",
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@jobrio/auth": "workspace:*",
+    "@jobrio/constants": "workspace:*",
+    "@jobrio/database": "workspace:*",
+    "@jobrio/hooks": "workspace:*",
+    "@jobrio/types": "workspace:*",
+    "@jobrio/ui": "workspace:*",
+    "@jobrio/utils": "workspace:*",
+    "@lovable.dev/vite-tanstack-config": "^2.19.5",
+    "@supabase/supabase-js": "^2.110.0",
+    "@tailwindcss/vite": "^4.2.1",
+    "@tanstack/react-query": "^5.102.8",
+    "@tanstack/react-router": "^1.170.32",
+    "@tanstack/react-start": "^1.168.49",
+    "@tanstack/router-plugin": "^1.168.35",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "html5-qrcode": "^2.3.8",
+    "lucide-react": "^0.575.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "recharts": "^2.15.4",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.2.1",
+    "tw-animate-css": "^1.3.4",
+    "vite-tsconfig-paths": "^6.0.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.16.5",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "typescript": "^5.8.3",
+    "vite": "^8.0.16"
+  }
+}
