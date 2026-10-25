@@ -162,6 +162,18 @@ importers:
 
   apps/api:
     dependencies:
+      '@jobrio/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
+      '@jobrio/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@jobrio/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      '@jobrio/validation':
+        specifier: workspace:*
+        version: link:../../packages/validation
       '@supabase/supabase-js':
         specifier: ^2.110.0
         version: 2.112.4

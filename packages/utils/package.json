@@ -15,5 +15,9 @@
   },
   "scripts": {
     "test": "vitest run"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./finance": "./src/finance.ts"
   }
 }
