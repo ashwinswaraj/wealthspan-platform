@@ -1,9 +1,8 @@
 name: deploy-production
 
 # Requires repository secrets: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+# Disabled for Wealthspan: runs only manually until the deploy target (Catalyst) and its secrets are set up.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:

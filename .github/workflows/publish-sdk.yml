@@ -2,9 +2,8 @@ name: publish-sdk
 
 # Runs on tags like sdk-v1.2.0. Requires the NPM_TOKEN secret.
 # @jobrio/sdk is currently "private": true, so the publish step is skipped until that is removed.
+# Disabled for Wealthspan: runs only manually until the deploy target (Catalyst) and its secrets are set up.
 on:
-  push:
-    tags: ["sdk-v*"]
   workflow_dispatch:
 
 jobs:
