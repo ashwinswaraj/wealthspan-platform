@@ -33,12 +33,23 @@ const handle = (fn) => async (req, res) => {
     res.json(await fn(req));
   } catch (e) {
     if (e instanceof LoginError) return res.status(e.status).json({ error: e.code, message: e.message });
-    console.error("auth error", e?.message); // never log codes, tokens or hashes
+    // Catalyst SDK errors are often plain objects/strings, so don't rely on .message.
+    // Log only safe fields (never codes, tokens, hashes or request bodies).
+    const safe = typeof e === "string" ? e : [e?.name, e?.code, e?.status, e?.message, e?.stage].filter(Boolean).join(" | ");
+    console.error("auth error:", String(safe || typeof e).slice(0, 300), "| keys:", e && typeof e === "object" ? Object.keys(e).join(",") : "");
     res.status(500).json({ error: "server", message: "Something went wrong. Try again." });
   }
 };
 
-app.post("/send", handle(async (req) => serviceFor(req).svc.send(req.body ?? {})));
+const stage = async (label, fn) => {
+  try { return await fn(); } catch (e) {
+    if (e instanceof LoginError) throw e;
+    if (e && typeof e === "object") e.stage = label; else { const w = new Error(String(e)); w.stage = label; throw w; }
+    throw e;
+  }
+};
+
+app.post("/send", handle(async (req) => stage("send", async () => serviceFor(req).svc.send(req.body ?? {}))));
 
 app.post("/verify", handle(async (req) => {
   const { c, svc } = serviceFor(req);
