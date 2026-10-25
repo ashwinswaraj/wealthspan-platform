@@ -1,3 +1,3 @@
 {
-  "functions": { "targets": ["auth"], "ignore": [], "source": "functions" }
+  "functions": { "targets": ["auth", "finance"], "ignore": [], "source": "functions" }
 }

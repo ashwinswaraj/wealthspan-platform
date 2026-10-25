@@ -19,3 +19,10 @@ Unverified until the first deploy: the Node SDK calls in `index.js`, `lib/cataly
 `lib/mailer.js` (`catalyst.initialize`, `zcql().executeZCQLQuery`, `datastore().table().insertRow/updateRow`,
 `email().sendMail`, `userManagement().generateCustomToken`), the `stack` value in `catalyst-config.json`,
 and how Data Store returns `used_at` datetimes. Fix against real responses, don't guess.
+
+## functions/finance (transactions API)
+Routes: `GET/POST /transactions`, `PATCH/DELETE /transactions/:id`, `GET /summary`. Login required; the user comes from the Catalyst session.
+`functions/finance/index.js` is GENERATED: after changing anything in `apps/api/src/features/finance`, run
+`pnpm --filter @jobrio/api build:catalyst`, commit the result, then deploy (`catalyst deploy` from this folder; run `npm install` in `functions/finance` first).
+Not yet run on real Catalyst (unverified): `userManagement().getCurrentUser()` field names, how bigint ids / NULLs come back, ZCQL row cap.
+Only transactions have routes so far; projects, accounts, events, loans and investments need their own routes (and the chatbot) next.
