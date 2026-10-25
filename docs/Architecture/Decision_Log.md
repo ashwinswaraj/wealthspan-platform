@@ -31,5 +31,6 @@ Newest first. One entry per decision: what, why, who, what it replaces.
    Signup. STILL UNVERIFIED: email-code (OTP) login, outbound HTTP from
    functions to Sarvam, free-tier insert/row limits at real usage, function
    memory. Money columns must be BigInt (paise); Int (10 digits) overflows at ~₹10 crore, below our ₹100 crore input cap.
+5b. **Login method (2026-10-25):** email code (OTP) or magic link, one per attempt, built as a custom `auth` function + Catalyst third-party auth; Google login can be added later. Catalyst Mail free tier (~100 emails) is a launch blocker to resolve.
 6. **Data model:** see `docs/Database/41_Wealthspan_Data_Model.md`.
 7. **Money** is integer paise everywhere (the old frontend used floats).

@@ -23,3 +23,11 @@ Rules
 Not yet created: chat history table, pending-confirmation table, users/profile table.
 Production environment must be created by deploying/promoting Development.
 Secrets (Sarvam key etc.) live only in function environment variables, never in the repo.
+
+## login_codes (added 2026-10-25) — id 64308000000038017
+email, method (`otp` | `link`), secret_hash (SHA-256 of code/token, never the plain value), expires_at, attempts, used_at.
+Login design (owner choice: email OTP *or* magic link, one at a time, per login attempt):
+- Catalyst native auth has no documented email-OTP, so login runs through our own `auth` function + Catalyst third-party (custom token) auth.
+- send: create 6-digit code or a random link token, store only its hash, expiry 10 min, mail it with Catalyst Mail.
+- verify: constant-time hash compare, max 5 attempts, single use, then issue the Catalyst custom token (session).
+- Rate-limit sends per email (e.g. 1/min, 5/hour). Free tier has only ~100 emails — must be raised before launch.
