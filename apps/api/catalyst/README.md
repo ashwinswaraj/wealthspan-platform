@@ -26,3 +26,7 @@ Routes: `GET/POST /transactions`, `PATCH/DELETE /transactions/:id`, `GET /summar
 `pnpm --filter @jobrio/api build:catalyst`, commit the result, then deploy (`catalyst deploy` from this folder; run `npm install` in `functions/finance` first).
 Not yet run on real Catalyst (unverified): `userManagement().getCurrentUser()` field names, how bigint ids / NULLs come back, ZCQL row cap.
 Only transactions have routes so far; projects, accounts, events, loans and investments need their own routes (and the chatbot) next.
+
+Note: `catalyst deploy` overwrites a function's env variables with `env_variables` from its `catalyst-config.json`.
+Non-secret values (FROM_EMAIL) live there. Secrets (SARVAM_API_KEY, etc.) must NEVER be put in the repo:
+set them in the console or via the connector AFTER each deploy until a better way is chosen.

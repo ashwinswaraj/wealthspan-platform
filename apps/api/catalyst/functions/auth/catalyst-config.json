@@ -3,7 +3,11 @@
     "name": "auth",
     "type": "advancedio",
     "stack": "node22",
-    "env_variables": {}
+    "env_variables": {
+      "FROM_EMAIL": "wealthspan@zohomail.in"
+    }
   },
-  "execution": { "main": "index.js" }
+  "execution": {
+    "main": "index.js"
+  }
 }
