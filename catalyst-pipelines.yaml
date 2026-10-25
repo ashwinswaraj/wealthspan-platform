@@ -1,0 +1,27 @@
+# Wealthspan — deploys the Catalyst functions in apps/api/catalyst.
+# Pipeline variables to set in the Catalyst console (Pipelines -> deploy-main -> Variables):
+#   PROJECT_ID, CATALYST_ORG, CATALYST_TOKEN (secret)
+# Adapted from Catalyst's "Deploy to Catalyst" sample; first run may need small fixes.
+version: 1
+runners:
+  Machine:
+    config-id: 2
+images:
+  DeployMachine:
+    image: ubuntu
+jobs:
+  Deploy_Functions:
+    steps:
+      - apt-get update
+      - apt-get install -y curl ca-certificates
+      - curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+      - apt-get install -y nodejs
+      - npm i -g zcatalyst-cli
+      - catalyst -v
+      - cd apps/api/catalyst/functions/auth && npm install --omit=dev
+      - cd apps/api/catalyst && catalyst deploy --project << env.PROJECT_ID >> --org << env.CATALYST_ORG >> --token << env.CATALYST_TOKEN >>
+stages:
+  - name: build
+    image: DeployMachine
+    jobs:
+      - Deploy_Functions
