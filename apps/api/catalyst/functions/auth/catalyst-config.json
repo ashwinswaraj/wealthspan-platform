@@ -1,0 +1,9 @@
+{
+  "deployment": {
+    "name": "auth",
+    "type": "advancedio",
+    "stack": "node22",
+    "env_variables": {}
+  },
+  "execution": { "main": "index.js" }
+}
