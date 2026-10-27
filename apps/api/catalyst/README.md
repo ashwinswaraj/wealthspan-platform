@@ -30,3 +30,10 @@ Only transactions have routes so far; projects, accounts, events, loans and inve
 Note: `catalyst deploy` overwrites a function's env variables with `env_variables` from its `catalyst-config.json`.
 Non-secret values (FROM_EMAIL) live there. Secrets (SARVAM_API_KEY, etc.) must NEVER be put in the repo:
 set them in the console or via the connector AFTER each deploy until a better way is chosen.
+
+## files function (PDF / Excel / CSV / Word)
+
+`GET /server/files/export?format=csv|xlsx|docx|pdf&from=YYYY-MM-DD&to=YYYY-MM-DD&projectId=` (login required).
+Shared report code: `apps/api/src/features/files`. PDF uses "Rs." because built-in PDF fonts have no ₹ glyph.
+Project/account names show as ids until the projects/accounts routes exist (pass `names` to `buildReport`).
+Build all functions with `pnpm --filter @jobrio/api build:catalyst` (script: `apps/api/catalyst/build.mjs`).
