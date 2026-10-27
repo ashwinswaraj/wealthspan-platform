@@ -46,7 +46,7 @@ function createSarvamClient(opts) {
         const res = await doFetch(url, {
           method: "POST",
           signal: ctrl.signal,
-          headers: { "content-type": "application/json", "api-subscription-key": opts.apiKey },
+          headers: { "content-type": "application/json", "api-subscription-key": opts.apiKey, authorization: `Bearer ${opts.apiKey}` },
           body: JSON.stringify({
             model: opts.model ?? "sarvam-105b",
             messages: input.messages,
@@ -55,7 +55,10 @@ function createSarvamClient(opts) {
             ...input.tools?.length ? { tools: input.tools, tool_choice: "auto" } : {}
           })
         });
-        if (!res.ok) throw new AiError("provider", `AI provider returned ${res.status}.`, res.status === 429 ? 429 : 502);
+        if (!res.ok) {
+          const detail = (await res.text().catch(() => "")).replace(/sk_[A-Za-z0-9_]+/g, "[key]").slice(0, 200);
+          throw new AiError("provider", `AI provider returned ${res.status}. ${detail}`.trim(), res.status === 429 ? 429 : 502);
+        }
         const data = await res.json();
         const choice = data.choices?.[0];
         if (!choice?.message) throw new AiError("bad_response", "AI provider sent an unexpected reply.");
