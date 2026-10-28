@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ClientsRouteImport } from './routes/clients'
 import { Route as DisputeResolutionRouteImport } from './routes/dispute-resolution'
@@ -50,6 +51,11 @@ const IndexRoute = IndexRouteImport.update({
 const AnalyticsRoute = AnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -206,6 +212,7 @@ const SignupProfessionalStep5Route = SignupProfessionalStep5RouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/clients': typeof ClientsRoute
   '/dispute-resolution': typeof DisputeResolutionRoute
@@ -240,6 +247,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/clients': typeof ClientsRoute
   '/dispute-resolution': typeof DisputeResolutionRoute
@@ -274,6 +282,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/app': typeof AppRoute
   '/auth': typeof AuthRoute
   '/clients': typeof ClientsRoute
   '/dispute-resolution': typeof DisputeResolutionRoute
@@ -310,6 +319,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/analytics'
+    | '/app'
     | '/auth'
     | '/clients'
     | '/dispute-resolution'
@@ -344,6 +354,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/analytics'
+    | '/app'
     | '/auth'
     | '/clients'
     | '/dispute-resolution'
@@ -377,6 +388,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/analytics'
+    | '/app'
     | '/auth'
     | '/clients'
     | '/dispute-resolution'
@@ -412,6 +424,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
+  AppRoute: typeof AppRoute
   AuthRoute: typeof AuthRoute
   ClientsRoute: typeof ClientsRoute
   DisputeResolutionRoute: typeof DisputeResolutionRoute
@@ -446,6 +459,13 @@ declare module '@tanstack/react-router' {
       path: '/analytics'
       fullPath: '/analytics'
       preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -707,6 +727,7 @@ const DashboardSuperRouteWithChildren = DashboardSuperRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
+  AppRoute: AppRoute,
   AuthRoute: AuthRoute,
   ClientsRoute: ClientsRoute,
   DisputeResolutionRoute: DisputeResolutionRoute,

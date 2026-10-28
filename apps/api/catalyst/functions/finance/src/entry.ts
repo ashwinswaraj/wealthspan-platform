@@ -6,6 +6,7 @@
  *   POST   /transactions
  *   PATCH  /transactions/:id
  *   DELETE /transactions/:id        (soft delete)
+ *   GET    /me                      (200 when logged in, else 401)
  *   GET    /summary?from&to&projectId
  *   GET/POST /projects|accounts|events|loans|investments ; PATCH/DELETE /<entity>/:id
  *   POST   /events/:id/conclude|reopen, /loans/:id/close|reopen, /projects|accounts/:id/archive|unarchive
@@ -68,6 +69,9 @@ app.delete("/transactions/:id", wrap(async (req) => { await req.svc!.deleteTrans
 
 app.get("/summary", wrap((req) =>
   req.svc!.getSummary(req.userId!, { from: date(req.query.from), to: date(req.query.to), projectId: q(req.query.projectId) })));
+
+/** Is there a valid login? Used by the app to decide between the login screen and the app. */
+app.get("/me", wrap(async (req) => ({ userId: req.userId })));
 
 /* ---- projects, accounts, events, loans, investments ---- */
 const ENTITIES: CatalogEntity[] = ["projects", "accounts", "events", "loans", "investments"];

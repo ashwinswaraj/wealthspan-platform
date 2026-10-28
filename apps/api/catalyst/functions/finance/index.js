@@ -1013,6 +1013,7 @@ app.delete("/transactions/:id", wrap(async (req) => {
   return { deleted: true };
 }));
 app.get("/summary", wrap((req) => req.svc.getSummary(req.userId, { from: date(req.query.from), to: date(req.query.to), projectId: q(req.query.projectId) })));
+app.get("/me", wrap(async (req) => ({ userId: req.userId })));
 var ENTITIES = ["projects", "accounts", "events", "loans", "investments"];
 for (const entity of ENTITIES) {
   app.get(`/${entity}`, wrap((req) => req.cat.list(entity, req.userId).then((items) => ({ items }))));

@@ -314,3 +314,10 @@
 @media (prefers-reduced-motion: reduce) {
   .skeleton-shimmer { animation: none; }
 }
+
+/* Wealthspan app (/app): monochrome brand — near-black primary instead of Jobrio blue. */
+.wealthspan-theme {
+  --primary: 0 0% 9%;
+  --primary-foreground: 0 0% 100%;
+  --primary-container: 0 0% 9%;
+}
