@@ -38,6 +38,7 @@ var PAYMENT_MODES = [
   { id: "wallet", label: "Wallet" }
 ];
 var PAYMENT_MODE_IDS = PAYMENT_MODES.map((m) => m.id);
+var ACCOUNT_KINDS = ["cash", "bank", "credit_card", "wallet"];
 var PAYMENT_MODE_ACCOUNT_KINDS = {
   cash: ["cash"],
   upi: ["bank", "wallet"],
@@ -47,6 +48,18 @@ var PAYMENT_MODE_ACCOUNT_KINDS = {
   cheque: ["bank"],
   wallet: ["wallet"]
 };
+var PROJECT_KINDS = ["personal", "business"];
+var INVESTMENT_KINDS = [
+  "fixed_deposit",
+  "recurring_deposit",
+  "sip",
+  "mutual_fund",
+  "stocks",
+  "gold",
+  "ppf_epf_nps",
+  "real_estate",
+  "other"
+];
 
 // ../../packages/validation/src/finance.ts
 var MAX_AMOUNT_RUPEES = 1e9;
@@ -130,13 +143,105 @@ var validateTransactionInput = (input, opts = {}) => {
   }
   return e;
 };
+var validateName = (v, label) => {
+  const s = typeof v === "string" ? v.trim() : "";
+  if (!s) return `${label} is required.`;
+  if (s.length < 2) return `${label} must be at least 2 characters.`;
+  if (s.length > 60) return `${label} must be at most 60 characters.`;
+  return null;
+};
+var validateProjectInput = (input) => {
+  const e = {};
+  const n = validateName(input.name, "Project name");
+  if (n) e.name = n;
+  if (isBlank(input.kind)) e.kind = "Project type is required.";
+  else if (!PROJECT_KINDS.includes(input.kind))
+    e.kind = "Project type must be personal or business.";
+  return e;
+};
+var validateAccountInput = (input) => {
+  const e = {};
+  const n = validateName(input.name, "Account name");
+  if (n) e.name = n;
+  if (isBlank(input.kind)) e.kind = "Account type is required.";
+  else if (!ACCOUNT_KINDS.includes(input.kind))
+    e.kind = "Account type must be cash, bank, credit card or wallet.";
+  if (!isBlank(input.openingBalance)) {
+    const v = parseRupees(input.openingBalance);
+    if (v === null) e.openingBalance = "Opening balance must be a number.";
+    else if (v > MAX_AMOUNT_RUPEES) e.openingBalance = "Opening balance looks too large.";
+    else if (Math.round(v * 100) / 100 !== v) e.openingBalance = "Opening balance can have at most 2 decimal places.";
+  }
+  if (!isBlank(input.creditLimit)) {
+    if (input.kind !== "credit_card") e.creditLimit = "Credit limit is only for credit cards.";
+    else {
+      const err = validateAmountRupees(input.creditLimit, "Credit limit");
+      if (err) e.creditLimit = err;
+    }
+  }
+  return e;
+};
+var validateLoanInput = (input) => {
+  const e = {};
+  if (isBlank(input.projectId)) e.projectId = "Project is required.";
+  const l = validateName(input.lender, "Lender");
+  if (l) e.lender = l;
+  const p = validateAmountRupees(input.principal, "Loan amount");
+  if (p) e.principal = p;
+  if (!isBlank(input.emi)) {
+    const err = validateAmountRupees(input.emi, "EMI");
+    if (err) e.emi = err;
+  }
+  if (!isBlank(input.interestRatePct)) {
+    const r = Number(input.interestRatePct);
+    if (!Number.isFinite(r) || r < 0 || r > 100) e.interestRatePct = "Interest rate must be between 0 and 100.";
+  }
+  if (!isBlank(input.emiDayOfMonth)) {
+    const d = Number(input.emiDayOfMonth);
+    if (!Number.isInteger(d) || d < 1 || d > 31) e.emiDayOfMonth = "EMI day must be between 1 and 31.";
+  }
+  if (!isBlank(input.tenureMonths)) {
+    const t2 = Number(input.tenureMonths);
+    if (!Number.isInteger(t2) || t2 < 1 || t2 > 600) e.tenureMonths = "Tenure must be between 1 and 600 months.";
+  }
+  return e;
+};
+var validateInvestmentInput = (input) => {
+  const e = {};
+  if (isBlank(input.projectId)) e.projectId = "Project is required.";
+  const n = validateName(input.name, "Investment name");
+  if (n) e.name = n;
+  if (isBlank(input.kind)) e.kind = "Investment type is required.";
+  else if (!INVESTMENT_KINDS.includes(input.kind))
+    e.kind = "Please choose a valid investment type.";
+  if (!isBlank(input.currentValue)) {
+    const err = validateAmountRupees(input.currentValue, "Current value");
+    if (err) e.currentValue = err;
+  }
+  return e;
+};
+var validateEventInput = (input) => {
+  const e = {};
+  if (isBlank(input.projectId)) e.projectId = "Project is required.";
+  const n = validateName(input.name, "Event name");
+  if (n) e.name = n;
+  if (!isBlank(input.budget)) {
+    const err = validateAmountRupees(input.budget, "Budget");
+    if (err) e.budget = err;
+  }
+  if (!isBlank(input.startDate) && !isValidIsoDate(input.startDate)) e.startDate = "Start date must be a valid date.";
+  if (!isBlank(input.endDate) && !isValidIsoDate(input.endDate)) e.endDate = "End date must be a valid date.";
+  if (!e.startDate && !e.endDate && input.startDate && input.endDate && input.endDate < input.startDate)
+    e.endDate = "End date can't be before the start date.";
+  return e;
+};
 
 // ../../packages/utils/src/finance.ts
 var rupeesToPaise = (value) => {
   const n = typeof value === "number" ? value : Number(String(value).replace(/[₹,\s]/g, ""));
   if (!Number.isFinite(n)) return null;
-  const paise = Math.round(n * 100);
-  return Math.abs(paise / 100 - n) < 1e-9 ? paise : null;
+  const paise2 = Math.round(n * 100);
+  return Math.abs(paise2 / 100 - n) < 1e-9 ? paise2 : null;
 };
 var live = (rows) => rows.filter((r) => !r.deletedAt);
 var countsAsExpense = (tx, eventsById) => {
@@ -186,10 +291,10 @@ var summarize = (transactions, events, filter = {}) => {
   return out;
 };
 var CARD_BILL_WORDS = /(credit\s*card|card\s*(bill|payment|due|dues|outstanding)|cc\s*(bill|payment)|\bcard\s*pay)/i;
-var looksLikeCardBillPayment = (...texts) => texts.some((t) => !!t && CARD_BILL_WORDS.test(t));
+var looksLikeCardBillPayment = (...texts) => texts.some((t2) => !!t2 && CARD_BILL_WORDS.test(t2));
 var dayDiff = (a, b) => Math.abs(Math.round((Date.parse(`${a}T00:00:00Z`) - Date.parse(`${b}T00:00:00Z`)) / 864e5));
 var findSameAmountCardExpenses = (candidate, existing, windowDays = 45) => live(existing).filter(
-  (t) => t.type === "expense" && t.paymentMode === "credit_card" && t.amountPaise === candidate.amountPaise && dayDiff(t.date, candidate.date) <= windowDays
+  (t2) => t2.type === "expense" && t2.paymentMode === "credit_card" && t2.amountPaise === candidate.amountPaise && dayDiff(t2.date, candidate.date) <= windowDays
 );
 
 // src/features/finance/service.ts
@@ -227,22 +332,22 @@ var clean = (input) => {
   }
   return out;
 };
-var toInput = (t) => ({
-  type: t.type,
-  amount: t.amountPaise / 100,
-  date: t.date,
-  projectId: t.projectId,
-  accountId: t.accountId,
-  fromAccountId: t.fromAccountId,
-  toAccountId: t.toAccountId,
-  paymentMode: t.paymentMode,
-  category: t.category,
-  party: t.party,
-  source: t.source,
-  note: t.note,
-  eventId: t.eventId,
-  loanId: t.loanId,
-  investmentId: t.investmentId
+var toInput = (t2) => ({
+  type: t2.type,
+  amount: t2.amountPaise / 100,
+  date: t2.date,
+  projectId: t2.projectId,
+  accountId: t2.accountId,
+  fromAccountId: t2.fromAccountId,
+  toAccountId: t2.toAccountId,
+  paymentMode: t2.paymentMode,
+  category: t2.category,
+  party: t2.party,
+  source: t2.source,
+  note: t2.note,
+  eventId: t2.eventId,
+  loanId: t2.loanId,
+  investmentId: t2.investmentId
 });
 var createFinanceService = ({
   store,
@@ -338,21 +443,21 @@ var createFinanceService = ({
       });
       return { transaction, warnings };
     },
-    async updateTransaction(userId, id2, patch, source = "manual") {
-      const before = await store.getTransaction(userId, id2);
+    async updateTransaction(userId, id3, patch, source = "manual") {
+      const before = await store.getTransaction(userId, id3);
       if (!before) throw new FinanceError("not_found", "Transaction not found.", 404);
       const input = clean({ ...toInput(before), ...removeUndefined(patch) });
       await validate(userId, input);
       const row = toRow(userId, input, before.createdBy);
       const warnings = await warningsFor(userId, row);
       const { userId: _u, createdBy: _c, ...changes } = row;
-      const transaction = await store.updateTransaction(userId, id2, changes);
+      const transaction = await store.updateTransaction(userId, id3, changes);
       await store.insertAudit({
         userId,
         actor: source,
         action: "update_transaction",
         entity: "transaction",
-        entityId: id2,
+        entityId: id3,
         before,
         after: transaction,
         createdAt: nowIso(),
@@ -361,16 +466,16 @@ var createFinanceService = ({
       return { transaction, warnings };
     },
     /** Soft delete: hidden now, recoverable for 30 days. */
-    async deleteTransaction(userId, id2, source = "manual") {
-      const before = await store.getTransaction(userId, id2);
+    async deleteTransaction(userId, id3, source = "manual") {
+      const before = await store.getTransaction(userId, id3);
       if (!before) throw new FinanceError("not_found", "Transaction not found.", 404);
-      await store.softDeleteTransaction(userId, id2, nowIso());
+      await store.softDeleteTransaction(userId, id3, nowIso());
       await store.insertAudit({
         userId,
         actor: source,
         action: "delete_transaction",
         entity: "transaction",
-        entityId: id2,
+        entityId: id3,
         before,
         after: null,
         createdAt: nowIso(),
@@ -380,7 +485,7 @@ var createFinanceService = ({
     async listTransactions(userId, f = {}) {
       const limit = Math.min(Math.max(f.limit ?? 50, 1), 200);
       const offset = Math.max(f.offset ?? 0, 0);
-      const all = (await store.listTransactions(userId)).filter((t) => (!f.from || t.date >= f.from) && (!f.to || t.date <= f.to)).filter((t) => !f.projectId || t.projectId === f.projectId).filter((t) => !f.type || t.type === f.type).filter((t) => !f.accountId || [t.accountId, t.fromAccountId, t.toAccountId].includes(f.accountId)).sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+      const all = (await store.listTransactions(userId)).filter((t2) => (!f.from || t2.date >= f.from) && (!f.to || t2.date <= f.to)).filter((t2) => !f.projectId || t2.projectId === f.projectId).filter((t2) => !f.type || t2.type === f.type).filter((t2) => !f.accountId || [t2.accountId, t2.fromAccountId, t2.toAccountId].includes(f.accountId)).sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
       return { total: all.length, items: all.slice(offset, offset + limit) };
     },
     async getSummary(userId, filter = {}) {
@@ -428,7 +533,7 @@ var rowToTransaction = (r) => ({
   loanId: str(r.loan_id),
   investmentId: str(r.investment_id)
 });
-var transactionToColumns = (t) => {
+var transactionToColumns = (t2) => {
   const m = [
     ["type", "type"],
     ["amountPaise", "amount_paise"],
@@ -449,7 +554,7 @@ var transactionToColumns = (t) => {
     ["createdBy", "created_by"]
   ];
   const out = {};
-  for (const [k, col] of m) if (k in t) out[col] = t[k] ?? null;
+  for (const [k, col] of m) if (k in t2) out[col] = t2[k] ?? null;
   return out;
 };
 var createCatalystFinanceStore = (app2) => {
@@ -563,6 +668,295 @@ var createCatalystFinanceStore = (app2) => {
   };
 };
 
+// src/features/catalog/types.ts
+var CatalogError = class extends Error {
+  constructor(code, message, status = 400, fields) {
+    super(message);
+    this.code = code;
+    this.status = status;
+    this.fields = fields;
+  }
+};
+
+// src/features/catalog/service.ts
+var t = (v) => typeof v === "string" ? v.trim() || null : v ?? null;
+var has = (i, k) => k in i;
+var paise = (v) => v === null || v === void 0 || v === "" ? null : rupeesToPaise(Number(v));
+var numOrNull = (v) => v === null || v === void 0 || v === "" ? null : Number(v);
+var toStored = {
+  projects: (i) => ({ ...has(i, "name") && { name: String(t(i.name) ?? "") }, ...has(i, "kind") && { kind: i.kind } }),
+  accounts: (i) => ({
+    ...has(i, "name") && { name: String(t(i.name) ?? "") },
+    ...has(i, "kind") && { kind: i.kind },
+    ...has(i, "openingBalance") && { openingBalancePaise: paise(i.openingBalance) ?? 0 },
+    ...has(i, "creditLimit") && { creditLimitPaise: paise(i.creditLimit) },
+    ...has(i, "defaultProjectId") && { defaultProjectId: t(i.defaultProjectId) }
+  }),
+  events: (i) => ({
+    ...has(i, "projectId") && { projectId: String(t(i.projectId) ?? "") },
+    ...has(i, "name") && { name: String(t(i.name) ?? "") },
+    ...has(i, "budget") && { budgetPaise: paise(i.budget) },
+    ...has(i, "startDate") && { startDate: t(i.startDate) },
+    ...has(i, "endDate") && { endDate: t(i.endDate) }
+  }),
+  loans: (i) => ({
+    ...has(i, "projectId") && { projectId: String(t(i.projectId) ?? "") },
+    ...has(i, "lender") && { lender: String(t(i.lender) ?? "") },
+    ...has(i, "principal") && { principalPaise: paise(i.principal) ?? 0 },
+    ...has(i, "interestRatePct") && { interestRatePct: numOrNull(i.interestRatePct) },
+    ...has(i, "emi") && { emiPaise: paise(i.emi) },
+    ...has(i, "emiDayOfMonth") && { emiDayOfMonth: numOrNull(i.emiDayOfMonth) },
+    ...has(i, "startDate") && { startDate: t(i.startDate) },
+    ...has(i, "tenureMonths") && { tenureMonths: numOrNull(i.tenureMonths) }
+  }),
+  investments: (i) => ({
+    ...has(i, "projectId") && { projectId: String(t(i.projectId) ?? "") },
+    ...has(i, "name") && { name: String(t(i.name) ?? "") },
+    ...has(i, "kind") && { kind: i.kind },
+    ...has(i, "currentValue") && { currentValuePaise: paise(i.currentValue) },
+    ...has(i, "folioNo") && { folioNo: t(i.folioNo) }
+  })
+};
+var validators = {
+  projects: (i) => validateProjectInput(i),
+  accounts: (i) => validateAccountInput(i),
+  events: (i) => validateEventInput(i),
+  loans: (i) => validateLoanInput(i),
+  investments: (i) => validateInvestmentInput(i)
+};
+var TX_REFS = {
+  projects: ["projectId"],
+  accounts: ["accountId", "fromAccountId", "toAccountId"],
+  events: ["eventId"],
+  loans: ["loanId"],
+  investments: ["investmentId"]
+};
+var LABEL = { projects: "Project", accounts: "Account", events: "Event", loans: "Loan", investments: "Investment" };
+var createCatalogService = ({
+  store,
+  finance,
+  now = () => /* @__PURE__ */ new Date()
+}) => {
+  const SINGULAR = { projects: "project", accounts: "account", events: "event", loans: "loan", investments: "investment" };
+  const audit = (userId, source, action, entity, entityId, before, after) => finance.insertAudit({
+    userId,
+    actor: source,
+    action: `${action}_${SINGULAR[entity]}`,
+    entity: SINGULAR[entity],
+    entityId,
+    before,
+    after,
+    createdAt: now().toISOString(),
+    undoneAt: null
+  });
+  const need = async (entity, userId, id3) => {
+    const r = await store.get(entity, userId, id3);
+    if (!r) throw new CatalogError("not_found", `${LABEL[entity]} not found.`, 404);
+    return r;
+  };
+  const checkRefs = async (entity, userId, stored) => {
+    const projectId = entity === "accounts" ? stored.defaultProjectId : stored.projectId;
+    if (typeof projectId === "string" && projectId && !await store.get("projects", userId, projectId))
+      throw new CatalogError("invalid", "That project doesn't exist.", 400, { [entity === "accounts" ? "defaultProjectId" : "projectId"]: "Choose one of your projects." });
+  };
+  const fail = (f) => {
+    throw new CatalogError("invalid", Object.values(f)[0] ?? "Invalid entry.", 400, f);
+  };
+  return {
+    list: (entity, userId) => store.list(entity, userId),
+    async create(entity, userId, input, source = "manual") {
+      const errors = validators[entity](input);
+      if (Object.keys(errors).length) fail(errors);
+      const stored = toStored[entity](input);
+      await checkRefs(entity, userId, stored);
+      const base2 = { userId, createdBy: source, ...stored };
+      if (entity === "projects") base2.archivedAt = null;
+      if (entity === "accounts") Object.assign(base2, { archivedAt: null, defaultProjectId: stored.defaultProjectId ?? null, creditLimitPaise: stored.creditLimitPaise ?? null, openingBalancePaise: stored.openingBalancePaise ?? 0 });
+      if (entity === "events") Object.assign(base2, { status: "open", concludedAt: null, budgetPaise: stored.budgetPaise ?? null, startDate: stored.startDate ?? null, endDate: stored.endDate ?? null });
+      if (entity === "loans") Object.assign(base2, { status: "active", interestRatePct: stored.interestRatePct ?? null, emiPaise: stored.emiPaise ?? null, emiDayOfMonth: stored.emiDayOfMonth ?? null, startDate: stored.startDate ?? null, tenureMonths: stored.tenureMonths ?? null });
+      if (entity === "investments") Object.assign(base2, { currentValuePaise: stored.currentValuePaise ?? null, folioNo: stored.folioNo ?? null });
+      const row = await store.insert(entity, base2);
+      await audit(userId, source, "create", entity, row.id, null, row);
+      return row;
+    },
+    async update(entity, userId, id3, patch, source = "manual") {
+      const before = await need(entity, userId, id3);
+      const merged = { ...recordAsInput(entity, before), ...patch };
+      const errors = validators[entity](merged);
+      if (Object.keys(errors).length) fail(errors);
+      const stored = toStored[entity](patch);
+      await checkRefs(entity, userId, stored);
+      const row = await store.update(entity, userId, id3, stored);
+      await audit(userId, source, "update", entity, id3, before, row);
+      return row;
+    },
+    async remove(entity, userId, id3, source = "manual") {
+      const before = await need(entity, userId, id3);
+      const txs = await finance.listTransactions(userId);
+      const used = txs.filter((x) => TX_REFS[entity].some((k) => x[k] === id3)).length;
+      if (used) throw new CatalogError("conflict", `${LABEL[entity]} has ${used} entr${used === 1 ? "y" : "ies"}. Delete or move them first.`, 409);
+      if (entity === "projects") {
+        for (const other of ["events", "loans", "investments"]) {
+          if ((await store.list(other, userId)).some((r) => r.projectId === id3))
+            throw new CatalogError("conflict", `Project still has ${other}. Delete them first.`, 409);
+        }
+      }
+      await store.softDelete(entity, userId, id3, now().toISOString());
+      await audit(userId, source, "delete", entity, id3, before, null);
+    },
+    /** Festival / function finished: its spending now counts as normal expense. */
+    async setEventStatus(userId, id3, status, source = "manual") {
+      const before = await need("events", userId, id3);
+      if (before.status === status) throw new CatalogError("conflict", `Event is already ${status}.`, 409);
+      const row = await store.update("events", userId, id3, { status, concludedAt: status === "concluded" ? now().toISOString() : null });
+      await audit(userId, source, status === "concluded" ? "conclude" : "reopen", "events", id3, before, row);
+      return row;
+    },
+    async setLoanStatus(userId, id3, status, source = "manual") {
+      const before = await need("loans", userId, id3);
+      const row = await store.update("loans", userId, id3, { status });
+      await audit(userId, source, "update", "loans", id3, before, row);
+      return row;
+    },
+    async archive(entity, userId, id3, archived, source = "manual") {
+      const before = await need(entity, userId, id3);
+      const row = await store.update(entity, userId, id3, { archivedAt: archived ? now().toISOString() : null });
+      await audit(userId, source, "update", entity, id3, before, row);
+      return row;
+    }
+  };
+};
+function recordAsInput(entity, r) {
+  const r2 = (p) => p === null || p === void 0 ? null : Number(p) / 100;
+  switch (entity) {
+    case "projects":
+      return { name: r.name, kind: r.kind };
+    case "accounts":
+      return { name: r.name, kind: r.kind, openingBalance: r2(r.openingBalancePaise), creditLimit: r2(r.creditLimitPaise) };
+    case "events":
+      return { projectId: r.projectId, name: r.name, budget: r2(r.budgetPaise), startDate: r.startDate, endDate: r.endDate };
+    case "loans":
+      return { projectId: r.projectId, lender: r.lender, principal: r2(r.principalPaise), interestRatePct: r.interestRatePct, emi: r2(r.emiPaise), emiDayOfMonth: r.emiDayOfMonth, tenureMonths: r.tenureMonths };
+    case "investments":
+      return { projectId: r.projectId, name: r.name, kind: r.kind, currentValue: r2(r.currentValuePaise) };
+  }
+}
+
+// src/features/catalog/catalyst-store.ts
+var SPEC = {
+  projects: { table: "projects", fields: [["name", "name", "reqstr"], ["kind", "kind", "reqstr"], ["archivedAt", "archived_at", "str"]] },
+  accounts: {
+    table: "accounts",
+    fields: [
+      ["name", "name", "reqstr"],
+      ["kind", "kind", "reqstr"],
+      ["openingBalancePaise", "opening_balance_paise", "int"],
+      ["creditLimitPaise", "credit_limit_paise", "int"],
+      ["defaultProjectId", "default_project_id", "str"],
+      ["archivedAt", "archived_at", "str"]
+    ]
+  },
+  events: {
+    table: "events",
+    fields: [
+      ["projectId", "project_id", "reqstr"],
+      ["name", "name", "reqstr"],
+      ["budgetPaise", "budget_paise", "int"],
+      ["startDate", "start_date", "str"],
+      ["endDate", "end_date", "str"],
+      ["status", "status", "reqstr"],
+      ["concludedAt", "concluded_at", "str"]
+    ]
+  },
+  loans: {
+    table: "loans",
+    fields: [
+      ["projectId", "project_id", "reqstr"],
+      ["lender", "lender", "reqstr"],
+      ["principalPaise", "principal_paise", "int"],
+      ["interestRatePct", "interest_rate_pct", "int"],
+      ["emiPaise", "emi_paise", "int"],
+      ["emiDayOfMonth", "emi_day_of_month", "int"],
+      ["startDate", "start_date", "str"],
+      ["tenureMonths", "tenure_months", "int"],
+      ["status", "status", "reqstr"]
+    ]
+  },
+  investments: {
+    table: "investments",
+    fields: [["projectId", "project_id", "reqstr"], ["name", "name", "reqstr"], ["kind", "kind", "reqstr"], ["currentValuePaise", "current_value_paise", "int"], ["folioNo", "folio_no", "str"]]
+  }
+};
+var PAGE2 = 250;
+var esc2 = (s) => String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+var id2 = (v) => {
+  if (!/^\d{1,20}$/.test(String(v))) throw new Error("bad id");
+  return String(v);
+};
+var nul2 = (v) => v === void 0 || v === null || v === "" || v === "null" ? null : v;
+var ts2 = (v) => String(nul2(v) ?? "").replace(" ", "T");
+var createCatalystCatalogStore = (app2) => {
+  const run = async (q2, table) => (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
+  const toRecord = (entity, r) => {
+    const out = {
+      id: String(r.ROWID),
+      userId: String(r.user_id),
+      createdAt: ts2(r.CREATEDTIME),
+      updatedAt: ts2(r.MODIFIEDTIME),
+      deletedAt: nul2(r.deleted_at) === null ? null : String(r.deleted_at),
+      createdBy: String(nul2(r.created_by) ?? "manual")
+    };
+    for (const [f, col, kind] of SPEC[entity].fields) {
+      const v = nul2(r[col]);
+      out[f] = v === null ? kind === "reqstr" ? "" : null : kind === "int" ? Number(v) : String(v);
+    }
+    if (entity === "accounts" && out.openingBalancePaise === null) out.openingBalancePaise = 0;
+    if (entity === "loans" && out.principalPaise === null) out.principalPaise = 0;
+    return out;
+  };
+  const toColumns = (entity, rec) => {
+    const cols = {};
+    for (const [f, col] of SPEC[entity].fields) if (f in rec) cols[col] = rec[f] ?? null;
+    return cols;
+  };
+  const getOne = async (entity, userId, rowId) => {
+    const t2 = SPEC[entity].table;
+    const rows = await run(`SELECT * FROM ${t2} WHERE ROWID = ${id2(rowId)} AND user_id = '${esc2(userId)}' AND deleted_at IS NULL LIMIT 0,1`, t2);
+    return rows[0] ? toRecord(entity, rows[0]) : null;
+  };
+  return {
+    async list(entity, userId) {
+      const t2 = SPEC[entity].table;
+      const out = [];
+      for (let offset = 0; ; offset += PAGE2) {
+        const rows = await run(`SELECT * FROM ${t2} WHERE user_id = '${esc2(userId)}' AND deleted_at IS NULL ORDER BY ROWID LIMIT ${offset},${PAGE2}`, t2);
+        out.push(...rows);
+        if (rows.length < PAGE2) break;
+      }
+      return out.map((r) => toRecord(entity, r));
+    },
+    get: (entity, userId, rowId) => getOne(entity, userId, rowId),
+    async insert(entity, row) {
+      const saved = await app2.datastore().table(SPEC[entity].table).insertRow({
+        user_id: row.userId,
+        created_by: row.createdBy,
+        ...toColumns(entity, row)
+      });
+      return toRecord(entity, saved);
+    },
+    async update(entity, userId, rowId, patch) {
+      const current = await getOne(entity, userId, rowId);
+      if (!current) throw new Error("not found");
+      await app2.datastore().table(SPEC[entity].table).updateRow({ ROWID: id2(rowId), ...toColumns(entity, patch) });
+      return { ...current, ...patch };
+    },
+    async softDelete(entity, userId, rowId, deletedAtIso) {
+      if (!await getOne(entity, userId, rowId)) throw new Error("not found");
+      await app2.datastore().table(SPEC[entity].table).updateRow({ ROWID: id2(rowId), deleted_at: deletedAtIso.slice(0, 19).replace("T", " ") });
+    }
+  };
+};
+
 // catalyst/functions/finance/src/entry.ts
 var catalyst = require("zcatalyst-sdk-node");
 var app = (0, import_express.default)();
@@ -574,7 +968,9 @@ app.use(async (req, res, next) => {
     const userId = user?.user_id ?? user?.userId;
     if (!userId) throw new Error("no user");
     req.userId = String(userId);
-    req.svc = createFinanceService({ store: createCatalystFinanceStore(c) });
+    const fin = createCatalystFinanceStore(c);
+    req.svc = createFinanceService({ store: fin });
+    req.cat = createCatalogService({ store: createCatalystCatalogStore(c), finance: fin });
     next();
   } catch {
     res.status(401).json({ error: "unauthorized", message: "Please log in." });
@@ -595,6 +991,7 @@ var wrap = (fn) => async (req, res) => {
   try {
     res.json(await fn(req));
   } catch (e) {
+    if (e instanceof CatalogError) return res.status(e.status).json({ error: e.code, message: e.message, fields: e.fields });
     if (e instanceof FinanceError) return res.status(e.status).json({ error: e.code, message: e.message, fields: e.fields });
     console.error("finance error:", String(e?.message ?? typeof e).slice(0, 300));
     res.status(500).json({ error: "server", message: "Something went wrong. Try again." });
@@ -605,7 +1002,7 @@ app.get("/transactions", wrap((req) => req.svc.listTransactions(req.userId, {
   to: date(req.query.to),
   projectId: q(req.query.projectId),
   accountId: q(req.query.accountId),
-  type: TYPES.find((t) => t === req.query.type),
+  type: TYPES.find((t2) => t2 === req.query.type),
   limit: int(req.query.limit),
   offset: int(req.query.offset)
 })));
@@ -616,4 +1013,22 @@ app.delete("/transactions/:id", wrap(async (req) => {
   return { deleted: true };
 }));
 app.get("/summary", wrap((req) => req.svc.getSummary(req.userId, { from: date(req.query.from), to: date(req.query.to), projectId: q(req.query.projectId) })));
+var ENTITIES = ["projects", "accounts", "events", "loans", "investments"];
+for (const entity of ENTITIES) {
+  app.get(`/${entity}`, wrap((req) => req.cat.list(entity, req.userId).then((items) => ({ items }))));
+  app.post(`/${entity}`, wrap((req) => req.cat.create(entity, req.userId, req.body ?? {}, "manual")));
+  app.patch(`/${entity}/:id`, wrap((req) => req.cat.update(entity, req.userId, req.params.id, req.body ?? {}, "manual")));
+  app.delete(`/${entity}/:id`, wrap(async (req) => {
+    await req.cat.remove(entity, req.userId, req.params.id, "manual");
+    return { deleted: true };
+  }));
+}
+app.post("/events/:id/conclude", wrap((req) => req.cat.setEventStatus(req.userId, req.params.id, "concluded")));
+app.post("/events/:id/reopen", wrap((req) => req.cat.setEventStatus(req.userId, req.params.id, "open")));
+app.post("/loans/:id/close", wrap((req) => req.cat.setLoanStatus(req.userId, req.params.id, "closed")));
+app.post("/loans/:id/reopen", wrap((req) => req.cat.setLoanStatus(req.userId, req.params.id, "active")));
+for (const entity of ["projects", "accounts"]) {
+  app.post(`/${entity}/:id/archive`, wrap((req) => req.cat.archive(entity, req.userId, req.params.id, true)));
+  app.post(`/${entity}/:id/unarchive`, wrap((req) => req.cat.archive(entity, req.userId, req.params.id, false)));
+}
 module.exports = app;

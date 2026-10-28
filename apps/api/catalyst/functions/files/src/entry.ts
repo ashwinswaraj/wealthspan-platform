@@ -11,6 +11,7 @@ import express from "express";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const catalyst = require("zcatalyst-sdk-node");
 import { createCatalystFinanceStore, createFinanceService } from "../../../../src/features/finance";
+import { createCatalystCatalogStore } from "../../../../src/features/catalog";
 import { buildReport, FILE_FORMATS, renderFile, type FileFormat } from "../../../../src/features/files";
 
 const app = express();
@@ -21,12 +22,14 @@ const date = (v: unknown) => { const s = q(v); return s && DATE.test(s) ? s : un
 app.get("/export", async (req, res) => {
   let userId: string;
   let svc: ReturnType<typeof createFinanceService>;
+  let catalog: ReturnType<typeof createCatalystCatalogStore>;
   try {
     const c = catalyst.initialize(req);
     const user = await c.userManagement().getCurrentUser();
     userId = String(user?.user_id ?? user?.userId ?? "");
     if (!userId) throw new Error("no user");
     svc = createFinanceService({ store: createCatalystFinanceStore(c) });
+    catalog = createCatalystCatalogStore(c);
   } catch {
     return res.status(401).json({ error: "unauthorized", message: "Please log in." });
   }
@@ -49,7 +52,12 @@ app.get("/export", async (req, res) => {
       if (!next.items.length) break;
       transactions.push(...next.items);
     }
-    const out = await renderFile(format, buildReport({ transactions, summary, from, to }));
+    const [projects, accounts, events] = await Promise.all([
+      catalog.list("projects", userId), catalog.list("accounts", userId), catalog.list("events", userId),
+    ]);
+    const map = (rows: { id: string; name: string }[]) => Object.fromEntries(rows.map((r) => [r.id, r.name]));
+    const names = { projects: map(projects), accounts: map(accounts), events: map(events) };
+    const out = await renderFile(format, buildReport({ transactions, summary, from, to, names }));
     res.setHeader("Content-Type", out.mime);
     res.setHeader("Content-Disposition", `attachment; filename="${out.fileName}"`);
     res.setHeader("Cache-Control", "no-store");

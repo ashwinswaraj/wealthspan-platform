@@ -338,21 +338,21 @@ var createFinanceService = ({
       });
       return { transaction, warnings };
     },
-    async updateTransaction(userId, id2, patch, source = "manual") {
-      const before = await store.getTransaction(userId, id2);
+    async updateTransaction(userId, id3, patch, source = "manual") {
+      const before = await store.getTransaction(userId, id3);
       if (!before) throw new FinanceError("not_found", "Transaction not found.", 404);
       const input = clean({ ...toInput(before), ...removeUndefined(patch) });
       await validate(userId, input);
       const row = toRow(userId, input, before.createdBy);
       const warnings = await warningsFor(userId, row);
       const { userId: _u, createdBy: _c, ...changes } = row;
-      const transaction = await store.updateTransaction(userId, id2, changes);
+      const transaction = await store.updateTransaction(userId, id3, changes);
       await store.insertAudit({
         userId,
         actor: source,
         action: "update_transaction",
         entity: "transaction",
-        entityId: id2,
+        entityId: id3,
         before,
         after: transaction,
         createdAt: nowIso(),
@@ -361,16 +361,16 @@ var createFinanceService = ({
       return { transaction, warnings };
     },
     /** Soft delete: hidden now, recoverable for 30 days. */
-    async deleteTransaction(userId, id2, source = "manual") {
-      const before = await store.getTransaction(userId, id2);
+    async deleteTransaction(userId, id3, source = "manual") {
+      const before = await store.getTransaction(userId, id3);
       if (!before) throw new FinanceError("not_found", "Transaction not found.", 404);
-      await store.softDeleteTransaction(userId, id2, nowIso());
+      await store.softDeleteTransaction(userId, id3, nowIso());
       await store.insertAudit({
         userId,
         actor: source,
         action: "delete_transaction",
         entity: "transaction",
-        entityId: id2,
+        entityId: id3,
         before,
         after: null,
         createdAt: nowIso(),
@@ -563,6 +563,121 @@ var createCatalystFinanceStore = (app2) => {
   };
 };
 
+// src/features/catalog/catalyst-store.ts
+var SPEC = {
+  projects: { table: "projects", fields: [["name", "name", "reqstr"], ["kind", "kind", "reqstr"], ["archivedAt", "archived_at", "str"]] },
+  accounts: {
+    table: "accounts",
+    fields: [
+      ["name", "name", "reqstr"],
+      ["kind", "kind", "reqstr"],
+      ["openingBalancePaise", "opening_balance_paise", "int"],
+      ["creditLimitPaise", "credit_limit_paise", "int"],
+      ["defaultProjectId", "default_project_id", "str"],
+      ["archivedAt", "archived_at", "str"]
+    ]
+  },
+  events: {
+    table: "events",
+    fields: [
+      ["projectId", "project_id", "reqstr"],
+      ["name", "name", "reqstr"],
+      ["budgetPaise", "budget_paise", "int"],
+      ["startDate", "start_date", "str"],
+      ["endDate", "end_date", "str"],
+      ["status", "status", "reqstr"],
+      ["concludedAt", "concluded_at", "str"]
+    ]
+  },
+  loans: {
+    table: "loans",
+    fields: [
+      ["projectId", "project_id", "reqstr"],
+      ["lender", "lender", "reqstr"],
+      ["principalPaise", "principal_paise", "int"],
+      ["interestRatePct", "interest_rate_pct", "int"],
+      ["emiPaise", "emi_paise", "int"],
+      ["emiDayOfMonth", "emi_day_of_month", "int"],
+      ["startDate", "start_date", "str"],
+      ["tenureMonths", "tenure_months", "int"],
+      ["status", "status", "reqstr"]
+    ]
+  },
+  investments: {
+    table: "investments",
+    fields: [["projectId", "project_id", "reqstr"], ["name", "name", "reqstr"], ["kind", "kind", "reqstr"], ["currentValuePaise", "current_value_paise", "int"], ["folioNo", "folio_no", "str"]]
+  }
+};
+var PAGE2 = 250;
+var esc2 = (s) => String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+var id2 = (v) => {
+  if (!/^\d{1,20}$/.test(String(v))) throw new Error("bad id");
+  return String(v);
+};
+var nul2 = (v) => v === void 0 || v === null || v === "" || v === "null" ? null : v;
+var ts2 = (v) => String(nul2(v) ?? "").replace(" ", "T");
+var createCatalystCatalogStore = (app2) => {
+  const run = async (q2, table) => (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
+  const toRecord = (entity, r) => {
+    const out = {
+      id: String(r.ROWID),
+      userId: String(r.user_id),
+      createdAt: ts2(r.CREATEDTIME),
+      updatedAt: ts2(r.MODIFIEDTIME),
+      deletedAt: nul2(r.deleted_at) === null ? null : String(r.deleted_at),
+      createdBy: String(nul2(r.created_by) ?? "manual")
+    };
+    for (const [f, col, kind] of SPEC[entity].fields) {
+      const v = nul2(r[col]);
+      out[f] = v === null ? kind === "reqstr" ? "" : null : kind === "int" ? Number(v) : String(v);
+    }
+    if (entity === "accounts" && out.openingBalancePaise === null) out.openingBalancePaise = 0;
+    if (entity === "loans" && out.principalPaise === null) out.principalPaise = 0;
+    return out;
+  };
+  const toColumns = (entity, rec) => {
+    const cols = {};
+    for (const [f, col] of SPEC[entity].fields) if (f in rec) cols[col] = rec[f] ?? null;
+    return cols;
+  };
+  const getOne = async (entity, userId, rowId) => {
+    const t = SPEC[entity].table;
+    const rows = await run(`SELECT * FROM ${t} WHERE ROWID = ${id2(rowId)} AND user_id = '${esc2(userId)}' AND deleted_at IS NULL LIMIT 0,1`, t);
+    return rows[0] ? toRecord(entity, rows[0]) : null;
+  };
+  return {
+    async list(entity, userId) {
+      const t = SPEC[entity].table;
+      const out = [];
+      for (let offset = 0; ; offset += PAGE2) {
+        const rows = await run(`SELECT * FROM ${t} WHERE user_id = '${esc2(userId)}' AND deleted_at IS NULL ORDER BY ROWID LIMIT ${offset},${PAGE2}`, t);
+        out.push(...rows);
+        if (rows.length < PAGE2) break;
+      }
+      return out.map((r) => toRecord(entity, r));
+    },
+    get: (entity, userId, rowId) => getOne(entity, userId, rowId),
+    async insert(entity, row) {
+      const saved = await app2.datastore().table(SPEC[entity].table).insertRow({
+        user_id: row.userId,
+        created_by: row.createdBy,
+        ...toColumns(entity, row)
+      });
+      return toRecord(entity, saved);
+    },
+    async update(entity, userId, rowId, patch) {
+      const current = await getOne(entity, userId, rowId);
+      if (!current) throw new Error("not found");
+      await app2.datastore().table(SPEC[entity].table).updateRow({ ROWID: id2(rowId), ...toColumns(entity, patch) });
+      return { ...current, ...patch };
+    },
+    async softDelete(entity, userId, rowId, deletedAtIso) {
+      if (!await getOne(entity, userId, rowId)) throw new Error("not found");
+      await app2.datastore().table(SPEC[entity].table).updateRow({ ROWID: id2(rowId), deleted_at: deletedAtIso.slice(0, 19).replace("T", " ") });
+    }
+  };
+};
+
 // src/features/files/writers.ts
 var import_exceljs = __toESM(require("exceljs"), 1);
 var import_pdfkit = __toESM(require("pdfkit"), 1);
@@ -591,7 +706,7 @@ var rupees = (paise) => Math.round(paise) / 100;
 var pretty = (s) => s ? s.replace(/_/g, " ") : "";
 function buildReport(input) {
   const n = input.names ?? {};
-  const name = (map, id2) => id2 ? map?.[id2] ?? id2 : "";
+  const name = (map, id3) => id3 ? map?.[id3] ?? id3 : "";
   const s = input.summary;
   const rows = [...input.transactions].sort((a, b) => a.date.localeCompare(b.date) || a.createdAt.localeCompare(b.createdAt)).map((t) => ({
     date: t.date,
@@ -791,12 +906,14 @@ var date = (v) => {
 app.get("/export", async (req, res) => {
   let userId;
   let svc;
+  let catalog;
   try {
     const c = catalyst.initialize(req);
     const user = await c.userManagement().getCurrentUser();
     userId = String(user?.user_id ?? user?.userId ?? "");
     if (!userId) throw new Error("no user");
     svc = createFinanceService({ store: createCatalystFinanceStore(c) });
+    catalog = createCatalystCatalogStore(c);
   } catch {
     return res.status(401).json({ error: "unauthorized", message: "Please log in." });
   }
@@ -817,7 +934,14 @@ app.get("/export", async (req, res) => {
       if (!next.items.length) break;
       transactions.push(...next.items);
     }
-    const out = await renderFile(format, buildReport({ transactions, summary, from, to }));
+    const [projects, accounts, events] = await Promise.all([
+      catalog.list("projects", userId),
+      catalog.list("accounts", userId),
+      catalog.list("events", userId)
+    ]);
+    const map = (rows) => Object.fromEntries(rows.map((r) => [r.id, r.name]));
+    const names = { projects: map(projects), accounts: map(accounts), events: map(events) };
+    const out = await renderFile(format, buildReport({ transactions, summary, from, to, names }));
     res.setHeader("Content-Type", out.mime);
     res.setHeader("Content-Disposition", `attachment; filename="${out.fileName}"`);
     res.setHeader("Cache-Control", "no-store");

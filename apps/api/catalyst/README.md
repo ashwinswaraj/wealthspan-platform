@@ -35,5 +35,11 @@ set them in the console or via the connector AFTER each deploy until a better wa
 
 `GET /server/files/export?format=csv|xlsx|docx|pdf&from=YYYY-MM-DD&to=YYYY-MM-DD&projectId=` (login required).
 Shared report code: `apps/api/src/features/files`. PDF uses "Rs." because built-in PDF fonts have no ₹ glyph.
-Project/account names show as ids until the projects/accounts routes exist (pass `names` to `buildReport`).
+Project, account and event names are looked up from the catalog store.
 Build all functions with `pnpm --filter @jobrio/api build:catalyst` (script: `apps/api/catalyst/build.mjs`).
+
+## Catalog routes (finance function)
+
+`GET/POST /projects|accounts|events|loans|investments`, `PATCH|DELETE /<entity>/:id`,
+`POST /events/:id/conclude|reopen`, `POST /loans/:id/close|reopen`, `POST /projects|accounts/:id/archive|unarchive`.
+Code: `apps/api/src/features/catalog`. Deleting something still used by transactions answers 409.
