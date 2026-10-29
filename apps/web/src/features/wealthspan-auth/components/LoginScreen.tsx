@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, ApiError } from "@/services/api";
 import { establishSession } from "@/services/session";
+import { CatalystLoginSheet } from "./CatalystLoginSheet";
 import { ArcMark, WealthspanWordmark } from "./Logo";
 
 type Step = "email" | "code";
@@ -15,16 +16,6 @@ const wrapperStyle = {
   paddingRight: "env(safe-area-inset-right, 0px)",
 };
 
-/**
- * Google sign-in goes to Catalyst's hosted login page (Google is switched on there, in the console).
- * Catalyst sets the session cookie and sends the user back to the app, where `/me` picks it up.
- * Override the page with VITE_AUTH_LOGIN_URL if the app and Catalyst are on different hosts.
- */
-function startGoogleLogin() {
-  const url = String(import.meta.env.VITE_AUTH_LOGIN_URL ?? "") || "/__catalyst/auth/login";
-  window.location.assign(url);
-}
-
 /** Login in the original Wealthspan look: Google (hosted by Catalyst) or email code (needs the mail domain). */
 export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
   const [step, setStep] = useState<Step>("email");
@@ -33,6 +24,7 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [wait, setWait] = useState(0);
+  const [sheet, setSheet] = useState(false);
 
   useEffect(() => {
     if (wait <= 0) return;
@@ -188,6 +180,7 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
 
   return (
     <div className={wrapper} style={wrapperStyle}>
+      {sheet ? <CatalystLoginSheet onClose={() => setSheet(false)} /> : null}
       <div className="auth-initial-content w-full max-w-[420px] mx-auto flex flex-col justify-between items-center py-3 xs:py-4 sm:py-6 px-4 xs:px-6 box-border">
         <WealthspanWordmark className="shrink-0 pt-1" />
         <div className="w-full flex flex-col items-center my-auto py-2 sm:py-3 text-center select-none">
@@ -216,7 +209,7 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
           </div>
           <button
             type="button"
-            onClick={startGoogleLogin}
+            onClick={() => setSheet(true)}
             className="w-full h-13 sm:h-14 min-h-[48px] rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-sm sm:text-base flex items-center justify-center gap-3 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
           >
             <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
