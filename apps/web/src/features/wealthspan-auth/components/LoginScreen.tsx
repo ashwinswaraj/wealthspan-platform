@@ -207,12 +207,9 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
               trial!
             </span>
           </div>
-          <button
-            type="button"
-            onClick={() => setSheet(true)}
-            className="w-full h-13 sm:h-14 min-h-[48px] rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-sm sm:text-base flex items-center justify-center gap-3 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
-          >
-            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+          <div className="w-full grid grid-cols-2 gap-3">
+            <button type="button" onClick={() => setSheet(true)} className="h-13 sm:h-14 min-h-[48px] rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm transition-all active:scale-[0.99] cursor-pointer">
+              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                 fill="#4285F4"
@@ -230,8 +227,18 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
                 fill="#EA4335"
               />
             </svg>
-            <span>Continue with Google</span>
-          </button>
+              <span>Google</span>
+            </button>
+            <button type="button" onClick={() => setSheet(true)} className="h-13 sm:h-14 min-h-[48px] rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm transition-all active:scale-[0.99] cursor-pointer">
+              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="1" y="5" width="10" height="6" rx="1.5" fill="#E42527" />
+                <rect x="13" y="5" width="10" height="6" rx="1.5" fill="#089949" />
+                <rect x="1" y="13" width="10" height="6" rx="1.5" fill="#226DB4" />
+                <rect x="13" y="13" width="10" height="6" rx="1.5" fill="#F9B21D" />
+              </svg>
+              <span>Zoho</span>
+            </button>
+          </div>
           <div className="w-full flex items-center my-0.5 select-none">
             <div className="flex-grow border-t border-gray-200 dark:border-[#272b35]" />
             <span className="px-3 text-[11px] font-semibold tracking-wider text-gray-400 uppercase">
