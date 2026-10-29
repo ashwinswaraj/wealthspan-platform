@@ -148,7 +148,11 @@ const FieldInput = ({
     return (
       <label className="block">
         <span className={labelCls}>{field.label}</span>
-        <select className={inputCls} value={String(raw ?? "")} onChange={(e) => set(e.target.value)}>
+        <select
+          className={inputCls}
+          value={String(raw ?? "")}
+          onChange={(e) => set(e.target.value)}
+        >
           {field.options.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}

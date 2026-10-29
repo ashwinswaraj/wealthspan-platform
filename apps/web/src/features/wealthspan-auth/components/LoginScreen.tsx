@@ -1,17 +1,34 @@
-import { useState } from "react";
-import { Button, Input } from "@jobrio/ui/design-system";
+import { useEffect, useState } from "react";
 import { api, ApiError } from "@/services/api";
 import { establishSession } from "@/services/session";
+import { ArcMark, WealthspanWordmark } from "./Logo";
 
 type Step = "email" | "code";
+const RESEND_SECONDS = 30;
 
-/** Email-code login. (A one-tap magic link can be added later — same /send endpoint, method "link".) */
+const wrapper =
+  "auth-viewport fixed inset-0 z-50 flex flex-col bg-[#fafafa] dark:bg-[#0c0d12] text-[#0f172a] dark:text-[#f3f4f6] w-full max-w-full overflow-x-hidden overflow-y-auto overscroll-contain selection:bg-black selection:text-white font-sans";
+const wrapperStyle = {
+  paddingTop: "env(safe-area-inset-top, 0px)",
+  paddingBottom: "env(safe-area-inset-bottom, 0px)",
+  paddingLeft: "env(safe-area-inset-left, 0px)",
+  paddingRight: "env(safe-area-inset-right, 0px)",
+};
+
+/** Email-code login in the original Wealthspan look. Google sign-in is shown but not available yet. */
 export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [wait, setWait] = useState(0);
+
+  useEffect(() => {
+    if (wait <= 0) return;
+    const t = setTimeout(() => setWait((w) => w - 1), 1000);
+    return () => clearTimeout(t);
+  }, [wait]);
 
   const run = async (fn: () => Promise<void>) => {
     setBusy(true);
@@ -29,95 +46,255 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
     run(async () => {
       await api("auth", "/send", { method: "POST", body: { email: email.trim(), method: "otp" } });
       setStep("code");
+      setWait(RESEND_SECONDS);
     });
 
-  const verify = () =>
+  const verify = (value: string) =>
     run(async () => {
       const { token } = await api<{ token: string }>("auth", "/verify", {
         method: "POST",
-        body: { email: email.trim(), method: "otp", secret: code.trim() },
+        body: { email: email.trim(), method: "otp", secret: value },
       });
       await establishSession(token);
       onLoggedIn();
     });
 
-  return (
-    <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-10 bg-surface">
-      <div className="w-full max-w-sm space-y-6">
-        <header className="text-center space-y-1">
-          <h1 className="text-3xl font-extrabold tracking-tight text-on-surface">
-            Wealth<span className="text-outline font-medium">span</span>
-          </h1>
-          <p className="font-serif text-lg text-on-surface-variant">The full arc of your money</p>
-        </header>
-
-        <form
-          className="space-y-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void (step === "email" ? send() : verify());
-          }}
-        >
-          {step === "email" ? (
-            <>
-              <label
-                className="text-[10px] font-bold uppercase tracking-wider text-outline"
-                htmlFor="login-email"
+  if (step === "code") {
+    return (
+      <div className={wrapper} style={wrapperStyle}>
+        <div className="shrink-0 w-full max-w-[440px] mx-auto flex flex-col justify-start items-center py-3 xs:py-4 px-5 xs:px-6 box-border">
+          <header className="w-full flex items-center justify-between pt-1 pb-4 shrink-0 select-none">
+            <button
+              type="button"
+              aria-label="Go back to email input"
+              onClick={() => {
+                setStep("email");
+                setCode("");
+                setError(null);
+              }}
+              className="w-11 h-11 rounded-full border border-[#ebebeb] dark:border-[#262a33] shadow-sm flex items-center justify-center text-gray-700 dark:text-gray-200 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#1a1d24] active:bg-gray-200 dark:active:bg-[#262a33] focus:outline-none active:scale-95 transition-all cursor-pointer bg-white dark:bg-[#0c0d12]"
+            >
+              <svg
+                className="w-5 h-5 stroke-[2.25]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                Enter your email
-              </label>
-              <Input
-                id="login-email"
-                type="email"
-                autoComplete="email"
-                inputMode="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Button type="submit" block disabled={busy || !email.includes("@")}>
-                Send code
-              </Button>
-            </>
-          ) : (
-            <>
-              <p className="text-sm text-on-surface-variant">
-                We sent a 6-digit code to <b className="text-on-surface">{email}</b>.
-              </p>
-              <Input
-                aria-label="6-digit code"
+                <path
+                  d="M15.75 19.5L8.25 12l7.5-7.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <WealthspanWordmark />
+            <div className="w-10 shrink-0" aria-hidden="true" />
+          </header>
+          <h1 className="text-[21px] xs:text-[23px] sm:text-[24px] font-medium tracking-tight text-neutral-900 dark:text-white text-center mt-6 xs:mt-8 mb-6 sm:mb-8 select-none">
+            Enter the code we sent to your email
+          </h1>
+          <form
+            className="w-full max-w-sm mb-5"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (code.length === 6) void verify(code);
+            }}
+          >
+            <div className="w-full relative">
+              <input
+                id="verification-code-input"
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 maxLength={6}
+                autoFocus
                 value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-              />
-              <Button type="submit" block disabled={busy || code.length !== 6}>
-                Verify & continue
-              </Button>
-              <Button
-                variant="ghost"
-                block
-                onClick={() => {
-                  setStep("email");
-                  setCode("");
-                  setError(null);
+                onChange={(e) => {
+                  const v = e.target.value.replace(/\D/g, "");
+                  setCode(v);
+                  if (v.length === 6) void verify(v);
                 }}
+                className="w-full h-14 sm:h-16 rounded-[22px] sm:rounded-[24px] bg-transparent text-neutral-950 dark:text-white text-center text-xl sm:text-2xl font-mono tracking-widest placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none transition-all duration-200 border-2 border-black dark:border-white"
+              />
+              <label
+                htmlFor="verification-code-input"
+                className="absolute top-0 -translate-y-1/2 left-6 text-xs px-1.5 font-semibold bg-[#fafafa] dark:bg-[#0c0d12] pointer-events-none select-none z-10 transition-colors text-black dark:text-white"
               >
-                Use a different email
-              </Button>
-            </>
-          )}
-          {error ? (
-            <p role="alert" className="text-xs text-error">
-              {error}
-            </p>
-          ) : null}
-        </form>
-
-        <p className="text-center text-xs text-on-surface-variant">
-          New here? Your first month of Wealthspan Go is free.
-        </p>
+                Code
+              </label>
+            </div>
+            {error ? (
+              <p role="alert" className="mt-3 text-center text-sm text-red-600 dark:text-red-400">
+                {error}
+              </p>
+            ) : null}
+          </form>
+          <div className="w-full max-w-sm bg-[#f6f6f6] dark:bg-[#161820] border border-neutral-200/90 dark:border-neutral-800 rounded-[28px] p-6 sm:p-7 text-center flex flex-col items-center justify-center select-none shadow-xs">
+            <span className="text-sm sm:text-[14.5px] text-neutral-600 dark:text-neutral-400 font-normal">
+              We sent an email to
+            </span>
+            <span className="text-base sm:text-[16.5px] font-bold text-neutral-950 dark:text-white mt-1 break-all">
+              {email}
+            </span>
+            <div className="mt-5 w-14 h-14 rounded-2xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center shadow-md shadow-black/5 select-none">
+              <svg
+                className="w-7 h-7"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                viewBox="0 0 24 24"
+              >
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+            </div>
+          </div>
+          <div className="mt-6 flex flex-col items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setStep("email");
+                setCode("");
+                setError(null);
+              }}
+              className="text-[15px] font-medium text-[#1d6de5] dark:text-[#3b82f6] hover:underline cursor-pointer transition-colors"
+            >
+              Change email address
+            </button>
+            <button
+              type="button"
+              disabled={wait > 0 || busy}
+              onClick={() => void send()}
+              className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+            >
+              {wait > 0 ? `Resend code in ${wait}s` : "Resend code"}
+            </button>
+          </div>
+        </div>
       </div>
-    </main>
+    );
+  }
+
+  return (
+    <div className={wrapper} style={wrapperStyle}>
+      <div className="auth-initial-content w-full max-w-[420px] mx-auto flex flex-col justify-between items-center py-3 xs:py-4 sm:py-6 px-4 xs:px-6 box-border">
+        <WealthspanWordmark className="shrink-0 pt-1" />
+        <div className="w-full flex flex-col items-center my-auto py-2 sm:py-3 text-center select-none">
+          <div className="relative flex flex-col items-center justify-center select-none">
+            <div className="relative z-10 flex items-center justify-center overflow-visible">
+              <ArcMark />
+            </div>
+          </div>
+          <h1
+            className="text-[22px] xs:text-[25px] sm:text-[29px] font-serif tracking-tight text-neutral-900 dark:text-white leading-snug sm:leading-tight text-center mt-1"
+            style={{ fontFamily: "Newsreader, Georgia, serif" }}
+          >
+            <span>The full arc of your</span>
+            <span className="block text-center">money</span>
+          </h1>
+        </div>
+        <div className="w-full max-w-sm mx-auto flex flex-col gap-3 sm:gap-3.5 shrink-0 pt-2 pb-2">
+          <div className="w-full py-2 px-3.5 rounded-2xl bg-neutral-100/90 dark:bg-neutral-900/80 border border-neutral-200/90 dark:border-neutral-800/90 flex items-center justify-center gap-2 text-center shadow-2xs backdrop-blur-xs transition-colors">
+            <span className="w-2 h-2 rounded-full bg-[#1d6de5] shadow-[0_0_8px_rgba(29,109,229,0.6)] animate-pulse shrink-0" />
+            <span className="text-[12.5px] sm:text-[13px] font-medium text-neutral-800 dark:text-neutral-200">
+              🎁 Sign up & get{" "}
+              <span className="font-bold text-black dark:text-white">Wealthspan</span>{" "}
+              <span className="font-bold text-[#1d6de5] dark:text-[#3b82f6]">Go 1 Month Free</span>{" "}
+              trial!
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setError("Google sign-in is coming soon. Please use your email.")}
+            className="w-full h-13 sm:h-14 min-h-[48px] rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-sm sm:text-base flex items-center justify-center gap-3 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
+          >
+            <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                fill="#EA4335"
+              />
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+          <div className="w-full flex items-center my-0.5 select-none">
+            <div className="flex-grow border-t border-gray-200 dark:border-[#272b35]" />
+            <span className="px-3 text-[11px] font-semibold tracking-wider text-gray-400 uppercase">
+              OR
+            </span>
+            <div className="flex-grow border-t border-gray-200 dark:border-[#272b35]" />
+          </div>
+          <form
+            className="w-full"
+            noValidate
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (email.includes("@") && !busy) void send();
+            }}
+          >
+            <div className="w-full relative">
+              <input
+                id="email-input"
+                type="email"
+                autoComplete="email"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full h-13 sm:h-14 min-h-[48px] bg-transparent rounded-[20px] sm:rounded-[24px] text-gray-950 dark:text-white text-[16px] sm:text-base font-normal text-center focus:outline-none transition-all duration-200 px-5 xs:px-6 border-2 border-black dark:border-white"
+              />
+              <label
+                htmlFor="email-input"
+                className="absolute pointer-events-none transition-all duration-200 ease-out select-none top-0 -translate-y-1/2 left-4 xs:left-5 text-xs px-1.5 font-medium bg-[#fafafa] dark:bg-[#0c0d12] z-10 text-black dark:text-white font-semibold"
+              >
+                Enter your email
+              </label>
+            </div>
+            {error ? (
+              <p role="alert" className="mt-3 text-center text-sm text-red-600 dark:text-red-400">
+                {error}
+              </p>
+            ) : null}
+          </form>
+          <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 leading-relaxed text-center mt-1 px-1 select-none">
+            By continuing, you agree to Wealthspan's{" "}
+            <a
+              href="/terms-of-service"
+              className="underline text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
+            >
+              Consumer Terms
+            </a>{" "}
+            and{" "}
+            <a
+              href="/terms-of-service"
+              className="underline text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
+            >
+              Usage Policy
+            </a>
+            , and acknowledge their{" "}
+            <a
+              href="/privacy-policy"
+              className="underline text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
+            >
+              Privacy Policy
+            </a>
+            .
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

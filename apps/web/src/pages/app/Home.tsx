@@ -1,23 +1,15 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { EmptyState, Spinner } from "@jobrio/ui/design-system";
-import { Hammer } from "lucide-react";
+import { Spinner } from "@jobrio/ui/design-system";
 import { LoginScreen, useSession } from "@/features/wealthspan-auth";
-import { AppShell, SECTIONS, type SectionKey } from "@/features/wealthspan-shell";
-import { ProjectsScreen } from "@/features/projects";
+import { HomeScreen, SideDrawer } from "@/features/wealthspan-shell";
+import type { Project } from "@/features/projects";
 
 export default function AppHome() {
-  return (
-    <div className="wealthspan-theme">
-      <AppHomeInner />
-    </div>
-  );
-}
-
-function AppHomeInner() {
   const session = useSession();
   const qc = useQueryClient();
-  const [active, setActive] = useState<SectionKey>("projects");
+  const [drawer, setDrawer] = useState(false);
+  const [project, setProject] = useState<Project | null>(null);
 
   if (session.status === "loading")
     return (
@@ -29,27 +21,36 @@ function AppHomeInner() {
     return <LoginScreen onLoggedIn={() => qc.invalidateQueries({ queryKey: ["session"] })} />;
   if (session.status === "error")
     return (
-      <div className="min-h-dvh grid place-items-center p-6">
-        <EmptyState
-          title="Can't reach Wealthspan"
-          description="Check your internet and try again."
-          actionLabel="Retry"
-          onAction={() => session.refetch()}
-        />
+      <div className="min-h-dvh grid place-items-center p-6 text-center">
+        <p className="text-neutral-600">
+          Can't reach Wealthspan. Check your internet and{" "}
+          <button className="underline" onClick={() => session.refetch()}>
+            try again
+          </button>
+          .
+        </p>
       </div>
     );
 
   return (
-    <AppShell active={active} onChange={setActive}>
-      {active === "projects" ? (
-        <ProjectsScreen />
-      ) : (
-        <EmptyState
-          icon={Hammer}
-          title={`${SECTIONS.find((s) => s.key === active)?.label} is coming next`}
-          description="This screen is being built."
-        />
-      )}
-    </AppShell>
+    <>
+      <HomeScreen
+        displayName="there"
+        onOpenMenu={() => setDrawer(true)}
+        onUpgrade={() => undefined}
+        onNotifications={() => undefined}
+        onAsk={() => undefined}
+        onVoice={() => undefined}
+      />
+      <SideDrawer
+        open={drawer}
+        onClose={() => setDrawer(false)}
+        user={{ name: "Ashwin", subtitle: "Personal Finance & Wealth Tracker" }}
+        activeProjectId={project?.id ?? null}
+        onSelectProject={setProject}
+        onOpenSection={() => setDrawer(false)}
+        onOpenSettings={() => undefined}
+      />
+    </>
   );
 }

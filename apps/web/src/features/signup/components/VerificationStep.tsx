@@ -156,13 +156,7 @@ const VerificationStep = ({ role, totalSteps, steps, backRoute, nextRoute }: Pro
               </div>
             )}
 
-            <Button
-              onClick={sendLink}
-              variant="ghost"
-              size="md"
-              block
-              className="rounded-full"
-            >
+            <Button onClick={sendLink} variant="ghost" size="md" block className="rounded-full">
               Resend magic link
             </Button>
           </div>

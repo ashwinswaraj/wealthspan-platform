@@ -132,7 +132,8 @@ const isPlainObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 
 const merge = <T>(base: T, patch: unknown): T => {
-  if (!isPlainObject(patch) || !isPlainObject(base)) return (patch === undefined ? base : patch) as T;
+  if (!isPlainObject(patch) || !isPlainObject(base))
+    return (patch === undefined ? base : patch) as T;
   const out: Record<string, unknown> = { ...base };
   for (const [k, v] of Object.entries(patch)) {
     out[k] = k in base ? merge((base as Record<string, unknown>)[k], v) : v;

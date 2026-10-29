@@ -1,3 +1,5 @@
+**The owner wants an exact visual copy** of the original app. Screens are ported from the original's rendered markup/classes (Tailwind), re-split into Jobrio-style feature components; behaviour is rebuilt against the Catalyst backend.
+
 # Wealthspan frontend — conversion plan (Jobrio shape, Wealthspan content)
 
 Source of screens: the owner's compiled `wealthspan.html` (reference only — Firebase/Gemini,

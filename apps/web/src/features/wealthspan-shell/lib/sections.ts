@@ -1,11 +1,9 @@
-import { Briefcase, Download, MessageCircle, Settings, Wallet } from "lucide-react";
-
-export const SECTIONS = [
-  { key: "projects", label: "Projects", icon: Briefcase },
-  { key: "accounts", label: "Accounts", icon: Wallet },
-  { key: "chat", label: "Accountant", icon: MessageCircle },
-  { key: "exports", label: "Export", icon: Download },
-  { key: "settings", label: "Settings", icon: Settings },
+export const LEDGER_SECTIONS = [
+  { key: "income", label: "Income" },
+  { key: "expense", label: "Expense" },
+  { key: "debt-loan", label: "Debt & loan/EMI etc" },
+  { key: "savings-investing", label: "Savings & Investing" },
+  { key: "festivals-functions", label: "Festivals & functions" },
 ] as const;
 
-export type SectionKey = (typeof SECTIONS)[number]["key"];
+export type LedgerSectionKey = (typeof LEDGER_SECTIONS)[number]["key"];

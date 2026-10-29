@@ -315,9 +315,46 @@
   .skeleton-shimmer { animation: none; }
 }
 
-/* Wealthspan app (/app): monochrome brand — near-black primary instead of Jobrio blue. */
-.wealthspan-theme {
-  --primary: 0 0% 9%;
-  --primary-foreground: 0 0% 100%;
-  --primary-container: 0 0% 9%;
+/* Wealthspan app (/app) */
+:root {
+  --logo-tile: #fff;
+  --logo-mark: #000;
+}
+.dark {
+  --logo-tile: #000;
+  --logo-mark: #fff;
+}
+.wealthspan-logo-tile {
+  background: var(--logo-tile);
+  color: var(--logo-mark);
+  border: none;
+  outline: none;
+}
+.auth-viewport {
+  height: 100dvh;
+  min-height: 0;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.auth-initial-content {
+  flex: 1 0 auto;
+  min-height: min(100%, 900px);
+  max-height: 900px;
+  margin-block: auto;
+}
+@keyframes wealthspan-arc-draw {
+  0% { stroke-dashoffset: 1; opacity: 1; }
+  55% { stroke-dashoffset: 0; opacity: 1; }
+  85% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+.wealthspan-arc-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: wealthspan-arc-draw 3.2s ease-in-out infinite;
 }
