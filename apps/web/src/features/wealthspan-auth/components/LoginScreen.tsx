@@ -15,7 +15,17 @@ const wrapperStyle = {
   paddingRight: "env(safe-area-inset-right, 0px)",
 };
 
-/** Email-code login in the original Wealthspan look. Google sign-in is shown but not available yet. */
+/**
+ * Google sign-in goes to Catalyst's hosted login page (Google is switched on there, in the console).
+ * Catalyst sets the session cookie and sends the user back to the app, where `/me` picks it up.
+ * Override the page with VITE_AUTH_LOGIN_URL if the app and Catalyst are on different hosts.
+ */
+function startGoogleLogin() {
+  const url = String(import.meta.env.VITE_AUTH_LOGIN_URL ?? "") || "/__catalyst/auth/login";
+  window.location.assign(url);
+}
+
+/** Login in the original Wealthspan look: Google (hosted by Catalyst) or email code (needs the mail domain). */
 export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
@@ -206,7 +216,7 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
           </div>
           <button
             type="button"
-            onClick={() => setError("Google sign-in is coming soon. Please use your email.")}
+            onClick={startGoogleLogin}
             className="w-full h-13 sm:h-14 min-h-[48px] rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-sm sm:text-base flex items-center justify-center gap-3 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
           >
             <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
