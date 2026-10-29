@@ -33,6 +33,8 @@ const alias = [
 export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
+    // `pnpm build:static` (Catalyst Web Client Hosting): emit a plain static SPA instead of an SSR server.
+    ...(process.env.WEALTHSPAN_STATIC ? { spa: { enabled: true } } : {}),
   },
   vite: {
     resolve: {

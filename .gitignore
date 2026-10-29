@@ -43,3 +43,4 @@ yarn.lock
 bun.lock
 bun.lockb
 *.tsbuildinfo
+apps/api/catalyst/client/

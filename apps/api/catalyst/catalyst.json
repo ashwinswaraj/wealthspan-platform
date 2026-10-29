@@ -1,3 +1,15 @@
 {
-  "functions": { "targets": ["auth", "finance", "chat", "files"], "ignore": [], "source": "functions" }
+  "functions": {
+    "targets": [
+      "auth",
+      "finance",
+      "chat",
+      "files"
+    ],
+    "ignore": [],
+    "source": "functions"
+  },
+  "client": {
+    "source": "client"
+  }
 }
