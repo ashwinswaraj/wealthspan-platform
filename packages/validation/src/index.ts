@@ -6,7 +6,7 @@
  * across the platform and admin apps.
  *
  * NOTE: forms using these helpers must set `noValidate` on the <form> so the
- * browser's own validation bubble never appears — Jobrio renders its own
+ * browser's own validation bubble never appears — Wealthspan renders its own
  * custom inline error UI instead.
  */
 
@@ -121,7 +121,7 @@ export const validateDobAdult = (value: string, label = "Date of birth"): Valida
   let age = now.getFullYear() - d.getFullYear();
   const m = now.getMonth() - d.getMonth();
   if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age -= 1;
-  if (age < 18) return "You must be at least 18 years old to use Jobrio.";
+  if (age < 18) return "You must be at least 18 years old to use Wealthspan.";
   if (age > 100) return `${label} does not look correct.`;
   return null;
 };
@@ -172,7 +172,7 @@ export const passwordStrength = (pw: string): PasswordStrengthResult => {
   let passed = checks.filter((c) => c.passed).length;
   // bonus for long passphrases, penalty for obvious sequences
   if (pw.length >= 14) passed += 1;
-  if (/^(.)\1+$/.test(pw) || /12345|qwerty|password|jobrio/i.test(pw)) passed -= 2;
+  if (/^(.)\1+$/.test(pw) || /12345|qwerty|password|wealthspan/i.test(pw)) passed -= 2;
   const score = Math.max(0, Math.min(4, passed - 1));
   const meta = LEVELS[score] ?? LEVELS[0];
   return {

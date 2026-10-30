@@ -55,7 +55,7 @@ describe('passwordStrength', () => {
     expect(result2.level).toBe('fair');
     expect(result2.score).toBe(2);
 
-    const result3 = passwordStrength('jobrioPass1!');
+    const result3 = passwordStrength('wealthspan1!A');
     expect(result3.level).toBe('fair');
     expect(result3.score).toBe(2);
 

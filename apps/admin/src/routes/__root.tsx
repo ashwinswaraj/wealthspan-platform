@@ -11,14 +11,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Jobrio Admin" },
+      { title: "Wealthspan Admin" },
       {
         name: "description",
         content:
-          "Internal Jobrio admin console for operations, workforce, orders and platform control.",
+          "Internal Wealthspan admin console: subscription payment approvals.",
       },
-      { name: "author", content: "Jobrio" },
-      { property: "og:site_name", content: "Jobrio Admin" },
+      { name: "author", content: "Wealthspan" },
+      { property: "og:site_name", content: "Wealthspan Admin" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "robots", content: "noindex, nofollow" },
@@ -28,10 +28,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;600&display=swap",
-      },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined",
       },
     ],
   }),
@@ -46,8 +42,8 @@ function NotFound() {
       <div className="text-center">
         <h1 className="mb-4 text-4xl font-bold">404</h1>
         <p className="mb-4 text-xl text-muted-foreground">Admin page not found</p>
-        <a href="/dashboard/admin" className="text-primary underline hover:text-primary/90">
-          Go to Admin Dashboard
+        <a href="/" className="text-primary underline hover:text-primary/90">
+          Go to Admin Home
         </a>
       </div>
     </div>

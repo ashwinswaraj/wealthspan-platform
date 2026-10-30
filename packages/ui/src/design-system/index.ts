@@ -89,29 +89,3 @@ export * as motionPresets from "./motion/transitions";
 
 // Icons — one library only
 export * as icons from "./icons";
-
-// List page shell — shared by admin desks and client dashboard
-export {
-  AuditListPage,
-  type AuditListTab,
-  type AuditSortOption,
-  type AuditSearchConfig,
-  type AuditListPageProps,
-} from "../shared/AuditListPage";
-
-// Messaging page — shared by client and professional dashboards
-export {
-  MessagesInbox,
-  type MessagesInboxProps,
-  type MessageThread,
-  type ChatMessage,
-} from "../shared/MessagesInbox";
-
-// Chatting page — focused conversation surface (header + timeline + composer)
-export {
-  ChatConversation,
-  type ChatConversationProps,
-  type ChatAttachment,
-  type ChatMessageState,
-  type ChatOrderContext,
-} from "../shared/ChatConversation";
