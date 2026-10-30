@@ -283,5 +283,8 @@ conflicts with §2 (Stack), **this section wins**. Full reasoning in
   `docs/Database/41_Wealthspan_Data_Model.md`. All money is integer paise.
   Never do money arithmetic in a component or in the chatbot prompt — call
   `@jobrio/utils`.
-- Do not delete Jobrio-specific code (orders, professionals, QA, escrow)
-  until the owner approves.
+- Jobrio-specific code (orders, professionals, QA, escrow) is being removed:
+  the owner approved the clean-up on 2026-10-30. The architecture (folders,
+  feature-driven layout, `@jobrio/*` package scope) stays; Wealthspan code
+  goes where the Jobrio code was. `apps/web` is already clean (route `/` is
+  the Wealthspan home); `apps/admin` and the shared packages are next.

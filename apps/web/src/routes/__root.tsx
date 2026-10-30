@@ -19,40 +19,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "author", content: "Jobrio" },
-      { property: "og:site_name", content: "Jobrio" },
+      { name: "author", content: "Wealthspan" },
+      { property: "og:site_name", content: "Wealthspan" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;600&display=swap",
-      },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined",
-      },
     ],
     scripts: [
       {
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "Organization",
-          name: "Jobrio",
-          url: "/",
-          description:
-            "Workforce-as-a-Service platform delivering guaranteed outcomes through an automated professional pipeline.",
-        }),
-      },
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
           "@type": "WebSite",
-          name: "Jobrio",
+          name: "Wealthspan",
           url: "/",
+          description: "Your personal AI accountant: the full arc of your money.",
         }),
       },
     ],

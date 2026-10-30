@@ -38,7 +38,7 @@ export function CatalystLoginSheet({ onClose }: { onClose: () => void }) {
         await loadScript(SDK);
         await loadScript(INIT);
         if (!window.catalyst) throw new Error("sdk");
-        window.catalyst.auth.signIn(BOX_ID, { service_url: "/app/" });
+        window.catalyst.auth.signIn(BOX_ID, { service_url: "/" });
       } catch {
         setError("Login is available only on the Wealthspan app address (Catalyst hosting).");
       }

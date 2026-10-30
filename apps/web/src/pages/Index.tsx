@@ -1,105 +1,56 @@
-import {
-  Navbar,
-  HeroSection,
-  BentoGrid,
-  HowItWorks,
-  ServicesSection,
-  ProfessionalsSection,
-  ClientsSection,
-  AnalyticsSection,
-  StorySection,
-  CTASection,
-  Footer,
-} from "@/features/marketing";
-import { useSkeleton, LandingBodySkeleton, FooterSkeleton } from "@jobrio/ui/design-system";
-import { useState, useCallback } from "react";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Spinner } from "@jobrio/ui/design-system";
+import { LoginScreen, useSession } from "@/features/wealthspan-auth";
+import { HomeScreen, SideDrawer } from "@/features/wealthspan-shell";
+import type { Project } from "@/features/projects";
 
-const Divider = () => (
-  <div className="px-8 md:px-20">
-    <div className="border-t border-surface-container-high" />
-  </div>
-);
+export default function AppHome() {
+  const session = useSession();
+  const qc = useQueryClient();
+  const [drawer, setDrawer] = useState(false);
+  const [project, setProject] = useState<Project | null>(null);
 
-const Index = () => {
-  // Global single-active-state: only one card flipped OR one QR expanded at a time
-  const [activeCardId, setActiveCardId] = useState<string | null>(null);
-  const [activeType, setActiveType] = useState<"flip" | "qr" | null>(null);
-
-  const handleFlip = useCallback(
-    (id: string) => {
-      if (activeCardId === id && activeType === "flip") {
-        setActiveCardId(null);
-        setActiveType(null);
-      } else {
-        setActiveCardId(id);
-        setActiveType("flip");
-      }
-    },
-    [activeCardId, activeType],
-  );
-
-  const handleQrExpand = useCallback(
-    (id: string) => {
-      if (activeCardId === id && activeType === "qr") {
-        setActiveCardId(null);
-        setActiveType(null);
-      } else {
-        setActiveCardId(id);
-        setActiveType("qr");
-      }
-    },
-    [activeCardId, activeType],
-  );
-
-  return (
-    <div className="bg-surface text-on-surface">
-      <Navbar />
-      <main>
-        <HeroSection />
-        <Divider />
-        <BentoGrid />
-        <Divider />
-        <HowItWorks />
-        <Divider />
-        <ServicesSection />
-        <Divider />
-        <ProfessionalsSection
-          activeCardId={activeCardId}
-          activeType={activeType}
-          onFlip={handleFlip}
-          onQrExpand={handleQrExpand}
-        />
-        <Divider />
-        <ClientsSection
-          activeCardId={activeCardId}
-          activeType={activeType}
-          onFlip={handleFlip}
-          onQrExpand={handleQrExpand}
-        />
-        <Divider />
-        <AnalyticsSection />
-        <Divider />
-        <StorySection />
-        <Divider />
-        <CTASection />
-      </main>
-      <Footer />
-    </div>
-  );
-};
-
-const IndexWithSkeleton = () => {
-  const booting = useSkeleton();
-  if (booting) {
+  if (session.status === "loading")
     return (
-      <div className="bg-surface text-on-surface min-h-screen">
-        <Navbar />
-        <LandingBodySkeleton />
-        <FooterSkeleton />
+      <div className="min-h-dvh grid place-items-center">
+        <Spinner />
       </div>
     );
-  }
-  return <Index />;
-};
+  if (session.status === "out")
+    return <LoginScreen onLoggedIn={() => qc.invalidateQueries({ queryKey: ["session"] })} />;
+  if (session.status === "error")
+    return (
+      <div className="min-h-dvh grid place-items-center p-6 text-center">
+        <p className="text-neutral-600">
+          Can't reach Wealthspan. Check your internet and{" "}
+          <button className="underline" onClick={() => session.refetch()}>
+            try again
+          </button>
+          .
+        </p>
+      </div>
+    );
 
-export default IndexWithSkeleton;
+  return (
+    <>
+      <HomeScreen
+        displayName="there"
+        onOpenMenu={() => setDrawer(true)}
+        onUpgrade={() => undefined}
+        onNotifications={() => undefined}
+        onAsk={() => undefined}
+        onVoice={() => undefined}
+      />
+      <SideDrawer
+        open={drawer}
+        onClose={() => setDrawer(false)}
+        user={{ name: "Ashwin", subtitle: "Personal Finance & Wealth Tracker" }}
+        activeProjectId={project?.id ?? null}
+        onSelectProject={setProject}
+        onOpenSection={() => setDrawer(false)}
+        onOpenSettings={() => undefined}
+      />
+    </>
+  );
+}
