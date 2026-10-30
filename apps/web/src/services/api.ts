@@ -17,7 +17,7 @@ export class ApiError extends Error {
   }
 }
 
-const base = () => String(import.meta.env.VITE_API_BASE ?? "").replace(/\/$/, "");
+const base = () => String(import.meta.env.VITE_API_BASE ?? "/server").replace(/\/$/, "");
 
 export async function api<T>(
   fn: "auth" | "finance" | "chat" | "files",
