@@ -1,6 +1,6 @@
 /**
  * Thin client for the Wealthspan Catalyst functions (auth, finance, chat, files).
- * Base URL comes from VITE_API_BASE (e.g. https://<project>.development.catalystserverless.in/server).
+ * Base URL comes from VITE_API_BASE (default "/server": the app and the functions share one Catalyst domain).
  * The browser session cookie identifies the user; this client never sends a user id.
  */
 export class ApiError extends Error {
