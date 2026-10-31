@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import Page from "@/pages/Index";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
-  component: Page,
-  head: () => ({ meta: [{ title: "Wealthspan Admin" }] }),
+  beforeLoad: () => {
+    throw redirect({ to: "/dashboard/admin" });
+  },
 });

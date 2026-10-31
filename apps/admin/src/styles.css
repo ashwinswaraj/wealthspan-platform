@@ -313,3 +313,109 @@
 @media (prefers-reduced-motion: reduce) {
   .skeleton-shimmer { animation: none; }
 }
+
+/* Wealthspan logo tile + scrollbars (matches the web app) */
+:root {
+  --logo-tile: #fff;
+  --logo-mark: #000;
+}
+.dark {
+  --logo-tile: #000;
+  --logo-mark: #fff;
+}
+.wealthspan-logo-tile {
+  background: var(--logo-tile);
+  color: var(--logo-mark);
+  border: none;
+  outline: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ------------------------------------------------------------------ *
+ * Wealthspan admin tokens — copied from the original app's theme so the
+ * ported screens (bg-surface-*, text-secondary, font-label-sm ...) look
+ * identical. Light values here, dark values under `.dark`.
+ * ------------------------------------------------------------------ */
+@theme {
+  --color-primary: #0d0d0d;
+  --color-secondary: #737373;
+  --color-background: #fff;
+  --color-on-background: #0d0d0d;
+  --color-surface-container-lowest: #fff;
+  --color-surface-container-low: #f9f9f9;
+  --color-surface-container-high: #ebebeb;
+  --color-secondary-container: #f2f2f2;
+  --color-on-secondary-container: #0d0d0d;
+  --color-outline: #8e8e8e;
+  --color-outline-variant: #ebebeb;
+  --color-on-surface: #0d0d0d;
+  --color-on-surface-variant: #737373;
+  --color-on-primary: #fff;
+  --color-error: #18181b;
+  --color-error-container: #f4f4f5;
+  --color-on-error-container: #18181b;
+}
+.dark {
+  --color-primary: #fff;
+  --color-secondary: #b4b4b4;
+  --color-background: #212121;
+  --color-on-background: #ececec;
+  --color-surface-container-lowest: #2f2f2f;
+  --color-surface-container-low: #171717;
+  --color-surface-container: #252525;
+  --color-surface-container-high: #383838;
+  --color-surface-container-highest: #444;
+  --color-primary-container: #383838;
+  --color-on-primary-container: #ececec;
+  --color-secondary-container: #252525;
+  --color-on-secondary-container: #ececec;
+  --color-outline: #737373;
+  --color-outline-variant: #383838;
+  --color-on-surface: #ececec;
+  --color-on-surface-variant: #b4b4b4;
+  --color-on-primary: #171717;
+  --color-error: #e4e4e7;
+  --color-error-container: #27272a;
+  --color-on-error-container: #f4f4f5;
+}
+.font-headline-lg {
+  letter-spacing: -0.02em;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 2.25rem;
+}
+.font-headline-md {
+  letter-spacing: -0.015em;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.75rem;
+}
+.font-headline-sm {
+  letter-spacing: -0.01em;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5rem;
+}
+.font-body-sm {
+  letter-spacing: 0;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.125rem;
+}
+.font-label-sm {
+  letter-spacing: 0.02em;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1rem;
+}
