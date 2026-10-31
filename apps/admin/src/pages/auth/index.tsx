@@ -9,7 +9,7 @@ export default function AdminAuthPage() {
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-    catalystSignIn("admin-login-box", "/admin/dashboard/admin").catch(() =>
+    catalystSignIn("admin-login-box", "/admin/").catch(() =>
       setError("Sign-in works only on the Wealthspan app address (Catalyst hosting)."),
     );
   }, []);

@@ -15,7 +15,8 @@
     "lint": "pnpm check:structure && eslint .",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "build:client": "pnpm --filter @jobrio/web build:static && pnpm --filter @jobrio/admin build:static"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",

@@ -22,6 +22,7 @@ JOBRIO/
 ├── apps/                deployable apps — web, admin, api
 │   ├── admin/               @jobrio/admin — super-admin panel
 │   │   ├── public/
+│   │   ├── scripts/
 │   │   └── src/
 │   │       ├── components/
 │   │       ├── config/
@@ -42,72 +43,96 @@ JOBRIO/
 │   │       ├── services/
 │   │       └── utils/
 │   ├── api/                 @jobrio/api — backend edge service
+│   │   ├── catalyst/
+│   │   │   └── functions/
+│   │   │       ├── auth/
+│   │   │       │   ├── lib/
+│   │   │       │   └── test/
+│   │   │       ├── chat/
+│   │   │       │   └── src/
+│   │   │       ├── files/
+│   │   │       │   └── src/
+│   │   │       └── finance/
+│   │   │           └── src/
 │   │   ├── src/
 │   │   │   ├── config/
 │   │   │   ├── features/
-│   │   │   │   └── auth/
+│   │   │   │   ├── admin/
+│   │   │   │   ├── auth/
+│   │   │   │   ├── catalog/
+│   │   │   │   ├── chat/
+│   │   │   │   ├── files/
+│   │   │   │   ├── finance/
+│   │   │   │   └── subscription/
 │   │   │   ├── middleware/
 │   │   │   └── utils/
 │   │   └── tests/
 │   │       └── features/
-│   │           └── auth/
+│   │           ├── admin/
+│   │           ├── auth/
+│   │           ├── catalog/
+│   │           ├── chat/
+│   │           ├── files/
+│   │           ├── finance/
+│   │           └── subscription/
 │   └── web/                 @jobrio/web — client & professional web app
 │       ├── public/
+│       ├── scripts/
 │       └── src/
-│           ├── assets/
-│           │   └── icons/
 │           ├── components/
-│           │   └── dashboard/
 │           ├── config/
 │           ├── features/
-│           │   ├── auth/
-│           │   │   └── components/
-│           │   ├── dashboard-client/
+│           │   ├── projects/
 │           │   │   ├── components/
-│           │   │   │   └── sections/
-│           │   │   │       └── settings/
-
+│           │   │   ├── hooks/
 │           │   │   └── lib/
-│           │   ├── dashboard-professional/
-│           │   │   └── components/
-│           │   ├── legal/
-│           │   │   └── components/
-│           │   ├── marketing/
-│           │   │   └── components/
-│           │   └── signup/
-│           │       └── components/
+│           │   ├── wealthspan-auth/
+│           │   │   ├── components/
+│           │   │   ├── hooks/
+│           │   │   └── lib/
+│           │   └── wealthspan-shell/
+│           │       ├── components/
+│           │       ├── hooks/
+│           │       └── lib/
 │           ├── hooks/
 │           ├── layouts/
-│           ├── lib/
 │           ├── pages/
-│           │   ├── auth/
-│           │   ├── dashboard/
-│           │   │   ├── client/
-│           │   │   └── professional/
-│           │   └── signup/
-│           │       ├── client/
-│           │       └── professional/
 │           ├── routes/
-│           │   ├── dashboard/
-│           │   └── signup/
-│           │       ├── client/
-│           │       └── professional/
 │           ├── services/
 │           ├── store/
 │           └── utils/
+├── docs/                product & architecture documentation, by domain
+│   ├── ADR/
+│   ├── API/
+│   ├── Admin/
+│   ├── Architecture/
+│   ├── Assets/
+│   ├── Business/
+│   ├── Database/
+│   ├── DevOps/
+│   ├── Frontend/
+│   ├── Integrations/
+│   ├── Legal/
+│   ├── Platform/
+│   ├── Product/
+│   ├── Roadmap/
+│   ├── Security/
+│   └── Testing/
+├── infrastructure/      ops & security — DB config, proxy, secrets docs, seed scripts
+│   ├── audit/
+│   ├── database/
+│   ├── proxy/
+│   ├── secrets/
+│   └── seed/
 ├── packages/            shared internal libraries (workspace:* only)
 │   ├── auth/
 │   │   └── src/
-│   │       ├── components/
 │   │       └── hooks/
 │   ├── config/
 │   │   ├── src/
 │   │   └── testing/
 │   ├── constants/
 │   │   └── src/
-│   │       ├── __tests__/
-│   │       └── actions/
-│   │           └── __tests__/
 │   ├── database/
 │   │   └── src/
 │   ├── hooks/
@@ -129,34 +154,12 @@ JOBRIO/
 │   │       └── shared/
 │   ├── utils/
 │   │   └── src/
+│   │       └── __tests__/
 │   └── validation/
 │       └── src/
 │           └── __tests__/
-├── infrastructure/      ops & security — DB config, proxy, secrets docs, seed scripts
-│   ├── audit/
-│   ├── database/
-│   ├── proxy/
-│   ├── secrets/
-│   └── seed/
-├── docs/                product & architecture documentation, by domain
-│   ├── ADR/
-│   ├── API/
-│   ├── Admin/
-│   ├── Architecture/
-│   ├── Assets/
-│   ├── Business/
-│   ├── Database/
-│   ├── DevOps/
-│   ├── Frontend/
-│   ├── Integrations/
-│   ├── Legal/
-│   ├── Platform/
-│   ├── Product/
-│   ├── Roadmap/
-│   ├── Security/
-│   └── Testing/
 ├── tests/               root-level cross-app E2E/integration tests
-├── tools/
+└── tools/
 └── (root-level files: .editorconfig, .env, .env.example, .gitignore, .nvmrc, .prettierignore, .prettierrc, AGENTS.md, ARCHITECTURE_RATIONALE.md, CHANGELOG.md, CODE_OF_CONDUCT.md, CONTRIBUTING.md, LICENSE, README.md, SECURITY.md, UX_INTEGRITY_AUDIT.md, eslint.config.js, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, tsconfig.json, turbo.json, vercel.json, vite.config.ts)
 ```
 

@@ -957,10 +957,386 @@ var createCatalystCatalogStore = (app2) => {
   };
 };
 
+// src/features/subscription/types.ts
+var PLANS = {
+  trial: { label: "1 month free trial", pricePaise: 0, days: 30 },
+  pro_monthly: { label: "Pro \u2014 monthly", pricePaise: 19900, days: 30 },
+  pro_annual: { label: "Pro \u2014 annual", pricePaise: 199900, days: 365 }
+};
+var SubscriptionError = class extends Error {
+  constructor(code, message, status = 400) {
+    super(message);
+    this.code = code;
+    this.status = status;
+  }
+};
+
+// src/features/subscription/service.ts
+var DATE = (d) => d.toISOString().slice(0, 10);
+var addDays = (isoDate, days) => {
+  const d = /* @__PURE__ */ new Date(`${isoDate}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return DATE(d);
+};
+var UTR = /^\d{12}$/;
+var createSubscriptionService = (deps) => {
+  const { store } = deps;
+  const now = () => deps.now?.() ?? /* @__PURE__ */ new Date();
+  const today = () => DATE(now());
+  const isAdmin = (id3) => (deps.adminIds ?? []).includes(id3);
+  const entitlementOf = (subs) => {
+    const t2 = today();
+    const live2 = subs.filter((s) => s.startsOn <= t2 && s.endsOn >= t2).sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0];
+    const trialUsed = subs.some((s) => s.plan === "trial");
+    if (!live2) return { plan: "free", active: false, endsOn: null, daysLeft: 0, trialUsed };
+    const daysLeft = Math.round((Date.parse(`${live2.endsOn}T00:00:00Z`) - Date.parse(`${t2}T00:00:00Z`)) / 864e5) + 1;
+    return { plan: live2.plan, active: true, endsOn: live2.endsOn, daysLeft, trialUsed };
+  };
+  const startFor = (subs) => {
+    const latest = subs.map((s) => s.endsOn).sort().pop();
+    return latest && latest >= today() ? addDays(latest, 1) : today();
+  };
+  return {
+    async getEntitlement(userId) {
+      return entitlementOf(await store.listSubscriptions(userId));
+    },
+    async startTrial(userId) {
+      const subs = await store.listSubscriptions(userId);
+      if (subs.some((s) => s.plan === "trial")) throw new SubscriptionError("conflict", "Free trial already used.", 409);
+      const startsOn = startFor(subs);
+      return store.insertSubscription({ userId, plan: "trial", startsOn, endsOn: addDays(startsOn, PLANS.trial.days - 1), paymentId: null, createdAt: now().toISOString() });
+    },
+    async submitPayment(userId, input) {
+      const plan = input.plan;
+      if (plan !== "pro_monthly" && plan !== "pro_annual") throw new SubscriptionError("validation", "Choose a paid plan.");
+      const utr = String(input.utr ?? "").replace(/\s+/g, "");
+      if (!UTR.test(utr)) throw new SubscriptionError("validation", "UTR must be exactly 12 digits.");
+      const expected = PLANS[plan].pricePaise;
+      if (Math.round(Number(input.amountRupees) * 100) !== expected) {
+        throw new SubscriptionError("validation", `Amount must be \u20B9${expected / 100} for this plan.`);
+      }
+      if (await store.findPaymentByUtr(utr)) throw new SubscriptionError("conflict", "This UTR was already submitted.", 409);
+      const mine = await store.listPayments(userId);
+      if (mine.filter((p) => p.status === "pending").length >= 3) throw new SubscriptionError("conflict", "You already have payments waiting for review.", 429);
+      return store.insertPayment({ userId, plan, amountPaise: expected, utr, status: "pending", note: null, createdAt: now().toISOString(), reviewedAt: null, reviewedBy: null });
+    },
+    async listMyPayments(userId) {
+      return (await store.listPayments(userId)).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    },
+    async listPending(adminId) {
+      if (!isAdmin(adminId)) throw new SubscriptionError("forbidden", "Admins only.", 403);
+      return store.listPendingPayments();
+    },
+    async review(adminId, paymentId, decision, note) {
+      if (!isAdmin(adminId)) throw new SubscriptionError("forbidden", "Admins only.", 403);
+      const p = await store.getPayment(paymentId);
+      if (!p) throw new SubscriptionError("not_found", "Payment not found.", 404);
+      if (p.status !== "pending") throw new SubscriptionError("conflict", "Already reviewed.", 409);
+      const reviewed = { reviewedAt: now().toISOString(), reviewedBy: adminId, note: note?.slice(0, 200) ?? null };
+      if (decision === "reject") return { payment: await store.updatePayment(p.id, { status: "rejected", ...reviewed }), subscription: null };
+      const subs = await store.listSubscriptions(p.userId);
+      const startsOn = startFor(subs);
+      const subscription = await store.insertSubscription({
+        userId: p.userId,
+        plan: p.plan,
+        startsOn,
+        endsOn: addDays(startsOn, PLANS[p.plan].days - 1),
+        paymentId: p.id,
+        createdAt: now().toISOString()
+      });
+      return { payment: await store.updatePayment(p.id, { status: "approved", ...reviewed }), subscription };
+    }
+  };
+};
+
+// src/features/subscription/catalyst-store.ts
+var PAGE3 = 250;
+var esc3 = (s) => String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+var rid = (v) => {
+  if (!/^\d{1,20}$/.test(String(v))) throw new Error("bad id");
+  return String(v);
+};
+var nul3 = (v) => v === void 0 || v === null || v === "" || v === "null" ? null : v;
+var str2 = (v) => nul3(v) === null ? null : String(v);
+var ts3 = (v) => String(nul3(v) ?? "").replace(" ", "T");
+var rowToSubscription = (r) => ({
+  id: String(r.ROWID),
+  userId: String(r.user_id),
+  plan: r.plan,
+  startsOn: String(r.starts_on),
+  endsOn: String(r.ends_on),
+  paymentId: str2(r.payment_id),
+  createdAt: ts3(r.CREATEDTIME)
+});
+var rowToPayment = (r) => ({
+  id: String(r.ROWID),
+  userId: String(r.user_id),
+  plan: r.plan,
+  amountPaise: Number(r.amount_paise),
+  utr: String(r.utr),
+  status: r.status,
+  note: str2(r.note),
+  createdAt: ts3(r.CREATEDTIME),
+  reviewedAt: str2(r.reviewed_at),
+  reviewedBy: str2(r.reviewed_by)
+});
+var createCatalystSubscriptionStore = (app2) => {
+  const query = async (q2, table) => (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
+  const queryAll = async (table, where) => {
+    const out = [];
+    for (let offset = 0; ; offset += PAGE3) {
+      const rows = await query(`SELECT * FROM ${table} WHERE ${where} ORDER BY ROWID DESC LIMIT ${offset},${PAGE3}`, table);
+      out.push(...rows);
+      if (rows.length < PAGE3) return out;
+    }
+  };
+  return {
+    async listSubscriptions(userId) {
+      return (await queryAll("subscriptions", `user_id = '${esc3(userId)}'`)).map(rowToSubscription);
+    },
+    async insertSubscription(s) {
+      const saved = await app2.datastore().table("subscriptions").insertRow({
+        user_id: s.userId,
+        plan: s.plan,
+        starts_on: s.startsOn,
+        ends_on: s.endsOn,
+        payment_id: s.paymentId
+      });
+      return rowToSubscription(saved);
+    },
+    async listPayments(userId) {
+      return (await queryAll("payment_submissions", `user_id = '${esc3(userId)}'`)).map(rowToPayment);
+    },
+    async getPayment(paymentId) {
+      const rows = await query(`SELECT * FROM payment_submissions WHERE ROWID = ${rid(paymentId)} LIMIT 0,1`, "payment_submissions");
+      return rows[0] ? rowToPayment(rows[0]) : null;
+    },
+    async findPaymentByUtr(utr) {
+      const rows = await query(`SELECT * FROM payment_submissions WHERE utr = '${esc3(utr)}' LIMIT 0,1`, "payment_submissions");
+      return rows[0] ? rowToPayment(rows[0]) : null;
+    },
+    async insertPayment(p) {
+      const saved = await app2.datastore().table("payment_submissions").insertRow({
+        user_id: p.userId,
+        plan: p.plan,
+        amount_paise: p.amountPaise,
+        utr: p.utr,
+        status: p.status,
+        note: p.note,
+        reviewed_at: p.reviewedAt,
+        reviewed_by: p.reviewedBy
+      });
+      return rowToPayment(saved);
+    },
+    async updatePayment(paymentId, patch) {
+      const current = await this.getPayment(paymentId);
+      if (!current) throw new Error("not found");
+      const cols = { ROWID: rid(paymentId) };
+      if (patch.status) cols.status = patch.status;
+      if ("note" in patch) cols.note = patch.note ?? null;
+      if ("reviewedAt" in patch) cols.reviewed_at = patch.reviewedAt ?? null;
+      if ("reviewedBy" in patch) cols.reviewed_by = patch.reviewedBy ?? null;
+      await app2.datastore().table("payment_submissions").updateRow(cols);
+      return { ...current, ...patch };
+    },
+    async listPendingPayments() {
+      return (await queryAll("payment_submissions", "status = 'pending'")).map(rowToPayment);
+    },
+    async listAllPayments(status) {
+      return (await queryAll("payment_submissions", status ? `status = '${esc3(status)}'` : "ROWID > 0")).map(rowToPayment);
+    },
+    async listAllSubscriptions() {
+      return (await queryAll("subscriptions", "ROWID > 0")).map(rowToSubscription);
+    }
+  };
+};
+
+// src/features/admin/service.ts
+var DAY = 864e5;
+var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+var dmy = (iso) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  return m ? `${m[3]} ${MONTHS[Number(m[2]) - 1] ?? ""} ${m[1]}` : "";
+};
+var tierOf = (plan) => plan === "trial" ? "Go" : "Pro";
+var createAdminService = (deps) => {
+  const { store } = deps;
+  const now = () => deps.now?.() ?? /* @__PURE__ */ new Date();
+  const today = () => now().toISOString().slice(0, 10);
+  const admins = new Set(deps.adminEmails.map((e) => e.trim().toLowerCase()).filter(Boolean));
+  const isAdminEmail = (email) => !!email && admins.has(email.trim().toLowerCase());
+  const liveSub = (subs) => {
+    const t2 = today();
+    return subs.filter((s) => s.startsOn <= t2 && s.endsOn >= t2).sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0] ?? null;
+  };
+  const byUser = (subs) => {
+    const m = /* @__PURE__ */ new Map();
+    for (const s of subs) m.set(s.userId, [...m.get(s.userId) ?? [], s]);
+    return m;
+  };
+  return {
+    isAdminEmail,
+    async overview() {
+      const [users, subs, payments, projects, transactions] = await Promise.all([
+        store.listUsers(),
+        store.listAllSubscriptions(),
+        store.listAllPayments("pending"),
+        store.countRows("projects"),
+        store.countRows("transactions")
+      ]);
+      const per = byUser(subs);
+      const usersByPlan = { free: 0, go: 0, pro: 0 };
+      let mrrPaise = 0;
+      for (const u of users) {
+        const live2 = liveSub(per.get(u.id) ?? []);
+        if (!live2) usersByPlan.free += 1;
+        else if (live2.plan === "trial") usersByPlan.go += 1;
+        else {
+          usersByPlan.pro += 1;
+          const p = PLANS[live2.plan];
+          mrrPaise += Math.round(p.pricePaise * 30 / p.days);
+        }
+      }
+      const t0 = Date.parse(`${today()}T00:00:00Z`);
+      const usersTrend = Array.from({ length: 30 }, (_, i) => {
+        const day = new Date(t0 - (29 - i) * DAY).toISOString().slice(0, 10);
+        return users.filter((u) => u.createdAt.slice(0, 10) === day).length;
+      });
+      return { users: users.length, usersByPlan, projects, transactions, mrrPaise, pendingPayments: payments.length, usersTrend };
+    },
+    async users() {
+      const [users, subs] = await Promise.all([store.listUsers(), store.listAllSubscriptions()]);
+      const per = byUser(subs);
+      return users.map((u) => {
+        const live2 = liveSub(per.get(u.id) ?? []);
+        const isSuper = isAdminEmail(u.email);
+        return {
+          id: u.id,
+          name: u.name || u.email,
+          email: u.email,
+          code: `WSP-${u.id.slice(-5)}`,
+          role: isSuper ? "Super Administrator" : "Standard User",
+          plan: live2 ? tierOf(live2.plan) : "Free",
+          planValidity: live2 ? dmy(live2.endsOn) : "Lifetime Free Tier",
+          activeSince: dmy(u.createdAt),
+          status: u.active ? "Active" : "Suspended",
+          isSuperAdmin: isSuper
+        };
+      });
+    },
+    async payments(status) {
+      const [rows, users] = await Promise.all([store.listAllPayments(status), store.listUsers()]);
+      const email = new Map(users.map((u) => [u.id, u.email]));
+      return rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map((p) => ({
+        id: p.id,
+        utr: p.utr,
+        userEmail: email.get(p.userId) ?? p.userId,
+        plan: PLANS[p.plan]?.label ?? p.plan,
+        amountPaise: p.amountPaise,
+        orderId: `ORD-${p.id.slice(-6)}`,
+        createdAt: p.createdAt,
+        status: p.status
+      }));
+    },
+    async ledger(limit = 100) {
+      const rows = await store.recentTransactions(limit);
+      return rows.map((t2) => ({
+        id: t2.id,
+        project: t2.projectName ?? "\u2014",
+        category: t2.category ?? (t2.type ? t2.type[0].toUpperCase() + t2.type.slice(1) : "\u2014"),
+        counterparty: t2.party ?? "\u2014",
+        amountPaise: t2.amountPaise,
+        mode: t2.paymentMode ? t2.paymentMode.replace(/_/g, " ").toUpperCase() : "\u2014",
+        // Wealthspan records money that already moved; there is no pending/in-transit state.
+        status: "Cleared",
+        createdAt: t2.createdAt
+      }));
+    },
+    async audit(limit = 100) {
+      const rows = await store.recentAudit(limit);
+      return rows.map((a) => ({
+        id: a.id,
+        title: a.action.replace(/_/g, " "),
+        description: [a.entity, a.entityId].filter(Boolean).join(" "),
+        actor: a.actor,
+        at: a.createdAt
+      }));
+    }
+  };
+};
+
+// src/features/admin/catalyst-store.ts
+var nul4 = (v) => v === void 0 || v === null || v === "" || v === "null" ? null : v;
+var str3 = (v) => nul4(v) === null ? null : String(v);
+var ts4 = (v) => String(nul4(v) ?? "").replace(" ", "T");
+var PAGE4 = 250;
+var createCatalystAdminStore = (app2) => {
+  const subs = createCatalystSubscriptionStore(app2);
+  const query = async (q2, table) => (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
+  return {
+    async listUsers() {
+      const raw = await app2.userManagement().getAllUsers() ?? [];
+      return raw.map((u) => {
+        const first = str3(u.first_name) ?? "";
+        const last = str3(u.last_name) ?? "";
+        return {
+          id: String(u.user_id ?? u.userId ?? ""),
+          email: String(u.email_id ?? u.email ?? ""),
+          name: `${first} ${last}`.trim(),
+          createdAt: ts4(u.created_time ?? u.createdTime ?? ""),
+          active: String(u.status ?? "ACTIVE").toUpperCase() === "ACTIVE"
+        };
+      }).filter((u) => u.id);
+    },
+    async countRows(table) {
+      const where = table === "transactions" || table === "projects" ? "deleted_at IS NULL" : "ROWID > 0";
+      const rows = await app2.zcql().executeZCQLQuery(`SELECT COUNT(ROWID) FROM ${table} WHERE ${where}`);
+      const first = rows[0]?.[table] ?? Object.values(rows[0] ?? {})[0] ?? {};
+      const v = Object.values(first)[0];
+      return Number(v ?? 0);
+    },
+    listAllPayments: (status) => subs.listAllPayments(status),
+    listAllSubscriptions: () => subs.listAllSubscriptions(),
+    async recentTransactions(limit) {
+      const n = Math.max(1, Math.min(PAGE4, Math.floor(limit)));
+      const rows = await query(`SELECT * FROM transactions WHERE deleted_at IS NULL ORDER BY ROWID DESC LIMIT 0,${n}`, "transactions");
+      const ids = [...new Set(rows.map((r) => str3(r.project_id)).filter((v) => !!v && /^\d{1,20}$/.test(v)))];
+      const names = /* @__PURE__ */ new Map();
+      if (ids.length) {
+        const ps = await query(`SELECT ROWID, name FROM projects WHERE ROWID IN (${ids.join(",")}) LIMIT 0,${PAGE4}`, "projects");
+        for (const p of ps) names.set(String(p.ROWID), String(p.name));
+      }
+      return rows.map((r) => ({
+        id: String(r.ROWID),
+        type: String(r.type ?? ""),
+        category: str3(r.category),
+        party: str3(r.party),
+        paymentMode: str3(r.payment_mode),
+        amountPaise: Number(r.amount_paise ?? 0),
+        projectName: names.get(String(r.project_id)) ?? null,
+        createdAt: ts4(r.CREATEDTIME)
+      }));
+    },
+    async recentAudit(limit) {
+      const n = Math.max(1, Math.min(PAGE4, Math.floor(limit)));
+      const rows = await query(`SELECT * FROM audit_log ORDER BY ROWID DESC LIMIT 0,${n}`, "audit_log");
+      return rows.map((r) => ({
+        id: String(r.ROWID),
+        action: String(r.action ?? ""),
+        entity: String(r.entity ?? ""),
+        entityId: str3(r.entity_id),
+        actor: String(r.actor ?? ""),
+        createdAt: ts4(r.CREATEDTIME)
+      }));
+    }
+  };
+};
+
 // catalyst/functions/finance/src/entry.ts
 var catalyst = require("zcatalyst-sdk-node");
 var app = (0, import_express.default)();
 app.use(import_express.default.json({ limit: "32kb" }));
+var ADMIN_EMAILS = () => String(process.env.ADMIN_EMAILS ?? "").split(",");
 app.use(async (req, res, next) => {
   try {
     const c = catalyst.initialize(req);
@@ -968,7 +1344,13 @@ app.use(async (req, res, next) => {
     const userId = user?.user_id ?? user?.userId;
     if (!userId) throw new Error("no user");
     req.userId = String(userId);
+    req.email = String(user?.email_id ?? user?.emailId ?? "");
+    req.name = [user?.first_name, user?.last_name].filter(Boolean).join(" ");
+    req.c = c;
     const fin = createCatalystFinanceStore(c);
+    const subStore = createCatalystSubscriptionStore(c);
+    req.sub = createSubscriptionService({ store: subStore, adminIds: [] });
+    req.admin = createAdminService({ store: createCatalystAdminStore(c), adminEmails: ADMIN_EMAILS() });
     req.svc = createFinanceService({ store: fin });
     req.cat = createCatalogService({ store: createCatalystCatalogStore(c), finance: fin });
     next();
@@ -976,11 +1358,11 @@ app.use(async (req, res, next) => {
     res.status(401).json({ error: "unauthorized", message: "Please log in." });
   }
 });
-var DATE = /^\d{4}-\d{2}-\d{2}$/;
+var DATE2 = /^\d{4}-\d{2}-\d{2}$/;
 var q = (v) => typeof v === "string" && v ? v : void 0;
 var date = (v) => {
   const s = q(v);
-  return s && DATE.test(s) ? s : void 0;
+  return s && DATE2.test(s) ? s : void 0;
 };
 var int = (v) => {
   const n = Number(q(v));
@@ -992,6 +1374,7 @@ var wrap = (fn) => async (req, res) => {
     res.json(await fn(req));
   } catch (e) {
     if (e instanceof CatalogError) return res.status(e.status).json({ error: e.code, message: e.message, fields: e.fields });
+    if (e instanceof SubscriptionError) return res.status(e.status).json({ error: e.code, message: e.message });
     if (e instanceof FinanceError) return res.status(e.status).json({ error: e.code, message: e.message, fields: e.fields });
     console.error("finance error:", String(e?.message ?? typeof e).slice(0, 300));
     res.status(500).json({ error: "server", message: "Something went wrong. Try again." });
@@ -1032,4 +1415,45 @@ for (const entity of ["projects", "accounts"]) {
   app.post(`/${entity}/:id/archive`, wrap((req) => req.cat.archive(entity, req.userId, req.params.id, true)));
   app.post(`/${entity}/:id/unarchive`, wrap((req) => req.cat.archive(entity, req.userId, req.params.id, false)));
 }
+app.get("/subscription", wrap((req) => req.sub.getEntitlement(req.userId)));
+app.post("/subscription/trial", wrap((req) => req.sub.startTrial(req.userId)));
+app.get("/subscription/payments", wrap((req) => req.sub.listMyPayments(req.userId).then((payments) => ({ payments }))));
+app.post("/subscription/payments", wrap((req) => req.sub.submitPayment(req.userId, req.body ?? {})));
+app.get("/admin/me", wrap(async (req) => ({ email: req.email ?? "", name: req.name || req.email || "", isAdmin: req.admin.isAdminEmail(req.email) })));
+app.use("/admin", (req, res, next) => {
+  if (!req.admin.isAdminEmail(req.email)) return res.status(403).json({ error: "forbidden", message: "Admins only." });
+  next();
+});
+var PAYMENT_STATUS = ["pending", "approved", "rejected"];
+app.get("/admin/overview", wrap((req) => req.admin.overview()));
+app.get("/admin/users", wrap((req) => req.admin.users().then((users) => ({ users }))));
+app.get("/admin/payments", wrap((req) => req.admin.payments(PAYMENT_STATUS.find((s) => s === req.query.status)).then((payments) => ({ payments }))));
+app.get("/admin/ledger", wrap((req) => req.admin.ledger().then((rows) => ({ rows }))));
+app.get("/admin/audit", wrap((req) => req.admin.audit().then((rows) => ({ rows }))));
+for (const decision of ["approve", "reject"]) {
+  app.post(`/admin/payments/:id/${decision}`, wrap(async (req) => {
+    const svc = createSubscriptionService({ store: createCatalystSubscriptionStore(req.c), adminIds: [req.userId] });
+    const note = typeof req.body?.note === "string" ? req.body.note : void 0;
+    const r = await svc.review(req.userId, req.params.id, decision, note);
+    return { payment: r.payment };
+  }));
+}
+app.get("/admin/health", wrap(async (req) => {
+  const t0 = Date.now();
+  let dataOk = true;
+  try {
+    await req.c.zcql().executeZCQLQuery("SELECT ROWID FROM projects LIMIT 0,1");
+  } catch {
+    dataOk = false;
+  }
+  const dataMs = Date.now() - t0;
+  return {
+    checks: [
+      { name: "Core API (finance)", ok: true, latencyMs: 0 },
+      { name: "Data Store", ok: dataOk, latencyMs: dataOk ? dataMs : null },
+      { name: "Chat (Sarvam)", ok: null, latencyMs: null },
+      { name: "Files", ok: null, latencyMs: null }
+    ]
+  };
+}));
 module.exports = app;
