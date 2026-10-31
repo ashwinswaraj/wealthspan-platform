@@ -1,7 +1,6 @@
 {
   "functions": {
     "targets": [
-      "auth",
       "finance",
       "chat",
       "files"

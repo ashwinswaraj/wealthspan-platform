@@ -12,12 +12,41 @@ import express from "express";
 const catalyst = require("zcatalyst-sdk-node");
 import { createCatalystFinanceStore, createFinanceService } from "../../../../src/features/finance";
 import { createCatalystCatalogStore } from "../../../../src/features/catalog";
-import { buildReport, FILE_FORMATS, renderFile, type FileFormat } from "../../../../src/features/files";
+import {
+  buildReport,
+  FILE_FORMATS,
+  renderFile,
+  type FileFormat,
+} from "../../../../src/features/files";
+
+import {
+  hardenApp,
+  jsonErrors,
+  notFound,
+  rateLimit,
+  requestGuard,
+} from "../../../../src/middleware/security";
 
 const app = express();
+hardenApp(app);
+app.use(requestGuard());
+// Each export reads every row and builds a PDF/Excel/Word file, so keep it to a few a minute.
+app.use(
+  rateLimit({
+    windowMs: 60_000,
+    max: 5,
+    key: (req) =>
+      String(req.headers["x-forwarded-for"] ?? req.ip ?? "anon")
+        .split(",")[0]
+        .trim(),
+  }),
+);
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const q = (v: unknown) => (typeof v === "string" && v ? v : undefined);
-const date = (v: unknown) => { const s = q(v); return s && DATE.test(s) ? s : undefined; };
+const date = (v: unknown) => {
+  const s = q(v);
+  return s && DATE.test(s) ? s : undefined;
+};
 
 app.get("/export", async (req, res) => {
   let userId: string;
@@ -34,10 +63,16 @@ app.get("/export", async (req, res) => {
     return res.status(401).json({ error: "unauthorized", message: "Please log in." });
   }
   const format = FILE_FORMATS.find((f) => f === req.query.format) as FileFormat | undefined;
-  if (!format) return res.status(400).json({ error: "validation", message: `format must be one of: ${FILE_FORMATS.join(", ")}` });
+  if (!format)
+    return res
+      .status(400)
+      .json({ error: "validation", message: `format must be one of: ${FILE_FORMATS.join(", ")}` });
   const from = date(req.query.from);
   const to = date(req.query.to);
-  if ((req.query.from && !from) || (req.query.to && !to)) return res.status(400).json({ error: "validation", message: "Dates must look like 2026-04-01." });
+  if ((req.query.from && !from) || (req.query.to && !to))
+    return res
+      .status(400)
+      .json({ error: "validation", message: "Dates must look like 2026-04-01." });
 
   try {
     const projectId = q(req.query.projectId);
@@ -48,14 +83,23 @@ app.get("/export", async (req, res) => {
     // listTransactions pages by 200; keep reading until everything is in the file.
     const transactions = [...list.items];
     while (transactions.length < list.total) {
-      const next = await svc.listTransactions(userId, { from, to, projectId, limit: 200, offset: transactions.length });
+      const next = await svc.listTransactions(userId, {
+        from,
+        to,
+        projectId,
+        limit: 200,
+        offset: transactions.length,
+      });
       if (!next.items.length) break;
       transactions.push(...next.items);
     }
     const [projects, accounts, events] = await Promise.all([
-      catalog.list("projects", userId), catalog.list("accounts", userId), catalog.list("events", userId),
+      catalog.list("projects", userId),
+      catalog.list("accounts", userId),
+      catalog.list("events", userId),
     ]);
-    const map = (rows: { id: string; name: string }[]) => Object.fromEntries(rows.map((r) => [r.id, r.name]));
+    const map = (rows: { id: string; name: string }[]) =>
+      Object.fromEntries(rows.map((r) => [r.id, r.name]));
     const names = { projects: map(projects), accounts: map(accounts), events: map(events) };
     const out = await renderFile(format, buildReport({ transactions, summary, from, to, names }));
     res.setHeader("Content-Type", out.mime);
@@ -63,9 +107,15 @@ app.get("/export", async (req, res) => {
     res.setHeader("Cache-Control", "no-store");
     res.send(out.body);
   } catch (e) {
-    console.error("files error:", String((e as { message?: string })?.message ?? typeof e).slice(0, 300));
+    console.error(
+      "files error:",
+      String((e as { message?: string })?.message ?? typeof e).slice(0, 300),
+    );
     res.status(500).json({ error: "server", message: "Could not make the file. Try again." });
   }
 });
+
+app.use(notFound());
+app.use(jsonErrors());
 
 module.exports = app;

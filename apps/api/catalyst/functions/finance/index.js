@@ -306,6 +306,7 @@ var FinanceError = class extends Error {
     this.fields = fields;
   }
 };
+var MAX_TRANSACTIONS_PER_USER = 5e3;
 var IST_OFFSET_MS = 5.5 * 36e5;
 var FIELDS = [
   "type",
@@ -379,12 +380,14 @@ var createFinanceService = ({
       if (i.eventId) {
         const ev = await store.getEvent(userId, i.eventId);
         if (!ev) e.eventId = "That event was not found.";
-        else if (project && ev.projectId !== project.id) e.eventId = "That event belongs to a different project.";
+        else if (project && ev.projectId !== project.id)
+          e.eventId = "That event belongs to a different project.";
       }
       if (i.loanId) {
         const loan = await store.getLoan(userId, i.loanId);
         if (!loan) e.loanId = "That loan was not found.";
-        else if (project && loan.projectId !== project.id) e.loanId = "That loan belongs to a different project.";
+        else if (project && loan.projectId !== project.id)
+          e.loanId = "That loan belongs to a different project.";
       }
     }
     if (Object.keys(e).length) fail(e);
@@ -416,7 +419,9 @@ var createFinanceService = ({
   const warningsFor = async (userId, row) => {
     const w = [];
     if (row.type === "expense" && looksLikeCardBillPayment(row.party, row.note, row.category)) {
-      w.push("This looks like a credit card bill payment. Paying a card bill is a transfer from your bank, not an expense, otherwise the spending is counted twice.");
+      w.push(
+        "This looks like a credit card bill payment. Paying a card bill is a transfer from your bank, not an expense, otherwise the spending is counted twice."
+      );
       const existing = await store.listTransactions(userId);
       if (findSameAmountCardExpenses(row, existing).length)
         w.push("You already have credit card spending of exactly this amount in the last 45 days.");
@@ -427,6 +432,12 @@ var createFinanceService = ({
     async createTransaction(userId, raw, source = "manual") {
       const input = clean(raw);
       await validate(userId, input);
+      if (store.countTransactions && await store.countTransactions(userId) >= MAX_TRANSACTIONS_PER_USER)
+        throw new FinanceError(
+          "invalid",
+          `You have reached the limit of ${MAX_TRANSACTIONS_PER_USER} entries. Export and delete old ones to add more.`,
+          429
+        );
       const row = toRow(userId, input, source);
       const warnings = await warningsFor(userId, row);
       const transaction = await store.insertTransaction(row);
@@ -485,11 +496,16 @@ var createFinanceService = ({
     async listTransactions(userId, f = {}) {
       const limit = Math.min(Math.max(f.limit ?? 50, 1), 200);
       const offset = Math.max(f.offset ?? 0, 0);
-      const all = (await store.listTransactions(userId)).filter((t2) => (!f.from || t2.date >= f.from) && (!f.to || t2.date <= f.to)).filter((t2) => !f.projectId || t2.projectId === f.projectId).filter((t2) => !f.type || t2.type === f.type).filter((t2) => !f.accountId || [t2.accountId, t2.fromAccountId, t2.toAccountId].includes(f.accountId)).sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+      const all = (await store.listTransactions(userId)).filter((t2) => (!f.from || t2.date >= f.from) && (!f.to || t2.date <= f.to)).filter((t2) => !f.projectId || t2.projectId === f.projectId).filter((t2) => !f.type || t2.type === f.type).filter(
+        (t2) => !f.accountId || [t2.accountId, t2.fromAccountId, t2.toAccountId].includes(f.accountId)
+      ).sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
       return { total: all.length, items: all.slice(offset, offset + limit) };
     },
     async getSummary(userId, filter = {}) {
-      const [txs, events] = await Promise.all([store.listTransactions(userId), store.listEvents(userId)]);
+      const [txs, events] = await Promise.all([
+        store.listTransactions(userId),
+        store.listEvents(userId)
+      ]);
       return summarize(txs, events, filter);
     }
   };
@@ -562,7 +578,10 @@ var createCatalystFinanceStore = (app2) => {
   const queryAll = async (select, table, where, order = "") => {
     const out = [];
     for (let offset = 0; ; offset += PAGE) {
-      const rows = await query(`${select} FROM ${table} WHERE ${where} ${order} LIMIT ${offset},${PAGE}`, table);
+      const rows = await query(
+        `${select} FROM ${table} WHERE ${where} ${order} LIMIT ${offset},${PAGE}`,
+        table
+      );
       out.push(...rows);
       if (rows.length < PAGE) return out;
     }
@@ -576,7 +595,12 @@ var createCatalystFinanceStore = (app2) => {
   };
   const archived = (r) => str(r.archived_at);
   return {
-    getProject: (u, i) => getOne("projects", u, i, (r) => ({ ...base(r), name: String(r.name), kind: r.kind, archivedAt: archived(r) })),
+    getProject: (u, i) => getOne("projects", u, i, (r) => ({
+      ...base(r),
+      name: String(r.name),
+      kind: r.kind,
+      archivedAt: archived(r)
+    })),
     getAccount: (u, i) => getOne("accounts", u, i, (r) => ({
       ...base(r),
       name: String(r.name),
@@ -617,11 +641,21 @@ var createCatalystFinanceStore = (app2) => {
       folioNo: str(r.folio_no)
     })),
     async listTransactions(userId) {
-      const rows = await queryAll("SELECT *", "transactions", `user_id = '${esc(userId)}' AND deleted_at IS NULL`, "ORDER BY ROWID");
+      const rows = await queryAll(
+        "SELECT *",
+        "transactions",
+        `user_id = '${esc(userId)}' AND deleted_at IS NULL`,
+        "ORDER BY ROWID"
+      );
       return rows.map(rowToTransaction);
     },
     async listEvents(userId) {
-      const rows = await queryAll("SELECT *", "events", `user_id = '${esc(userId)}' AND deleted_at IS NULL`, "ORDER BY ROWID");
+      const rows = await queryAll(
+        "SELECT *",
+        "events",
+        `user_id = '${esc(userId)}' AND deleted_at IS NULL`,
+        "ORDER BY ROWID"
+      );
       return rows.map((r) => ({
         ...base(r),
         projectId: String(r.project_id),
@@ -634,6 +668,18 @@ var createCatalystFinanceStore = (app2) => {
       }));
     },
     getTransaction: (u, i) => getOne("transactions", u, i, rowToTransaction),
+    async countTransactions(userId) {
+      const rows = await app2.zcql().executeZCQLQuery(
+        `SELECT COUNT(ROWID) FROM transactions WHERE user_id = '${esc(userId)}' AND deleted_at IS NULL`
+      );
+      const first = rows[0]?.transactions ?? Object.values(rows[0] ?? {})[0] ?? {};
+      const n = Number(Object.values(first)[0]);
+      return Number.isFinite(n) ? n : (await queryAll(
+        "SELECT ROWID",
+        "transactions",
+        `user_id = '${esc(userId)}' AND deleted_at IS NULL`
+      )).length;
+    },
     async insertTransaction(row) {
       const saved = await app2.datastore().table("transactions").insertRow(transactionToColumns(row));
       return rowToTransaction(saved);
@@ -684,7 +730,10 @@ var has = (i, k) => k in i;
 var paise = (v) => v === null || v === void 0 || v === "" ? null : rupeesToPaise(Number(v));
 var numOrNull = (v) => v === null || v === void 0 || v === "" ? null : Number(v);
 var toStored = {
-  projects: (i) => ({ ...has(i, "name") && { name: String(t(i.name) ?? "") }, ...has(i, "kind") && { kind: i.kind } }),
+  projects: (i) => ({
+    ...has(i, "name") && { name: String(t(i.name) ?? "") },
+    ...has(i, "kind") && { kind: i.kind }
+  }),
   accounts: (i) => ({
     ...has(i, "name") && { name: String(t(i.name) ?? "") },
     ...has(i, "kind") && { kind: i.kind },
@@ -731,13 +780,26 @@ var TX_REFS = {
   loans: ["loanId"],
   investments: ["investmentId"]
 };
-var LABEL = { projects: "Project", accounts: "Account", events: "Event", loans: "Loan", investments: "Investment" };
+var MAX_PER_ENTITY = 500;
+var LABEL = {
+  projects: "Project",
+  accounts: "Account",
+  events: "Event",
+  loans: "Loan",
+  investments: "Investment"
+};
 var createCatalogService = ({
   store,
   finance,
   now = () => /* @__PURE__ */ new Date()
 }) => {
-  const SINGULAR = { projects: "project", accounts: "account", events: "event", loans: "loan", investments: "investment" };
+  const SINGULAR = {
+    projects: "project",
+    accounts: "account",
+    events: "event",
+    loans: "loan",
+    investments: "investment"
+  };
   const audit = (userId, source, action, entity, entityId, before, after) => finance.insertAudit({
     userId,
     actor: source,
@@ -757,10 +819,17 @@ var createCatalogService = ({
   const checkRefs = async (entity, userId, stored) => {
     const projectId = entity === "accounts" ? stored.defaultProjectId : stored.projectId;
     if (typeof projectId === "string" && projectId && !await store.get("projects", userId, projectId))
-      throw new CatalogError("invalid", "That project doesn't exist.", 400, { [entity === "accounts" ? "defaultProjectId" : "projectId"]: "Choose one of your projects." });
+      throw new CatalogError("invalid", "That project doesn't exist.", 400, {
+        [entity === "accounts" ? "defaultProjectId" : "projectId"]: "Choose one of your projects."
+      });
   };
   const fail = (f) => {
-    throw new CatalogError("invalid", Object.values(f)[0] ?? "Invalid entry.", 400, f);
+    throw new CatalogError(
+      "invalid",
+      Object.values(f)[0] ?? "Invalid entry.",
+      400,
+      f
+    );
   };
   return {
     list: (entity, userId) => store.list(entity, userId),
@@ -769,12 +838,43 @@ var createCatalogService = ({
       if (Object.keys(errors).length) fail(errors);
       const stored = toStored[entity](input);
       await checkRefs(entity, userId, stored);
+      if ((await store.list(entity, userId)).length >= MAX_PER_ENTITY)
+        throw new CatalogError(
+          "conflict",
+          `You can keep up to ${MAX_PER_ENTITY} ${entity}. Delete some first.`,
+          429
+        );
       const base2 = { userId, createdBy: source, ...stored };
       if (entity === "projects") base2.archivedAt = null;
-      if (entity === "accounts") Object.assign(base2, { archivedAt: null, defaultProjectId: stored.defaultProjectId ?? null, creditLimitPaise: stored.creditLimitPaise ?? null, openingBalancePaise: stored.openingBalancePaise ?? 0 });
-      if (entity === "events") Object.assign(base2, { status: "open", concludedAt: null, budgetPaise: stored.budgetPaise ?? null, startDate: stored.startDate ?? null, endDate: stored.endDate ?? null });
-      if (entity === "loans") Object.assign(base2, { status: "active", interestRatePct: stored.interestRatePct ?? null, emiPaise: stored.emiPaise ?? null, emiDayOfMonth: stored.emiDayOfMonth ?? null, startDate: stored.startDate ?? null, tenureMonths: stored.tenureMonths ?? null });
-      if (entity === "investments") Object.assign(base2, { currentValuePaise: stored.currentValuePaise ?? null, folioNo: stored.folioNo ?? null });
+      if (entity === "accounts")
+        Object.assign(base2, {
+          archivedAt: null,
+          defaultProjectId: stored.defaultProjectId ?? null,
+          creditLimitPaise: stored.creditLimitPaise ?? null,
+          openingBalancePaise: stored.openingBalancePaise ?? 0
+        });
+      if (entity === "events")
+        Object.assign(base2, {
+          status: "open",
+          concludedAt: null,
+          budgetPaise: stored.budgetPaise ?? null,
+          startDate: stored.startDate ?? null,
+          endDate: stored.endDate ?? null
+        });
+      if (entity === "loans")
+        Object.assign(base2, {
+          status: "active",
+          interestRatePct: stored.interestRatePct ?? null,
+          emiPaise: stored.emiPaise ?? null,
+          emiDayOfMonth: stored.emiDayOfMonth ?? null,
+          startDate: stored.startDate ?? null,
+          tenureMonths: stored.tenureMonths ?? null
+        });
+      if (entity === "investments")
+        Object.assign(base2, {
+          currentValuePaise: stored.currentValuePaise ?? null,
+          folioNo: stored.folioNo ?? null
+        });
       const row = await store.insert(entity, base2);
       await audit(userId, source, "create", entity, row.id, null, row);
       return row;
@@ -794,11 +894,22 @@ var createCatalogService = ({
       const before = await need(entity, userId, id3);
       const txs = await finance.listTransactions(userId);
       const used = txs.filter((x) => TX_REFS[entity].some((k) => x[k] === id3)).length;
-      if (used) throw new CatalogError("conflict", `${LABEL[entity]} has ${used} entr${used === 1 ? "y" : "ies"}. Delete or move them first.`, 409);
+      if (used)
+        throw new CatalogError(
+          "conflict",
+          `${LABEL[entity]} has ${used} entr${used === 1 ? "y" : "ies"}. Delete or move them first.`,
+          409
+        );
       if (entity === "projects") {
         for (const other of ["events", "loans", "investments"]) {
-          if ((await store.list(other, userId)).some((r) => r.projectId === id3))
-            throw new CatalogError("conflict", `Project still has ${other}. Delete them first.`, 409);
+          if ((await store.list(other, userId)).some(
+            (r) => r.projectId === id3
+          ))
+            throw new CatalogError(
+              "conflict",
+              `Project still has ${other}. Delete them first.`,
+              409
+            );
         }
       }
       await store.softDelete(entity, userId, id3, now().toISOString());
@@ -807,9 +918,21 @@ var createCatalogService = ({
     /** Festival / function finished: its spending now counts as normal expense. */
     async setEventStatus(userId, id3, status, source = "manual") {
       const before = await need("events", userId, id3);
-      if (before.status === status) throw new CatalogError("conflict", `Event is already ${status}.`, 409);
-      const row = await store.update("events", userId, id3, { status, concludedAt: status === "concluded" ? now().toISOString() : null });
-      await audit(userId, source, status === "concluded" ? "conclude" : "reopen", "events", id3, before, row);
+      if (before.status === status)
+        throw new CatalogError("conflict", `Event is already ${status}.`, 409);
+      const row = await store.update("events", userId, id3, {
+        status,
+        concludedAt: status === "concluded" ? now().toISOString() : null
+      });
+      await audit(
+        userId,
+        source,
+        status === "concluded" ? "conclude" : "reopen",
+        "events",
+        id3,
+        before,
+        row
+      );
       return row;
     },
     async setLoanStatus(userId, id3, status, source = "manual") {
@@ -820,7 +943,9 @@ var createCatalogService = ({
     },
     async archive(entity, userId, id3, archived, source = "manual") {
       const before = await need(entity, userId, id3);
-      const row = await store.update(entity, userId, id3, { archivedAt: archived ? now().toISOString() : null });
+      const row = await store.update(entity, userId, id3, {
+        archivedAt: archived ? now().toISOString() : null
+      });
       await audit(userId, source, "update", entity, id3, before, row);
       return row;
     }
@@ -832,19 +957,50 @@ function recordAsInput(entity, r) {
     case "projects":
       return { name: r.name, kind: r.kind };
     case "accounts":
-      return { name: r.name, kind: r.kind, openingBalance: r2(r.openingBalancePaise), creditLimit: r2(r.creditLimitPaise) };
+      return {
+        name: r.name,
+        kind: r.kind,
+        openingBalance: r2(r.openingBalancePaise),
+        creditLimit: r2(r.creditLimitPaise)
+      };
     case "events":
-      return { projectId: r.projectId, name: r.name, budget: r2(r.budgetPaise), startDate: r.startDate, endDate: r.endDate };
+      return {
+        projectId: r.projectId,
+        name: r.name,
+        budget: r2(r.budgetPaise),
+        startDate: r.startDate,
+        endDate: r.endDate
+      };
     case "loans":
-      return { projectId: r.projectId, lender: r.lender, principal: r2(r.principalPaise), interestRatePct: r.interestRatePct, emi: r2(r.emiPaise), emiDayOfMonth: r.emiDayOfMonth, tenureMonths: r.tenureMonths };
+      return {
+        projectId: r.projectId,
+        lender: r.lender,
+        principal: r2(r.principalPaise),
+        interestRatePct: r.interestRatePct,
+        emi: r2(r.emiPaise),
+        emiDayOfMonth: r.emiDayOfMonth,
+        tenureMonths: r.tenureMonths
+      };
     case "investments":
-      return { projectId: r.projectId, name: r.name, kind: r.kind, currentValue: r2(r.currentValuePaise) };
+      return {
+        projectId: r.projectId,
+        name: r.name,
+        kind: r.kind,
+        currentValue: r2(r.currentValuePaise)
+      };
   }
 }
 
 // src/features/catalog/catalyst-store.ts
 var SPEC = {
-  projects: { table: "projects", fields: [["name", "name", "reqstr"], ["kind", "kind", "reqstr"], ["archivedAt", "archived_at", "str"]] },
+  projects: {
+    table: "projects",
+    fields: [
+      ["name", "name", "reqstr"],
+      ["kind", "kind", "reqstr"],
+      ["archivedAt", "archived_at", "str"]
+    ]
+  },
   accounts: {
     table: "accounts",
     fields: [
@@ -884,7 +1040,13 @@ var SPEC = {
   },
   investments: {
     table: "investments",
-    fields: [["projectId", "project_id", "reqstr"], ["name", "name", "reqstr"], ["kind", "kind", "reqstr"], ["currentValuePaise", "current_value_paise", "int"], ["folioNo", "folio_no", "str"]]
+    fields: [
+      ["projectId", "project_id", "reqstr"],
+      ["name", "name", "reqstr"],
+      ["kind", "kind", "reqstr"],
+      ["currentValuePaise", "current_value_paise", "int"],
+      ["folioNo", "folio_no", "str"]
+    ]
   }
 };
 var PAGE2 = 250;
@@ -921,7 +1083,10 @@ var createCatalystCatalogStore = (app2) => {
   };
   const getOne = async (entity, userId, rowId) => {
     const t2 = SPEC[entity].table;
-    const rows = await run(`SELECT * FROM ${t2} WHERE ROWID = ${id2(rowId)} AND user_id = '${esc2(userId)}' AND deleted_at IS NULL LIMIT 0,1`, t2);
+    const rows = await run(
+      `SELECT * FROM ${t2} WHERE ROWID = ${id2(rowId)} AND user_id = '${esc2(userId)}' AND deleted_at IS NULL LIMIT 0,1`,
+      t2
+    );
     return rows[0] ? toRecord(entity, rows[0]) : null;
   };
   return {
@@ -929,7 +1094,10 @@ var createCatalystCatalogStore = (app2) => {
       const t2 = SPEC[entity].table;
       const out = [];
       for (let offset = 0; ; offset += PAGE2) {
-        const rows = await run(`SELECT * FROM ${t2} WHERE user_id = '${esc2(userId)}' AND deleted_at IS NULL ORDER BY ROWID LIMIT ${offset},${PAGE2}`, t2);
+        const rows = await run(
+          `SELECT * FROM ${t2} WHERE user_id = '${esc2(userId)}' AND deleted_at IS NULL ORDER BY ROWID LIMIT ${offset},${PAGE2}`,
+          t2
+        );
         out.push(...rows);
         if (rows.length < PAGE2) break;
       }
@@ -979,17 +1147,20 @@ var addDays = (isoDate, days) => {
   return DATE(d);
 };
 var UTR = /^\d{12}$/;
+var paymentReference = (userId) => `WSP-${String(userId).slice(-5)}`;
 var createSubscriptionService = (deps) => {
   const { store } = deps;
   const now = () => deps.now?.() ?? /* @__PURE__ */ new Date();
   const today = () => DATE(now());
-  const isAdmin = (id3) => (deps.adminIds ?? []).includes(id3);
+  const isAdmin2 = (id3) => (deps.adminIds ?? []).includes(id3);
   const entitlementOf = (subs) => {
     const t2 = today();
     const live2 = subs.filter((s) => s.startsOn <= t2 && s.endsOn >= t2).sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0];
     const trialUsed = subs.some((s) => s.plan === "trial");
     if (!live2) return { plan: "free", active: false, endsOn: null, daysLeft: 0, trialUsed };
-    const daysLeft = Math.round((Date.parse(`${live2.endsOn}T00:00:00Z`) - Date.parse(`${t2}T00:00:00Z`)) / 864e5) + 1;
+    const daysLeft = Math.round(
+      (Date.parse(`${live2.endsOn}T00:00:00Z`) - Date.parse(`${t2}T00:00:00Z`)) / 864e5
+    ) + 1;
     return { plan: live2.plan, active: true, endsOn: live2.endsOn, daysLeft, trialUsed };
   };
   const startFor = (subs) => {
@@ -1002,49 +1173,108 @@ var createSubscriptionService = (deps) => {
     },
     async startTrial(userId) {
       const subs = await store.listSubscriptions(userId);
-      if (subs.some((s) => s.plan === "trial")) throw new SubscriptionError("conflict", "Free trial already used.", 409);
+      if (subs.some((s) => s.plan === "trial"))
+        throw new SubscriptionError("conflict", "Free trial already used.", 409);
       const startsOn = startFor(subs);
-      return store.insertSubscription({ userId, plan: "trial", startsOn, endsOn: addDays(startsOn, PLANS.trial.days - 1), paymentId: null, createdAt: now().toISOString() });
+      try {
+        return await store.insertSubscription({
+          userId,
+          plan: "trial",
+          startsOn,
+          endsOn: addDays(startsOn, PLANS.trial.days - 1),
+          paymentId: null,
+          subKey: `trial:${userId}`,
+          createdAt: now().toISOString()
+        });
+      } catch (e) {
+        if ((await store.listSubscriptions(userId)).some((x) => x.plan === "trial"))
+          throw new SubscriptionError("conflict", "Free trial already used.", 409);
+        throw e;
+      }
     },
     async submitPayment(userId, input) {
       const plan = input.plan;
-      if (plan !== "pro_monthly" && plan !== "pro_annual") throw new SubscriptionError("validation", "Choose a paid plan.");
+      if (plan !== "pro_monthly" && plan !== "pro_annual")
+        throw new SubscriptionError("validation", "Choose a paid plan.");
       const utr = String(input.utr ?? "").replace(/\s+/g, "");
-      if (!UTR.test(utr)) throw new SubscriptionError("validation", "UTR must be exactly 12 digits.");
+      if (!UTR.test(utr))
+        throw new SubscriptionError("validation", "UTR must be exactly 12 digits.");
       const expected = PLANS[plan].pricePaise;
       if (Math.round(Number(input.amountRupees) * 100) !== expected) {
-        throw new SubscriptionError("validation", `Amount must be \u20B9${expected / 100} for this plan.`);
+        throw new SubscriptionError(
+          "validation",
+          `Amount must be \u20B9${expected / 100} for this plan.`
+        );
       }
-      if (await store.findPaymentByUtr(utr)) throw new SubscriptionError("conflict", "This UTR was already submitted.", 409);
+      if (await store.findPaymentByUtr(utr))
+        throw new SubscriptionError("conflict", "This UTR was already submitted.", 409);
       const mine = await store.listPayments(userId);
-      if (mine.filter((p) => p.status === "pending").length >= 3) throw new SubscriptionError("conflict", "You already have payments waiting for review.", 429);
-      return store.insertPayment({ userId, plan, amountPaise: expected, utr, status: "pending", note: null, createdAt: now().toISOString(), reviewedAt: null, reviewedBy: null });
+      if (mine.filter((p) => p.status === "pending").length >= 3)
+        throw new SubscriptionError(
+          "conflict",
+          "You already have payments waiting for review.",
+          429
+        );
+      return store.insertPayment({
+        userId,
+        plan,
+        amountPaise: expected,
+        utr,
+        status: "pending",
+        note: null,
+        createdAt: now().toISOString(),
+        reviewedAt: null,
+        reviewedBy: null
+      });
     },
     async listMyPayments(userId) {
-      return (await store.listPayments(userId)).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      return (await store.listPayments(userId)).sort(
+        (a, b) => b.createdAt.localeCompare(a.createdAt)
+      );
     },
     async listPending(adminId) {
-      if (!isAdmin(adminId)) throw new SubscriptionError("forbidden", "Admins only.", 403);
+      if (!isAdmin2(adminId)) throw new SubscriptionError("forbidden", "Admins only.", 403);
       return store.listPendingPayments();
     },
     async review(adminId, paymentId, decision, note) {
-      if (!isAdmin(adminId)) throw new SubscriptionError("forbidden", "Admins only.", 403);
+      if (!isAdmin2(adminId)) throw new SubscriptionError("forbidden", "Admins only.", 403);
       const p = await store.getPayment(paymentId);
       if (!p) throw new SubscriptionError("not_found", "Payment not found.", 404);
       if (p.status !== "pending") throw new SubscriptionError("conflict", "Already reviewed.", 409);
-      const reviewed = { reviewedAt: now().toISOString(), reviewedBy: adminId, note: note?.slice(0, 200) ?? null };
-      if (decision === "reject") return { payment: await store.updatePayment(p.id, { status: "rejected", ...reviewed }), subscription: null };
+      const reviewed = {
+        reviewedAt: now().toISOString(),
+        reviewedBy: adminId,
+        note: note?.slice(0, 200) ?? null
+      };
+      if (decision === "reject")
+        return {
+          payment: await store.updatePayment(p.id, { status: "rejected", ...reviewed }),
+          subscription: null
+        };
       const subs = await store.listSubscriptions(p.userId);
       const startsOn = startFor(subs);
-      const subscription = await store.insertSubscription({
-        userId: p.userId,
-        plan: p.plan,
-        startsOn,
-        endsOn: addDays(startsOn, PLANS[p.plan].days - 1),
-        paymentId: p.id,
-        createdAt: now().toISOString()
-      });
-      return { payment: await store.updatePayment(p.id, { status: "approved", ...reviewed }), subscription };
+      let subscription;
+      try {
+        subscription = await store.insertSubscription({
+          userId: p.userId,
+          plan: p.plan,
+          startsOn,
+          endsOn: addDays(startsOn, PLANS[p.plan].days - 1),
+          paymentId: p.id,
+          subKey: `pay:${p.id}`,
+          createdAt: now().toISOString()
+        });
+      } catch (e) {
+        if ((await store.getPayment(paymentId))?.status !== "pending")
+          throw new SubscriptionError("conflict", "Already reviewed.", 409);
+        const dup = (await store.listSubscriptions(p.userId)).some((x) => x.paymentId === p.id);
+        if (dup) throw new SubscriptionError("conflict", "Already reviewed.", 409);
+        throw e;
+      }
+      return {
+        payment: await store.updatePayment(p.id, { status: "approved", ...reviewed }),
+        subscription
+      };
     }
   };
 };
@@ -1085,7 +1315,10 @@ var createCatalystSubscriptionStore = (app2) => {
   const queryAll = async (table, where) => {
     const out = [];
     for (let offset = 0; ; offset += PAGE3) {
-      const rows = await query(`SELECT * FROM ${table} WHERE ${where} ORDER BY ROWID DESC LIMIT ${offset},${PAGE3}`, table);
+      const rows = await query(
+        `SELECT * FROM ${table} WHERE ${where} ORDER BY ROWID DESC LIMIT ${offset},${PAGE3}`,
+        table
+      );
       out.push(...rows);
       if (rows.length < PAGE3) return out;
     }
@@ -1100,19 +1333,28 @@ var createCatalystSubscriptionStore = (app2) => {
         plan: s.plan,
         starts_on: s.startsOn,
         ends_on: s.endsOn,
-        payment_id: s.paymentId
+        payment_id: s.paymentId,
+        ...s.subKey ? { sub_key: s.subKey } : {}
       });
       return rowToSubscription(saved);
     },
     async listPayments(userId) {
-      return (await queryAll("payment_submissions", `user_id = '${esc3(userId)}'`)).map(rowToPayment);
+      return (await queryAll("payment_submissions", `user_id = '${esc3(userId)}'`)).map(
+        rowToPayment
+      );
     },
     async getPayment(paymentId) {
-      const rows = await query(`SELECT * FROM payment_submissions WHERE ROWID = ${rid(paymentId)} LIMIT 0,1`, "payment_submissions");
+      const rows = await query(
+        `SELECT * FROM payment_submissions WHERE ROWID = ${rid(paymentId)} LIMIT 0,1`,
+        "payment_submissions"
+      );
       return rows[0] ? rowToPayment(rows[0]) : null;
     },
     async findPaymentByUtr(utr) {
-      const rows = await query(`SELECT * FROM payment_submissions WHERE utr = '${esc3(utr)}' LIMIT 0,1`, "payment_submissions");
+      const rows = await query(
+        `SELECT * FROM payment_submissions WHERE utr = '${esc3(utr)}' LIMIT 0,1`,
+        "payment_submissions"
+      );
       return rows[0] ? rowToPayment(rows[0]) : null;
     },
     async insertPayment(p) {
@@ -1165,6 +1407,9 @@ var createAdminService = (deps) => {
   const today = () => now().toISOString().slice(0, 10);
   const admins = new Set(deps.adminEmails.map((e) => e.trim().toLowerCase()).filter(Boolean));
   const isAdminEmail = (email) => !!email && admins.has(email.trim().toLowerCase());
+  const pinned = new Set((deps.adminUserIds ?? []).map((i) => i.trim()).filter(Boolean));
+  const isAdmin2 = (who) => isAdminEmail(who.email) && (pinned.size === 0 || !!who.userId && pinned.has(String(who.userId)));
+  const isPinned = () => pinned.size > 0;
   const liveSub = (subs) => {
     const t2 = today();
     return subs.filter((s) => s.startsOn <= t2 && s.endsOn >= t2).sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0] ?? null;
@@ -1176,6 +1421,8 @@ var createAdminService = (deps) => {
   };
   return {
     isAdminEmail,
+    isAdmin: isAdmin2,
+    isPinned,
     async overview() {
       const [users, subs, payments, projects, transactions] = await Promise.all([
         store.listUsers(),
@@ -1202,14 +1449,22 @@ var createAdminService = (deps) => {
         const day = new Date(t0 - (29 - i) * DAY).toISOString().slice(0, 10);
         return users.filter((u) => u.createdAt.slice(0, 10) === day).length;
       });
-      return { users: users.length, usersByPlan, projects, transactions, mrrPaise, pendingPayments: payments.length, usersTrend };
+      return {
+        users: users.length,
+        usersByPlan,
+        projects,
+        transactions,
+        mrrPaise,
+        pendingPayments: payments.length,
+        usersTrend
+      };
     },
     async users() {
       const [users, subs] = await Promise.all([store.listUsers(), store.listAllSubscriptions()]);
       const per = byUser(subs);
       return users.map((u) => {
         const live2 = liveSub(per.get(u.id) ?? []);
-        const isSuper = isAdminEmail(u.email);
+        const isSuper = isAdmin2({ email: u.email, userId: u.id });
         return {
           id: u.id,
           name: u.name || u.email,
@@ -1231,6 +1486,8 @@ var createAdminService = (deps) => {
         id: p.id,
         utr: p.utr,
         userEmail: email.get(p.userId) ?? p.userId,
+        /** Matches the reference the user writes in the UPI remark. */
+        reference: paymentReference(p.userId),
         plan: PLANS[p.plan]?.label ?? p.plan,
         amountPaise: p.amountPaise,
         orderId: `ORD-${p.id.slice(-6)}`,
@@ -1243,8 +1500,9 @@ var createAdminService = (deps) => {
       return rows.map((t2) => ({
         id: t2.id,
         project: t2.projectName ?? "\u2014",
-        category: t2.category ?? (t2.type ? t2.type[0].toUpperCase() + t2.type.slice(1) : "\u2014"),
-        counterparty: t2.party ?? "\u2014",
+        // Privacy: the console never shows what a user typed (names, categories, notes), only the type and amount.
+        category: t2.type ? t2.type[0].toUpperCase() + t2.type.slice(1) : "\u2014",
+        counterparty: "Hidden",
         amountPaise: t2.amountPaise,
         mode: t2.paymentMode ? t2.paymentMode.replace(/_/g, " ").toUpperCase() : "\u2014",
         // Wealthspan records money that already moved; there is no pending/in-transit state.
@@ -1299,18 +1557,29 @@ var createCatalystAdminStore = (app2) => {
     listAllSubscriptions: () => subs.listAllSubscriptions(),
     async recentTransactions(limit) {
       const n = Math.max(1, Math.min(PAGE4, Math.floor(limit)));
-      const rows = await query(`SELECT * FROM transactions WHERE deleted_at IS NULL ORDER BY ROWID DESC LIMIT 0,${n}`, "transactions");
-      const ids = [...new Set(rows.map((r) => str3(r.project_id)).filter((v) => !!v && /^\d{1,20}$/.test(v)))];
+      const rows = await query(
+        `SELECT * FROM transactions WHERE deleted_at IS NULL ORDER BY ROWID DESC LIMIT 0,${n}`,
+        "transactions"
+      );
+      const ids = [
+        ...new Set(
+          rows.map((r) => str3(r.project_id)).filter((v) => !!v && /^\d{1,20}$/.test(v))
+        )
+      ];
       const names = /* @__PURE__ */ new Map();
       if (ids.length) {
-        const ps = await query(`SELECT ROWID, name FROM projects WHERE ROWID IN (${ids.join(",")}) LIMIT 0,${PAGE4}`, "projects");
+        const ps = await query(
+          `SELECT ROWID, name FROM projects WHERE ROWID IN (${ids.join(",")}) LIMIT 0,${PAGE4}`,
+          "projects"
+        );
         for (const p of ps) names.set(String(p.ROWID), String(p.name));
       }
       return rows.map((r) => ({
         id: String(r.ROWID),
         type: String(r.type ?? ""),
-        category: str3(r.category),
-        party: str3(r.party),
+        category: null,
+        // never read: admins don't see user-typed text
+        party: null,
         paymentMode: str3(r.payment_mode),
         amountPaise: Number(r.amount_paise ?? 0),
         projectName: names.get(String(r.project_id)) ?? null,
@@ -1319,7 +1588,10 @@ var createCatalystAdminStore = (app2) => {
     },
     async recentAudit(limit) {
       const n = Math.max(1, Math.min(PAGE4, Math.floor(limit)));
-      const rows = await query(`SELECT * FROM audit_log ORDER BY ROWID DESC LIMIT 0,${n}`, "audit_log");
+      const rows = await query(
+        `SELECT * FROM audit_log ORDER BY ROWID DESC LIMIT 0,${n}`,
+        "audit_log"
+      );
       return rows.map((r) => ({
         id: String(r.ROWID),
         action: String(r.action ?? ""),
@@ -1332,11 +1604,78 @@ var createCatalystAdminStore = (app2) => {
   };
 };
 
+// src/middleware/security.ts
+var CSRF_HEADER = "x-requested-with";
+var CSRF_VALUE = "wealthspan";
+var SAFE_METHODS = /* @__PURE__ */ new Set(["GET", "HEAD", "OPTIONS"]);
+function hardenApp(app2) {
+  process.env.NODE_ENV = process.env.NODE_ENV || "production";
+  app2.disable("x-powered-by");
+  app2.set("etag", false);
+}
+var requestGuard = () => (req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Cache-Control", "no-store");
+  if (SAFE_METHODS.has(req.method)) return next();
+  const site = String(req.headers["sec-fetch-site"] ?? "");
+  if (site === "cross-site") return deny(res);
+  if (req.headers[CSRF_HEADER] !== CSRF_VALUE) return deny(res);
+  next();
+};
+var deny = (res) => {
+  res.status(403).json({ error: "forbidden", message: "Request blocked." });
+};
+function rateLimit(opts) {
+  const hits = /* @__PURE__ */ new Map();
+  const now = opts.now ?? Date.now;
+  const keyOf = opts.key ?? ((req) => String(req.userId ?? req.ip ?? "anon"));
+  return (req, res, next) => {
+    if (opts.methods && !opts.methods.includes(req.method)) return next();
+    const t2 = now();
+    if (hits.size > 5e3) {
+      for (const [k, v] of hits) if (v.reset <= t2) hits.delete(k);
+    }
+    const key = keyOf(req);
+    const h = hits.get(key);
+    if (!h || h.reset <= t2) {
+      hits.set(key, { n: 1, reset: t2 + opts.windowMs });
+      return next();
+    }
+    h.n += 1;
+    if (h.n > opts.max) {
+      res.setHeader("Retry-After", String(Math.max(1, Math.ceil((h.reset - t2) / 1e3))));
+      return void res.status(429).json({ error: "rate_limited", message: "Too many requests. Please slow down." });
+    }
+    next();
+  };
+}
+var jsonErrors = () => (err, _req, res, _next) => {
+  const status = Number(
+    err?.status ?? err?.statusCode ?? 500
+  );
+  if (status === 413)
+    return void res.status(413).json({ error: "too_large", message: "That request is too large." });
+  if (status >= 400 && status < 500)
+    return void res.status(400).json({ error: "bad_request", message: "That request could not be read." });
+  console.error(
+    "unhandled error:",
+    String(err?.message ?? typeof err).slice(0, 200)
+  );
+  res.status(500).json({ error: "server", message: "Something went wrong. Try again." });
+};
+var notFound = () => (_req, res) => {
+  res.status(404).json({ error: "not_found", message: "Not found." });
+};
+
 // catalyst/functions/finance/src/entry.ts
 var catalyst = require("zcatalyst-sdk-node");
 var app = (0, import_express.default)();
+hardenApp(app);
+app.use(requestGuard());
 app.use(import_express.default.json({ limit: "32kb" }));
-var ADMIN_EMAILS = () => String(process.env.ADMIN_EMAILS ?? "").split(",");
+var list = (v) => String(v ?? "").split(",");
+var ADMIN_EMAILS = () => list(process.env.ADMIN_EMAILS);
+var ADMIN_USER_IDS = () => list(process.env.ADMIN_USER_IDS);
 app.use(async (req, res, next) => {
   try {
     const c = catalyst.initialize(req);
@@ -1350,7 +1689,11 @@ app.use(async (req, res, next) => {
     const fin = createCatalystFinanceStore(c);
     const subStore = createCatalystSubscriptionStore(c);
     req.sub = createSubscriptionService({ store: subStore, adminIds: [] });
-    req.admin = createAdminService({ store: createCatalystAdminStore(c), adminEmails: ADMIN_EMAILS() });
+    req.admin = createAdminService({
+      store: createCatalystAdminStore(c),
+      adminEmails: ADMIN_EMAILS(),
+      adminUserIds: ADMIN_USER_IDS()
+    });
     req.svc = createFinanceService({ store: fin });
     req.cat = createCatalogService({ store: createCatalystCatalogStore(c), finance: fin });
     next();
@@ -1358,6 +1701,8 @@ app.use(async (req, res, next) => {
     res.status(401).json({ error: "unauthorized", message: "Please log in." });
   }
 });
+app.use(rateLimit({ windowMs: 6e4, max: 90, methods: ["POST", "PATCH", "PUT", "DELETE"] }));
+app.use(rateLimit({ windowMs: 6e4, max: 300, methods: ["GET"] }));
 var DATE2 = /^\d{4}-\d{2}-\d{2}$/;
 var q = (v) => typeof v === "string" && v ? v : void 0;
 var date = (v) => {
@@ -1373,87 +1718,207 @@ var wrap = (fn) => async (req, res) => {
   try {
     res.json(await fn(req));
   } catch (e) {
-    if (e instanceof CatalogError) return res.status(e.status).json({ error: e.code, message: e.message, fields: e.fields });
-    if (e instanceof SubscriptionError) return res.status(e.status).json({ error: e.code, message: e.message });
-    if (e instanceof FinanceError) return res.status(e.status).json({ error: e.code, message: e.message, fields: e.fields });
-    console.error("finance error:", String(e?.message ?? typeof e).slice(0, 300));
+    if (e instanceof CatalogError)
+      return res.status(e.status).json({ error: e.code, message: e.message, fields: e.fields });
+    if (e instanceof SubscriptionError)
+      return res.status(e.status).json({ error: e.code, message: e.message });
+    if (e instanceof FinanceError)
+      return res.status(e.status).json({ error: e.code, message: e.message, fields: e.fields });
+    console.error(
+      "finance error:",
+      String(e?.message ?? typeof e).slice(0, 300)
+    );
     res.status(500).json({ error: "server", message: "Something went wrong. Try again." });
   }
 };
-app.get("/transactions", wrap((req) => req.svc.listTransactions(req.userId, {
-  from: date(req.query.from),
-  to: date(req.query.to),
-  projectId: q(req.query.projectId),
-  accountId: q(req.query.accountId),
-  type: TYPES.find((t2) => t2 === req.query.type),
-  limit: int(req.query.limit),
-  offset: int(req.query.offset)
-})));
-app.post("/transactions", wrap((req) => req.svc.createTransaction(req.userId, req.body ?? {}, "manual")));
-app.patch("/transactions/:id", wrap((req) => req.svc.updateTransaction(req.userId, req.params.id, req.body ?? {}, "manual")));
-app.delete("/transactions/:id", wrap(async (req) => {
-  await req.svc.deleteTransaction(req.userId, req.params.id, "manual");
-  return { deleted: true };
-}));
-app.get("/summary", wrap((req) => req.svc.getSummary(req.userId, { from: date(req.query.from), to: date(req.query.to), projectId: q(req.query.projectId) })));
-app.get("/me", wrap(async (req) => ({ userId: req.userId })));
+app.get(
+  "/transactions",
+  wrap(
+    (req) => req.svc.listTransactions(req.userId, {
+      from: date(req.query.from),
+      to: date(req.query.to),
+      projectId: q(req.query.projectId),
+      accountId: q(req.query.accountId),
+      type: TYPES.find((t2) => t2 === req.query.type),
+      limit: int(req.query.limit),
+      offset: int(req.query.offset)
+    })
+  )
+);
+app.post(
+  "/transactions",
+  wrap((req) => req.svc.createTransaction(req.userId, req.body ?? {}, "manual"))
+);
+app.patch(
+  "/transactions/:id",
+  wrap((req) => req.svc.updateTransaction(req.userId, req.params.id, req.body ?? {}, "manual"))
+);
+app.delete(
+  "/transactions/:id",
+  wrap(async (req) => {
+    await req.svc.deleteTransaction(req.userId, req.params.id, "manual");
+    return { deleted: true };
+  })
+);
+app.get(
+  "/summary",
+  wrap(
+    (req) => req.svc.getSummary(req.userId, {
+      from: date(req.query.from),
+      to: date(req.query.to),
+      projectId: q(req.query.projectId)
+    })
+  )
+);
+app.get(
+  "/me",
+  wrap(async (req) => ({ userId: req.userId }))
+);
 var ENTITIES = ["projects", "accounts", "events", "loans", "investments"];
 for (const entity of ENTITIES) {
-  app.get(`/${entity}`, wrap((req) => req.cat.list(entity, req.userId).then((items) => ({ items }))));
-  app.post(`/${entity}`, wrap((req) => req.cat.create(entity, req.userId, req.body ?? {}, "manual")));
-  app.patch(`/${entity}/:id`, wrap((req) => req.cat.update(entity, req.userId, req.params.id, req.body ?? {}, "manual")));
-  app.delete(`/${entity}/:id`, wrap(async (req) => {
-    await req.cat.remove(entity, req.userId, req.params.id, "manual");
-    return { deleted: true };
-  }));
+  app.get(
+    `/${entity}`,
+    wrap((req) => req.cat.list(entity, req.userId).then((items) => ({ items })))
+  );
+  app.post(
+    `/${entity}`,
+    wrap((req) => req.cat.create(entity, req.userId, req.body ?? {}, "manual"))
+  );
+  app.patch(
+    `/${entity}/:id`,
+    wrap((req) => req.cat.update(entity, req.userId, req.params.id, req.body ?? {}, "manual"))
+  );
+  app.delete(
+    `/${entity}/:id`,
+    wrap(async (req) => {
+      await req.cat.remove(entity, req.userId, req.params.id, "manual");
+      return { deleted: true };
+    })
+  );
 }
-app.post("/events/:id/conclude", wrap((req) => req.cat.setEventStatus(req.userId, req.params.id, "concluded")));
-app.post("/events/:id/reopen", wrap((req) => req.cat.setEventStatus(req.userId, req.params.id, "open")));
-app.post("/loans/:id/close", wrap((req) => req.cat.setLoanStatus(req.userId, req.params.id, "closed")));
-app.post("/loans/:id/reopen", wrap((req) => req.cat.setLoanStatus(req.userId, req.params.id, "active")));
+app.post(
+  "/events/:id/conclude",
+  wrap((req) => req.cat.setEventStatus(req.userId, req.params.id, "concluded"))
+);
+app.post(
+  "/events/:id/reopen",
+  wrap((req) => req.cat.setEventStatus(req.userId, req.params.id, "open"))
+);
+app.post(
+  "/loans/:id/close",
+  wrap((req) => req.cat.setLoanStatus(req.userId, req.params.id, "closed"))
+);
+app.post(
+  "/loans/:id/reopen",
+  wrap((req) => req.cat.setLoanStatus(req.userId, req.params.id, "active"))
+);
 for (const entity of ["projects", "accounts"]) {
-  app.post(`/${entity}/:id/archive`, wrap((req) => req.cat.archive(entity, req.userId, req.params.id, true)));
-  app.post(`/${entity}/:id/unarchive`, wrap((req) => req.cat.archive(entity, req.userId, req.params.id, false)));
+  app.post(
+    `/${entity}/:id/archive`,
+    wrap((req) => req.cat.archive(entity, req.userId, req.params.id, true))
+  );
+  app.post(
+    `/${entity}/:id/unarchive`,
+    wrap((req) => req.cat.archive(entity, req.userId, req.params.id, false))
+  );
 }
-app.get("/subscription", wrap((req) => req.sub.getEntitlement(req.userId)));
-app.post("/subscription/trial", wrap((req) => req.sub.startTrial(req.userId)));
-app.get("/subscription/payments", wrap((req) => req.sub.listMyPayments(req.userId).then((payments) => ({ payments }))));
-app.post("/subscription/payments", wrap((req) => req.sub.submitPayment(req.userId, req.body ?? {})));
-app.get("/admin/me", wrap(async (req) => ({ email: req.email ?? "", name: req.name || req.email || "", isAdmin: req.admin.isAdminEmail(req.email) })));
+app.get(
+  "/subscription",
+  wrap((req) => req.sub.getEntitlement(req.userId))
+);
+app.post(
+  "/subscription/trial",
+  wrap((req) => req.sub.startTrial(req.userId))
+);
+app.get(
+  "/subscription/payments",
+  wrap((req) => req.sub.listMyPayments(req.userId).then((payments) => ({ payments })))
+);
+app.post(
+  "/subscription/payments",
+  wrap((req) => req.sub.submitPayment(req.userId, req.body ?? {}))
+);
+var isAdmin = (req) => req.admin.isAdmin({ email: req.email, userId: req.userId });
+app.get(
+  "/admin/me",
+  wrap(async (req) => {
+    const ok = isAdmin(req);
+    const needsPin = !ok && req.admin.isAdminEmail(req.email) && !req.admin.isPinned();
+    return {
+      email: req.email ?? "",
+      name: req.name || req.email || "",
+      isAdmin: ok,
+      ...needsPin || ok && !req.admin.isPinned() ? { userId: req.userId } : {},
+      idPinned: req.admin.isPinned()
+    };
+  })
+);
 app.use("/admin", (req, res, next) => {
-  if (!req.admin.isAdminEmail(req.email)) return res.status(403).json({ error: "forbidden", message: "Admins only." });
+  if (!isAdmin(req)) {
+    if (req.admin.isAdminEmail(req.email))
+      console.warn("admin e-mail with a different user id was refused");
+    return res.status(403).json({ error: "forbidden", message: "Admins only." });
+  }
   next();
 });
 var PAYMENT_STATUS = ["pending", "approved", "rejected"];
-app.get("/admin/overview", wrap((req) => req.admin.overview()));
-app.get("/admin/users", wrap((req) => req.admin.users().then((users) => ({ users }))));
-app.get("/admin/payments", wrap((req) => req.admin.payments(PAYMENT_STATUS.find((s) => s === req.query.status)).then((payments) => ({ payments }))));
-app.get("/admin/ledger", wrap((req) => req.admin.ledger().then((rows) => ({ rows }))));
-app.get("/admin/audit", wrap((req) => req.admin.audit().then((rows) => ({ rows }))));
+app.get(
+  "/admin/overview",
+  wrap((req) => req.admin.overview())
+);
+app.get(
+  "/admin/users",
+  wrap((req) => req.admin.users().then((users) => ({ users })))
+);
+app.get(
+  "/admin/payments",
+  wrap(
+    (req) => req.admin.payments(PAYMENT_STATUS.find((s) => s === req.query.status)).then((payments) => ({ payments }))
+  )
+);
+app.get(
+  "/admin/ledger",
+  wrap((req) => req.admin.ledger().then((rows) => ({ rows })))
+);
+app.get(
+  "/admin/audit",
+  wrap((req) => req.admin.audit().then((rows) => ({ rows })))
+);
 for (const decision of ["approve", "reject"]) {
-  app.post(`/admin/payments/:id/${decision}`, wrap(async (req) => {
-    const svc = createSubscriptionService({ store: createCatalystSubscriptionStore(req.c), adminIds: [req.userId] });
-    const note = typeof req.body?.note === "string" ? req.body.note : void 0;
-    const r = await svc.review(req.userId, req.params.id, decision, note);
-    return { payment: r.payment };
-  }));
+  app.post(
+    `/admin/payments/:id/${decision}`,
+    wrap(async (req) => {
+      const svc = createSubscriptionService({
+        store: createCatalystSubscriptionStore(req.c),
+        adminIds: [req.userId]
+      });
+      const note = typeof req.body?.note === "string" ? req.body.note : void 0;
+      const r = await svc.review(req.userId, req.params.id, decision, note);
+      return { payment: r.payment };
+    })
+  );
 }
-app.get("/admin/health", wrap(async (req) => {
-  const t0 = Date.now();
-  let dataOk = true;
-  try {
-    await req.c.zcql().executeZCQLQuery("SELECT ROWID FROM projects LIMIT 0,1");
-  } catch {
-    dataOk = false;
-  }
-  const dataMs = Date.now() - t0;
-  return {
-    checks: [
-      { name: "Core API (finance)", ok: true, latencyMs: 0 },
-      { name: "Data Store", ok: dataOk, latencyMs: dataOk ? dataMs : null },
-      { name: "Chat (Sarvam)", ok: null, latencyMs: null },
-      { name: "Files", ok: null, latencyMs: null }
-    ]
-  };
-}));
+app.get(
+  "/admin/health",
+  wrap(async (req) => {
+    const t0 = Date.now();
+    let dataOk = true;
+    try {
+      await req.c.zcql().executeZCQLQuery("SELECT ROWID FROM projects LIMIT 0,1");
+    } catch {
+      dataOk = false;
+    }
+    const dataMs = Date.now() - t0;
+    return {
+      checks: [
+        { name: "Core API (finance)", ok: true, latencyMs: null },
+        { name: "Data Store", ok: dataOk, latencyMs: dataOk ? dataMs : null },
+        { name: "Chat (Sarvam)", ok: null, latencyMs: null },
+        { name: "Files", ok: null, latencyMs: null }
+      ]
+    };
+  })
+);
+app.use(notFound());
+app.use(jsonErrors());
 module.exports = app;

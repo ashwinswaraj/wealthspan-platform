@@ -37,6 +37,8 @@ export interface AdminPaymentRow {
   id: string;
   utr: string;
   userEmail: string;
+  /** Code the user writes in the UPI remark (WSP-xxxxx): match it on the bank statement before approving. */
+  reference?: string;
   plan: string; // "Pro — annual"
   amountPaise: number;
   orderId: string;

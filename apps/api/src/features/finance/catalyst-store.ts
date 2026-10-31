@@ -10,13 +10,20 @@
  * come back from the SDK, and the row cap per ZCQL query (we page by 250 to be safe).
  */
 import type {
-  FinanceAccount, FinanceAuditEntry, FinanceEvent, FinanceInvestment, FinanceLoan,
-  FinanceProject, FinanceTransaction,
+  FinanceAccount,
+  FinanceAuditEntry,
+  FinanceEvent,
+  FinanceInvestment,
+  FinanceLoan,
+  FinanceProject,
+  FinanceTransaction,
 } from "@jobrio/types";
 import type { FinanceStore, NewTransaction } from "./types";
 
 export interface CatalystLike {
-  zcql(): { executeZCQLQuery(query: string): Promise<Array<Record<string, Record<string, unknown>>>> };
+  zcql(): {
+    executeZCQLQuery(query: string): Promise<Array<Record<string, Record<string, unknown>>>>;
+  };
   datastore(): {
     table(name: string): {
       insertRow(row: Record<string, unknown>): Promise<Record<string, unknown>>;
@@ -70,11 +77,23 @@ export const rowToTransaction = (r: Row): FinanceTransaction => ({
 
 const transactionToColumns = (t: Partial<NewTransaction>): Row => {
   const m: Array<[keyof NewTransaction, string]> = [
-    ["type", "type"], ["amountPaise", "amount_paise"], ["date", "tx_date"], ["projectId", "project_id"],
-    ["accountId", "account_id"], ["fromAccountId", "from_account_id"], ["toAccountId", "to_account_id"],
-    ["paymentMode", "payment_mode"], ["category", "category"], ["party", "party"], ["source", "source"],
-    ["note", "note"], ["eventId", "event_id"], ["loanId", "loan_id"], ["investmentId", "investment_id"],
-    ["userId", "user_id"], ["createdBy", "created_by"],
+    ["type", "type"],
+    ["amountPaise", "amount_paise"],
+    ["date", "tx_date"],
+    ["projectId", "project_id"],
+    ["accountId", "account_id"],
+    ["fromAccountId", "from_account_id"],
+    ["toAccountId", "to_account_id"],
+    ["paymentMode", "payment_mode"],
+    ["category", "category"],
+    ["party", "party"],
+    ["source", "source"],
+    ["note", "note"],
+    ["eventId", "event_id"],
+    ["loanId", "loan_id"],
+    ["investmentId", "investment_id"],
+    ["userId", "user_id"],
+    ["createdBy", "created_by"],
   ];
   const out: Row = {};
   for (const [k, col] of m) if (k in t) out[col] = t[k] ?? null;
@@ -86,16 +105,29 @@ export const createCatalystFinanceStore = (app: CatalystLike): FinanceStore => {
     (await app.zcql().executeZCQLQuery(q)).map((r) => r[table] ?? Object.values(r)[0]);
 
   /** Reads every page so a row cap per query can never silently hide data. */
-  const queryAll = async (select: string, table: string, where: string, order = ""): Promise<Row[]> => {
+  const queryAll = async (
+    select: string,
+    table: string,
+    where: string,
+    order = "",
+  ): Promise<Row[]> => {
     const out: Row[] = [];
     for (let offset = 0; ; offset += PAGE) {
-      const rows = await query(`${select} FROM ${table} WHERE ${where} ${order} LIMIT ${offset},${PAGE}`, table);
+      const rows = await query(
+        `${select} FROM ${table} WHERE ${where} ${order} LIMIT ${offset},${PAGE}`,
+        table,
+      );
       out.push(...rows);
       if (rows.length < PAGE) return out;
     }
   };
 
-  const getOne = async <T>(table: string, userId: string, rowId: string, map: (r: Row) => T): Promise<T | null> => {
+  const getOne = async <T>(
+    table: string,
+    userId: string,
+    rowId: string,
+    map: (r: Row) => T,
+  ): Promise<T | null> => {
     const rows = await query(
       `SELECT * FROM ${table} WHERE ROWID = ${id(rowId)} AND user_id = '${esc(userId)}' AND deleted_at IS NULL LIMIT 0,1`,
       table,
@@ -107,45 +139,109 @@ export const createCatalystFinanceStore = (app: CatalystLike): FinanceStore => {
 
   return {
     getProject: (u, i) =>
-      getOne<FinanceProject>("projects", u, i, (r) => ({ ...base(r), name: String(r.name), kind: r.kind as FinanceProject["kind"], archivedAt: archived(r) })),
+      getOne<FinanceProject>("projects", u, i, (r) => ({
+        ...base(r),
+        name: String(r.name),
+        kind: r.kind as FinanceProject["kind"],
+        archivedAt: archived(r),
+      })),
     getAccount: (u, i) =>
       getOne<FinanceAccount>("accounts", u, i, (r) => ({
-        ...base(r), name: String(r.name), kind: r.kind as FinanceAccount["kind"],
-        openingBalancePaise: Number(r.opening_balance_paise ?? 0), creditLimitPaise: num(r.credit_limit_paise),
-        defaultProjectId: str(r.default_project_id), archivedAt: archived(r),
+        ...base(r),
+        name: String(r.name),
+        kind: r.kind as FinanceAccount["kind"],
+        openingBalancePaise: Number(r.opening_balance_paise ?? 0),
+        creditLimitPaise: num(r.credit_limit_paise),
+        defaultProjectId: str(r.default_project_id),
+        archivedAt: archived(r),
       })),
     getEvent: (u, i) =>
       getOne<FinanceEvent>("events", u, i, (r) => ({
-        ...base(r), projectId: String(r.project_id), name: String(r.name), budgetPaise: num(r.budget_paise),
-        startDate: str(r.start_date), endDate: str(r.end_date), status: r.status as FinanceEvent["status"], concludedAt: str(r.concluded_at),
+        ...base(r),
+        projectId: String(r.project_id),
+        name: String(r.name),
+        budgetPaise: num(r.budget_paise),
+        startDate: str(r.start_date),
+        endDate: str(r.end_date),
+        status: r.status as FinanceEvent["status"],
+        concludedAt: str(r.concluded_at),
       })),
     getLoan: (u, i) =>
       getOne<FinanceLoan>("loans", u, i, (r) => ({
-        ...base(r), projectId: String(r.project_id), lender: String(r.lender), principalPaise: Number(r.principal_paise),
-        interestRatePct: num(r.interest_rate_pct), emiPaise: num(r.emi_paise), emiDayOfMonth: num(r.emi_day_of_month),
-        startDate: str(r.start_date), tenureMonths: num(r.tenure_months), status: r.status as FinanceLoan["status"],
+        ...base(r),
+        projectId: String(r.project_id),
+        lender: String(r.lender),
+        principalPaise: Number(r.principal_paise),
+        interestRatePct: num(r.interest_rate_pct),
+        emiPaise: num(r.emi_paise),
+        emiDayOfMonth: num(r.emi_day_of_month),
+        startDate: str(r.start_date),
+        tenureMonths: num(r.tenure_months),
+        status: r.status as FinanceLoan["status"],
       })),
     getInvestment: (u, i) =>
       getOne<FinanceInvestment>("investments", u, i, (r) => ({
-        ...base(r), projectId: String(r.project_id), name: String(r.name), kind: r.kind as FinanceInvestment["kind"],
-        currentValuePaise: num(r.current_value_paise), folioNo: str(r.folio_no),
+        ...base(r),
+        projectId: String(r.project_id),
+        name: String(r.name),
+        kind: r.kind as FinanceInvestment["kind"],
+        currentValuePaise: num(r.current_value_paise),
+        folioNo: str(r.folio_no),
       })),
 
     async listTransactions(userId) {
-      const rows = await queryAll("SELECT *", "transactions", `user_id = '${esc(userId)}' AND deleted_at IS NULL`, "ORDER BY ROWID");
+      const rows = await queryAll(
+        "SELECT *",
+        "transactions",
+        `user_id = '${esc(userId)}' AND deleted_at IS NULL`,
+        "ORDER BY ROWID",
+      );
       return rows.map(rowToTransaction);
     },
     async listEvents(userId) {
-      const rows = await queryAll("SELECT *", "events", `user_id = '${esc(userId)}' AND deleted_at IS NULL`, "ORDER BY ROWID");
+      const rows = await queryAll(
+        "SELECT *",
+        "events",
+        `user_id = '${esc(userId)}' AND deleted_at IS NULL`,
+        "ORDER BY ROWID",
+      );
       return rows.map((r) => ({
-        ...base(r), projectId: String(r.project_id), name: String(r.name), budgetPaise: num(r.budget_paise),
-        startDate: str(r.start_date), endDate: str(r.end_date), status: r.status as FinanceEvent["status"], concludedAt: str(r.concluded_at),
+        ...base(r),
+        projectId: String(r.project_id),
+        name: String(r.name),
+        budgetPaise: num(r.budget_paise),
+        startDate: str(r.start_date),
+        endDate: str(r.end_date),
+        status: r.status as FinanceEvent["status"],
+        concludedAt: str(r.concluded_at),
       }));
     },
     getTransaction: (u, i) => getOne("transactions", u, i, rowToTransaction),
+    async countTransactions(userId) {
+      const rows = await app
+        .zcql()
+        .executeZCQLQuery(
+          `SELECT COUNT(ROWID) FROM transactions WHERE user_id = '${esc(userId)}' AND deleted_at IS NULL`,
+        );
+      const first = rows[0]?.transactions ?? Object.values(rows[0] ?? {})[0] ?? {};
+      const n = Number(Object.values(first as Record<string, unknown>)[0]);
+      // If the SDK ever answers in a shape we don't expect, fall back to counting (slow but correct).
+      return Number.isFinite(n)
+        ? n
+        : (
+            await queryAll(
+              "SELECT ROWID",
+              "transactions",
+              `user_id = '${esc(userId)}' AND deleted_at IS NULL`,
+            )
+          ).length;
+    },
 
     async insertTransaction(row) {
-      const saved = await app.datastore().table("transactions").insertRow(transactionToColumns(row));
+      const saved = await app
+        .datastore()
+        .table("transactions")
+        .insertRow(transactionToColumns(row));
       return rowToTransaction(saved);
     },
     async updateTransaction(userId, rowId, patch) {
@@ -154,24 +250,37 @@ export const createCatalystFinanceStore = (app: CatalystLike): FinanceStore => {
       const current = await getOne("transactions", userId, rowId, rowToTransaction);
       if (!current) throw new Error("not found");
       const { userId: _u, createdBy: _c, ...allowed } = patch;
-      await app.datastore().table("transactions").updateRow({ ROWID: id(rowId), ...transactionToColumns(allowed) });
+      await app
+        .datastore()
+        .table("transactions")
+        .updateRow({ ROWID: id(rowId), ...transactionToColumns(allowed) });
       return { ...current, ...patch } as FinanceTransaction;
     },
     async softDeleteTransaction(userId, rowId, deletedAtIso) {
       const current = await getOne("transactions", userId, rowId, rowToTransaction);
       if (!current) throw new Error("not found");
-      await app.datastore().table("transactions").updateRow({
-        ROWID: id(rowId),
-        deleted_at: deletedAtIso.slice(0, 19).replace("T", " "),
-      });
+      await app
+        .datastore()
+        .table("transactions")
+        .updateRow({
+          ROWID: id(rowId),
+          deleted_at: deletedAtIso.slice(0, 19).replace("T", " "),
+        });
     },
     async insertAudit(e: Omit<FinanceAuditEntry, "id">) {
-      await app.datastore().table("audit_log").insertRow({
-        user_id: e.userId, actor: e.actor, action: e.action, entity: e.entity, entity_id: e.entityId,
-        // the column holds 10,000 characters; cut long payloads rather than failing the user's request
-        before_json: JSON.stringify(e.before ?? null).slice(0, 9500),
-        after_json: JSON.stringify(e.after ?? null).slice(0, 9500),
-      });
+      await app
+        .datastore()
+        .table("audit_log")
+        .insertRow({
+          user_id: e.userId,
+          actor: e.actor,
+          action: e.action,
+          entity: e.entity,
+          entity_id: e.entityId,
+          // the column holds 10,000 characters; cut long payloads rather than failing the user's request
+          before_json: JSON.stringify(e.before ?? null).slice(0, 9500),
+          after_json: JSON.stringify(e.after ?? null).slice(0, 9500),
+        });
     },
   };
 };

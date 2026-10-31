@@ -45,9 +45,6 @@ JOBRIO/
 │   ├── api/                 @jobrio/api — backend edge service
 │   │   ├── catalyst/
 │   │   │   └── functions/
-│   │   │       ├── auth/
-│   │   │       │   ├── lib/
-│   │   │       │   └── test/
 │   │   │       ├── chat/
 │   │   │       │   └── src/
 │   │   │       ├── files/
@@ -67,14 +64,15 @@ JOBRIO/
 │   │   │   ├── middleware/
 │   │   │   └── utils/
 │   │   └── tests/
-│   │       └── features/
-│   │           ├── admin/
-│   │           ├── auth/
-│   │           ├── catalog/
-│   │           ├── chat/
-│   │           ├── files/
-│   │           ├── finance/
-│   │           └── subscription/
+│   │       ├── features/
+│   │       │   ├── admin/
+│   │       │   ├── auth/
+│   │       │   ├── catalog/
+│   │       │   ├── chat/
+│   │       │   ├── files/
+│   │       │   ├── finance/
+│   │       │   └── subscription/
+│   │       └── middleware/
 │   └── web/                 @jobrio/web — client & professional web app
 │       ├── public/
 │       ├── scripts/

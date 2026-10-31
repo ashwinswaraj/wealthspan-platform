@@ -27,21 +27,26 @@ export const createCatalystAdminStore = (app: CatalystAdminApp): AdminStore => {
   return {
     async listUsers() {
       const raw = (await app.userManagement().getAllUsers()) ?? [];
-      return raw.map((u): AdminUserRecord => {
-        const first = str(u.first_name) ?? "";
-        const last = str(u.last_name) ?? "";
-        return {
-          id: String(u.user_id ?? u.userId ?? ""),
-          email: String(u.email_id ?? u.email ?? ""),
-          name: `${first} ${last}`.trim(),
-          createdAt: ts(u.created_time ?? u.createdTime ?? ""),
-          active: String(u.status ?? "ACTIVE").toUpperCase() === "ACTIVE",
-        };
-      }).filter((u) => u.id);
+      return raw
+        .map((u): AdminUserRecord => {
+          const first = str(u.first_name) ?? "";
+          const last = str(u.last_name) ?? "";
+          return {
+            id: String(u.user_id ?? u.userId ?? ""),
+            email: String(u.email_id ?? u.email ?? ""),
+            name: `${first} ${last}`.trim(),
+            createdAt: ts(u.created_time ?? u.createdTime ?? ""),
+            active: String(u.status ?? "ACTIVE").toUpperCase() === "ACTIVE",
+          };
+        })
+        .filter((u) => u.id);
     },
     async countRows(table) {
-      const where = table === "transactions" || table === "projects" ? "deleted_at IS NULL" : "ROWID > 0";
-      const rows = await app.zcql().executeZCQLQuery(`SELECT COUNT(ROWID) FROM ${table} WHERE ${where}`);
+      const where =
+        table === "transactions" || table === "projects" ? "deleted_at IS NULL" : "ROWID > 0";
+      const rows = await app
+        .zcql()
+        .executeZCQLQuery(`SELECT COUNT(ROWID) FROM ${table} WHERE ${where}`);
       const first = rows[0]?.[table] ?? Object.values(rows[0] ?? {})[0] ?? {};
       const v = Object.values(first as Row)[0];
       return Number(v ?? 0);
@@ -50,18 +55,30 @@ export const createCatalystAdminStore = (app: CatalystAdminApp): AdminStore => {
     listAllSubscriptions: () => subs.listAllSubscriptions(),
     async recentTransactions(limit) {
       const n = Math.max(1, Math.min(PAGE, Math.floor(limit)));
-      const rows = await query(`SELECT * FROM transactions WHERE deleted_at IS NULL ORDER BY ROWID DESC LIMIT 0,${n}`, "transactions");
-      const ids = [...new Set(rows.map((r) => str(r.project_id)).filter((v): v is string => !!v && /^\d{1,20}$/.test(v)))];
+      const rows = await query(
+        `SELECT * FROM transactions WHERE deleted_at IS NULL ORDER BY ROWID DESC LIMIT 0,${n}`,
+        "transactions",
+      );
+      const ids = [
+        ...new Set(
+          rows
+            .map((r) => str(r.project_id))
+            .filter((v): v is string => !!v && /^\d{1,20}$/.test(v)),
+        ),
+      ];
       const names = new Map<string, string>();
       if (ids.length) {
-        const ps = await query(`SELECT ROWID, name FROM projects WHERE ROWID IN (${ids.join(",")}) LIMIT 0,${PAGE}`, "projects");
+        const ps = await query(
+          `SELECT ROWID, name FROM projects WHERE ROWID IN (${ids.join(",")}) LIMIT 0,${PAGE}`,
+          "projects",
+        );
         for (const p of ps) names.set(String(p.ROWID), String(p.name));
       }
       return rows.map((r): AdminTxRecord => ({
         id: String(r.ROWID),
         type: String(r.type ?? ""),
-        category: str(r.category),
-        party: str(r.party),
+        category: null, // never read: admins don't see user-typed text
+        party: null,
         paymentMode: str(r.payment_mode),
         amountPaise: Number(r.amount_paise ?? 0),
         projectName: names.get(String(r.project_id)) ?? null,
@@ -70,7 +87,10 @@ export const createCatalystAdminStore = (app: CatalystAdminApp): AdminStore => {
     },
     async recentAudit(limit) {
       const n = Math.max(1, Math.min(PAGE, Math.floor(limit)));
-      const rows = await query(`SELECT * FROM audit_log ORDER BY ROWID DESC LIMIT 0,${n}`, "audit_log");
+      const rows = await query(
+        `SELECT * FROM audit_log ORDER BY ROWID DESC LIMIT 0,${n}`,
+        "audit_log",
+      );
       return rows.map((r): AdminAuditRecord => ({
         id: String(r.ROWID),
         action: String(r.action ?? ""),

@@ -46,7 +46,11 @@ function createSarvamClient(opts) {
         const res = await doFetch(url, {
           method: "POST",
           signal: ctrl.signal,
-          headers: { "content-type": "application/json", "api-subscription-key": opts.apiKey, authorization: `Bearer ${opts.apiKey}` },
+          headers: {
+            "content-type": "application/json",
+            "api-subscription-key": opts.apiKey,
+            authorization: `Bearer ${opts.apiKey}`
+          },
           body: JSON.stringify({
             model: opts.model ?? "sarvam-105b",
             messages: input.messages,
@@ -57,11 +61,16 @@ function createSarvamClient(opts) {
         });
         if (!res.ok) {
           const detail = (await res.text().catch(() => "")).replace(/sk_[A-Za-z0-9_]+/g, "[key]").slice(0, 200);
-          throw new AiError("provider", `AI provider returned ${res.status}. ${detail}`.trim(), res.status === 429 ? 429 : 502);
+          throw new AiError(
+            "provider",
+            `AI provider returned ${res.status}. ${detail}`.trim(),
+            res.status === 429 ? 429 : 502
+          );
         }
         const data = await res.json();
         const choice = data.choices?.[0];
-        if (!choice?.message) throw new AiError("bad_response", "AI provider sent an unexpected reply.");
+        if (!choice?.message)
+          throw new AiError("bad_response", "AI provider sent an unexpected reply.");
         return {
           content: choice.message.content ?? null,
           toolCalls: choice.message.tool_calls ?? [],
@@ -70,7 +79,8 @@ function createSarvamClient(opts) {
         };
       } catch (e) {
         if (e instanceof AiError) throw e;
-        if (e?.name === "AbortError") throw new AiError("timeout", "AI took too long. Try again.", 504);
+        if (e?.name === "AbortError")
+          throw new AiError("timeout", "AI took too long. Try again.", 504);
         throw new AiError("provider", "Could not reach the AI provider.");
       } finally {
         clearTimeout(timer);
@@ -79,35 +89,412 @@ function createSarvamClient(opts) {
   };
 }
 
+// src/features/chat/quota.ts
+var DAILY_CHAT_LIMIT = 40;
+var IST_OFFSET_MS = 5.5 * 36e5;
+var createChatQuota = (deps) => {
+  const limit = deps.limit ?? DAILY_CHAT_LIMIT;
+  const day = () => new Date((deps.now?.() ?? /* @__PURE__ */ new Date()).getTime() + IST_OFFSET_MS).toISOString().slice(0, 10);
+  return {
+    limit,
+    /** Counts one message. `ok: false` means today's limit is used up. */
+    async consume(userId) {
+      const key = `${userId}:${day()}`;
+      let row = await deps.store.get(key);
+      if (!row) {
+        try {
+          await deps.store.insert(key, userId);
+          return { ok: true, used: 1, limit };
+        } catch {
+          row = await deps.store.get(key);
+          if (!row) throw new Error("chat usage unavailable");
+        }
+      }
+      if (row.uses >= limit) return { ok: false, used: row.uses, limit };
+      const next = row.uses + 1;
+      await deps.store.setUses(row.rowId, next);
+      return { ok: true, used: next, limit };
+    }
+  };
+};
+var esc = (s) => String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+var createCatalystChatUsageStore = (app2) => ({
+  async get(key) {
+    const rows = await app2.zcql().executeZCQLQuery(
+      `SELECT ROWID, uses FROM chat_usage WHERE usage_key = '${esc(key)}' LIMIT 0,1`
+    );
+    const r = rows[0]?.chat_usage ?? Object.values(rows[0] ?? {})[0];
+    return r ? { rowId: String(r.ROWID), uses: Number(r.uses ?? 0) } : null;
+  },
+  async insert(key, userId) {
+    await app2.datastore().table("chat_usage").insertRow({ usage_key: key, user_id: userId, uses: 1 });
+  },
+  async setUses(rowId, uses) {
+    if (!/^\d{1,20}$/.test(rowId)) throw new Error("bad id");
+    await app2.datastore().table("chat_usage").updateRow({ ROWID: rowId, uses });
+  }
+});
+
+// src/features/subscription/types.ts
+var PLANS = {
+  trial: { label: "1 month free trial", pricePaise: 0, days: 30 },
+  pro_monthly: { label: "Pro \u2014 monthly", pricePaise: 19900, days: 30 },
+  pro_annual: { label: "Pro \u2014 annual", pricePaise: 199900, days: 365 }
+};
+var SubscriptionError = class extends Error {
+  constructor(code, message, status = 400) {
+    super(message);
+    this.code = code;
+    this.status = status;
+  }
+};
+
+// src/features/subscription/service.ts
+var DATE = (d) => d.toISOString().slice(0, 10);
+var addDays = (isoDate, days) => {
+  const d = /* @__PURE__ */ new Date(`${isoDate}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return DATE(d);
+};
+var UTR = /^\d{12}$/;
+var createSubscriptionService = (deps) => {
+  const { store } = deps;
+  const now = () => deps.now?.() ?? /* @__PURE__ */ new Date();
+  const today = () => DATE(now());
+  const isAdmin = (id) => (deps.adminIds ?? []).includes(id);
+  const entitlementOf = (subs) => {
+    const t = today();
+    const live = subs.filter((s) => s.startsOn <= t && s.endsOn >= t).sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0];
+    const trialUsed = subs.some((s) => s.plan === "trial");
+    if (!live) return { plan: "free", active: false, endsOn: null, daysLeft: 0, trialUsed };
+    const daysLeft = Math.round(
+      (Date.parse(`${live.endsOn}T00:00:00Z`) - Date.parse(`${t}T00:00:00Z`)) / 864e5
+    ) + 1;
+    return { plan: live.plan, active: true, endsOn: live.endsOn, daysLeft, trialUsed };
+  };
+  const startFor = (subs) => {
+    const latest = subs.map((s) => s.endsOn).sort().pop();
+    return latest && latest >= today() ? addDays(latest, 1) : today();
+  };
+  return {
+    async getEntitlement(userId) {
+      return entitlementOf(await store.listSubscriptions(userId));
+    },
+    async startTrial(userId) {
+      const subs = await store.listSubscriptions(userId);
+      if (subs.some((s) => s.plan === "trial"))
+        throw new SubscriptionError("conflict", "Free trial already used.", 409);
+      const startsOn = startFor(subs);
+      try {
+        return await store.insertSubscription({
+          userId,
+          plan: "trial",
+          startsOn,
+          endsOn: addDays(startsOn, PLANS.trial.days - 1),
+          paymentId: null,
+          subKey: `trial:${userId}`,
+          createdAt: now().toISOString()
+        });
+      } catch (e) {
+        if ((await store.listSubscriptions(userId)).some((x) => x.plan === "trial"))
+          throw new SubscriptionError("conflict", "Free trial already used.", 409);
+        throw e;
+      }
+    },
+    async submitPayment(userId, input) {
+      const plan = input.plan;
+      if (plan !== "pro_monthly" && plan !== "pro_annual")
+        throw new SubscriptionError("validation", "Choose a paid plan.");
+      const utr = String(input.utr ?? "").replace(/\s+/g, "");
+      if (!UTR.test(utr))
+        throw new SubscriptionError("validation", "UTR must be exactly 12 digits.");
+      const expected = PLANS[plan].pricePaise;
+      if (Math.round(Number(input.amountRupees) * 100) !== expected) {
+        throw new SubscriptionError(
+          "validation",
+          `Amount must be \u20B9${expected / 100} for this plan.`
+        );
+      }
+      if (await store.findPaymentByUtr(utr))
+        throw new SubscriptionError("conflict", "This UTR was already submitted.", 409);
+      const mine = await store.listPayments(userId);
+      if (mine.filter((p) => p.status === "pending").length >= 3)
+        throw new SubscriptionError(
+          "conflict",
+          "You already have payments waiting for review.",
+          429
+        );
+      return store.insertPayment({
+        userId,
+        plan,
+        amountPaise: expected,
+        utr,
+        status: "pending",
+        note: null,
+        createdAt: now().toISOString(),
+        reviewedAt: null,
+        reviewedBy: null
+      });
+    },
+    async listMyPayments(userId) {
+      return (await store.listPayments(userId)).sort(
+        (a, b) => b.createdAt.localeCompare(a.createdAt)
+      );
+    },
+    async listPending(adminId) {
+      if (!isAdmin(adminId)) throw new SubscriptionError("forbidden", "Admins only.", 403);
+      return store.listPendingPayments();
+    },
+    async review(adminId, paymentId, decision, note) {
+      if (!isAdmin(adminId)) throw new SubscriptionError("forbidden", "Admins only.", 403);
+      const p = await store.getPayment(paymentId);
+      if (!p) throw new SubscriptionError("not_found", "Payment not found.", 404);
+      if (p.status !== "pending") throw new SubscriptionError("conflict", "Already reviewed.", 409);
+      const reviewed = {
+        reviewedAt: now().toISOString(),
+        reviewedBy: adminId,
+        note: note?.slice(0, 200) ?? null
+      };
+      if (decision === "reject")
+        return {
+          payment: await store.updatePayment(p.id, { status: "rejected", ...reviewed }),
+          subscription: null
+        };
+      const subs = await store.listSubscriptions(p.userId);
+      const startsOn = startFor(subs);
+      let subscription;
+      try {
+        subscription = await store.insertSubscription({
+          userId: p.userId,
+          plan: p.plan,
+          startsOn,
+          endsOn: addDays(startsOn, PLANS[p.plan].days - 1),
+          paymentId: p.id,
+          subKey: `pay:${p.id}`,
+          createdAt: now().toISOString()
+        });
+      } catch (e) {
+        if ((await store.getPayment(paymentId))?.status !== "pending")
+          throw new SubscriptionError("conflict", "Already reviewed.", 409);
+        const dup = (await store.listSubscriptions(p.userId)).some((x) => x.paymentId === p.id);
+        if (dup) throw new SubscriptionError("conflict", "Already reviewed.", 409);
+        throw e;
+      }
+      return {
+        payment: await store.updatePayment(p.id, { status: "approved", ...reviewed }),
+        subscription
+      };
+    }
+  };
+};
+
+// src/features/subscription/catalyst-store.ts
+var PAGE = 250;
+var esc2 = (s) => String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+var rid = (v) => {
+  if (!/^\d{1,20}$/.test(String(v))) throw new Error("bad id");
+  return String(v);
+};
+var nul = (v) => v === void 0 || v === null || v === "" || v === "null" ? null : v;
+var str = (v) => nul(v) === null ? null : String(v);
+var ts = (v) => String(nul(v) ?? "").replace(" ", "T");
+var rowToSubscription = (r) => ({
+  id: String(r.ROWID),
+  userId: String(r.user_id),
+  plan: r.plan,
+  startsOn: String(r.starts_on),
+  endsOn: String(r.ends_on),
+  paymentId: str(r.payment_id),
+  createdAt: ts(r.CREATEDTIME)
+});
+var rowToPayment = (r) => ({
+  id: String(r.ROWID),
+  userId: String(r.user_id),
+  plan: r.plan,
+  amountPaise: Number(r.amount_paise),
+  utr: String(r.utr),
+  status: r.status,
+  note: str(r.note),
+  createdAt: ts(r.CREATEDTIME),
+  reviewedAt: str(r.reviewed_at),
+  reviewedBy: str(r.reviewed_by)
+});
+var createCatalystSubscriptionStore = (app2) => {
+  const query = async (q, table) => (await app2.zcql().executeZCQLQuery(q)).map((r) => r[table] ?? Object.values(r)[0]);
+  const queryAll = async (table, where) => {
+    const out = [];
+    for (let offset = 0; ; offset += PAGE) {
+      const rows = await query(
+        `SELECT * FROM ${table} WHERE ${where} ORDER BY ROWID DESC LIMIT ${offset},${PAGE}`,
+        table
+      );
+      out.push(...rows);
+      if (rows.length < PAGE) return out;
+    }
+  };
+  return {
+    async listSubscriptions(userId) {
+      return (await queryAll("subscriptions", `user_id = '${esc2(userId)}'`)).map(rowToSubscription);
+    },
+    async insertSubscription(s) {
+      const saved = await app2.datastore().table("subscriptions").insertRow({
+        user_id: s.userId,
+        plan: s.plan,
+        starts_on: s.startsOn,
+        ends_on: s.endsOn,
+        payment_id: s.paymentId,
+        ...s.subKey ? { sub_key: s.subKey } : {}
+      });
+      return rowToSubscription(saved);
+    },
+    async listPayments(userId) {
+      return (await queryAll("payment_submissions", `user_id = '${esc2(userId)}'`)).map(
+        rowToPayment
+      );
+    },
+    async getPayment(paymentId) {
+      const rows = await query(
+        `SELECT * FROM payment_submissions WHERE ROWID = ${rid(paymentId)} LIMIT 0,1`,
+        "payment_submissions"
+      );
+      return rows[0] ? rowToPayment(rows[0]) : null;
+    },
+    async findPaymentByUtr(utr) {
+      const rows = await query(
+        `SELECT * FROM payment_submissions WHERE utr = '${esc2(utr)}' LIMIT 0,1`,
+        "payment_submissions"
+      );
+      return rows[0] ? rowToPayment(rows[0]) : null;
+    },
+    async insertPayment(p) {
+      const saved = await app2.datastore().table("payment_submissions").insertRow({
+        user_id: p.userId,
+        plan: p.plan,
+        amount_paise: p.amountPaise,
+        utr: p.utr,
+        status: p.status,
+        note: p.note,
+        reviewed_at: p.reviewedAt,
+        reviewed_by: p.reviewedBy
+      });
+      return rowToPayment(saved);
+    },
+    async updatePayment(paymentId, patch) {
+      const current = await this.getPayment(paymentId);
+      if (!current) throw new Error("not found");
+      const cols = { ROWID: rid(paymentId) };
+      if (patch.status) cols.status = patch.status;
+      if ("note" in patch) cols.note = patch.note ?? null;
+      if ("reviewedAt" in patch) cols.reviewed_at = patch.reviewedAt ?? null;
+      if ("reviewedBy" in patch) cols.reviewed_by = patch.reviewedBy ?? null;
+      await app2.datastore().table("payment_submissions").updateRow(cols);
+      return { ...current, ...patch };
+    },
+    async listPendingPayments() {
+      return (await queryAll("payment_submissions", "status = 'pending'")).map(rowToPayment);
+    },
+    async listAllPayments(status) {
+      return (await queryAll("payment_submissions", status ? `status = '${esc2(status)}'` : "ROWID > 0")).map(rowToPayment);
+    },
+    async listAllSubscriptions() {
+      return (await queryAll("subscriptions", "ROWID > 0")).map(rowToSubscription);
+    }
+  };
+};
+
+// src/middleware/security.ts
+var CSRF_HEADER = "x-requested-with";
+var CSRF_VALUE = "wealthspan";
+var SAFE_METHODS = /* @__PURE__ */ new Set(["GET", "HEAD", "OPTIONS"]);
+function hardenApp(app2) {
+  process.env.NODE_ENV = process.env.NODE_ENV || "production";
+  app2.disable("x-powered-by");
+  app2.set("etag", false);
+}
+var requestGuard = () => (req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Cache-Control", "no-store");
+  if (SAFE_METHODS.has(req.method)) return next();
+  const site = String(req.headers["sec-fetch-site"] ?? "");
+  if (site === "cross-site") return deny(res);
+  if (req.headers[CSRF_HEADER] !== CSRF_VALUE) return deny(res);
+  next();
+};
+var deny = (res) => {
+  res.status(403).json({ error: "forbidden", message: "Request blocked." });
+};
+var jsonErrors = () => (err, _req, res, _next) => {
+  const status = Number(
+    err?.status ?? err?.statusCode ?? 500
+  );
+  if (status === 413)
+    return void res.status(413).json({ error: "too_large", message: "That request is too large." });
+  if (status >= 400 && status < 500)
+    return void res.status(400).json({ error: "bad_request", message: "That request could not be read." });
+  console.error(
+    "unhandled error:",
+    String(err?.message ?? typeof err).slice(0, 200)
+  );
+  res.status(500).json({ error: "server", message: "Something went wrong. Try again." });
+};
+var notFound = () => (_req, res) => {
+  res.status(404).json({ error: "not_found", message: "Not found." });
+};
+
 // catalyst/functions/chat/src/entry.ts
 var catalyst = require("zcatalyst-sdk-node");
 var app = (0, import_express.default)();
-app.use(import_express.default.json({ limit: "64kb" }));
+hardenApp(app);
+app.use(requestGuard());
+app.use(import_express.default.json({ limit: "32kb" }));
 var ai = () => createSarvamClient({ apiKey: process.env.SARVAM_API_KEY });
 var SYSTEM = "You are Wealthspan's accountant assistant for an Indian user. Amounts are in rupees. Reply briefly in the user's language (Hindi, Hinglish or English).";
 var fail = (res, e) => {
   if (e instanceof AiError) return res.status(e.status).json({ error: e.code, message: e.message });
-  console.error("chat error:", String(e?.message ?? typeof e).slice(0, 200));
+  console.error(
+    "chat error:",
+    String(e?.message ?? typeof e).slice(0, 200)
+  );
   return res.status(500).json({ error: "server", message: "Something went wrong. Try again." });
 };
-app.get("/ping", async (_req, res) => {
-  try {
-    const r = await ai().chat({ messages: [{ role: "user", content: "Say OK" }], maxTokens: 8 });
-    res.json({ ok: true, reply: r.content, usage: r.usage });
-  } catch (e) {
-    fail(res, e);
-  }
-});
 app.post("/chat", async (req, res) => {
+  let userId;
+  let c;
   try {
-    const user = await catalyst.initialize(req).userManagement().getCurrentUser();
-    if (!(user?.user_id ?? user?.userId)) throw new Error("no user");
+    c = catalyst.initialize(req);
+    const user = await c.userManagement().getCurrentUser();
+    userId = String(user?.user_id ?? user?.userId ?? "");
+    if (!userId) throw new Error("no user");
   } catch {
     return res.status(401).json({ error: "unauthorized", message: "Please log in." });
   }
+  try {
+    const entitlement = await createSubscriptionService({
+      store: createCatalystSubscriptionStore(c)
+    }).getEntitlement(userId);
+    if (!entitlement.active)
+      return res.status(402).json({
+        error: "subscription_required",
+        message: "Start your free trial or subscribe to chat with your accountant."
+      });
+    const quota = await createChatQuota({ store: createCatalystChatUsageStore(c) }).consume(userId);
+    if (!quota.ok)
+      return res.status(429).json({
+        error: "daily_limit",
+        message: `Daily chat limit (${quota.limit} messages) reached. Try again tomorrow.`
+      });
+  } catch (e) {
+    return fail(res, e);
+  }
   const raw = Array.isArray(req.body?.messages) ? req.body.messages : [];
-  const messages = raw.filter((m) => (m?.role === "user" || m?.role === "assistant") && typeof m.content === "string").slice(-20).map((m) => ({ role: m.role, content: m.content.slice(0, 4e3) }));
-  if (!messages.length) return res.status(400).json({ error: "validation", message: "Send at least one message." });
+  const messages = raw.filter(
+    (m) => (m?.role === "user" || m?.role === "assistant") && typeof m.content === "string"
+  ).slice(-12).map((m) => ({
+    role: m.role,
+    content: m.content.slice(0, 2e3)
+  }));
+  if (!messages.length)
+    return res.status(400).json({ error: "validation", message: "Send at least one message." });
   try {
     const r = await ai().chat({ messages: [{ role: "system", content: SYSTEM }, ...messages] });
     res.json({ reply: r.content ?? "", usage: r.usage });
@@ -115,4 +502,6 @@ app.post("/chat", async (req, res) => {
     fail(res, e);
   }
 });
+app.use(notFound());
+app.use(jsonErrors());
 module.exports = app;

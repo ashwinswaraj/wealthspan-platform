@@ -1,4 +1,4 @@
 {
-  "deployment": { "name": "chat", "type": "advancedio", "stack": "node22", "env_variables": {} },
+  "deployment": { "name": "chat", "type": "advancedio", "stack": "node22", "env_variables": { "NODE_ENV": "production" } },
   "execution": { "main": "index.js" }
 }

@@ -2,7 +2,13 @@
  * Read models for the admin console. Pure logic over an AdminStore so it can be tested without Catalyst.
  * Admin rights are decided by e-mail (ADMIN_EMAILS) at the edge; this service trusts that check.
  */
-import { PLANS, type PaymentStatus, type PlanId, type Subscription } from "../subscription";
+import {
+  PLANS,
+  paymentReference,
+  type PaymentStatus,
+  type PlanId,
+  type Subscription,
+} from "../subscription";
 import type { AdminStore } from "./types";
 
 export type PlanTier = "Free" | "Go" | "Pro";
@@ -18,16 +24,36 @@ const dmy = (iso: string) => {
 /** The free trial is the "Go" tier in the app's wording; paid plans are "Pro". */
 const tierOf = (plan: PlanId): PlanTier => (plan === "trial" ? "Go" : "Pro");
 
-export const createAdminService = (deps: { store: AdminStore; adminEmails: string[]; now?: () => Date }) => {
+export const createAdminService = (deps: {
+  store: AdminStore;
+  adminEmails: string[];
+  adminUserIds?: string[];
+  now?: () => Date;
+}) => {
   const { store } = deps;
   const now = () => deps.now?.() ?? new Date();
   const today = () => now().toISOString().slice(0, 10);
   const admins = new Set(deps.adminEmails.map((e) => e.trim().toLowerCase()).filter(Boolean));
-  const isAdminEmail = (email: string | null | undefined) => !!email && admins.has(email.trim().toLowerCase());
+  const isAdminEmail = (email: string | null | undefined) =>
+    !!email && admins.has(email.trim().toLowerCase());
+  /**
+   * When ADMIN_USER_IDS is set, an admin needs BOTH a listed e-mail AND a listed Catalyst user id, so
+   * signing up with someone else's e-mail address is not enough. With it empty only the e-mail counts
+   * (bootstrap: read your id from GET /admin/me, then pin it).
+   */
+  const pinned = new Set((deps.adminUserIds ?? []).map((i) => i.trim()).filter(Boolean));
+  const isAdmin = (who: { email?: string | null; userId?: string | null }) =>
+    isAdminEmail(who.email) &&
+    (pinned.size === 0 || (!!who.userId && pinned.has(String(who.userId))));
+  const isPinned = () => pinned.size > 0;
 
   const liveSub = (subs: Subscription[]) => {
     const t = today();
-    return subs.filter((s) => s.startsOn <= t && s.endsOn >= t).sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0] ?? null;
+    return (
+      subs
+        .filter((s) => s.startsOn <= t && s.endsOn >= t)
+        .sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0] ?? null
+    );
   };
   const byUser = (subs: Subscription[]) => {
     const m = new Map<string, Subscription[]>();
@@ -37,11 +63,16 @@ export const createAdminService = (deps: { store: AdminStore; adminEmails: strin
 
   return {
     isAdminEmail,
+    isAdmin,
+    isPinned,
 
     async overview() {
       const [users, subs, payments, projects, transactions] = await Promise.all([
-        store.listUsers(), store.listAllSubscriptions(), store.listAllPayments("pending"),
-        store.countRows("projects"), store.countRows("transactions"),
+        store.listUsers(),
+        store.listAllSubscriptions(),
+        store.listAllPayments("pending"),
+        store.countRows("projects"),
+        store.countRows("transactions"),
       ]);
       const per = byUser(subs);
       const usersByPlan = { free: 0, go: 0, pro: 0 };
@@ -61,7 +92,15 @@ export const createAdminService = (deps: { store: AdminStore; adminEmails: strin
         const day = new Date(t0 - (29 - i) * DAY).toISOString().slice(0, 10);
         return users.filter((u) => u.createdAt.slice(0, 10) === day).length;
       });
-      return { users: users.length, usersByPlan, projects, transactions, mrrPaise, pendingPayments: payments.length, usersTrend };
+      return {
+        users: users.length,
+        usersByPlan,
+        projects,
+        transactions,
+        mrrPaise,
+        pendingPayments: payments.length,
+        usersTrend,
+      };
     },
 
     async users() {
@@ -69,7 +108,7 @@ export const createAdminService = (deps: { store: AdminStore; adminEmails: strin
       const per = byUser(subs);
       return users.map((u) => {
         const live = liveSub(per.get(u.id) ?? []);
-        const isSuper = isAdminEmail(u.email);
+        const isSuper = isAdmin({ email: u.email, userId: u.id });
         return {
           id: u.id,
           name: u.name || u.email,
@@ -94,6 +133,8 @@ export const createAdminService = (deps: { store: AdminStore; adminEmails: strin
           id: p.id,
           utr: p.utr,
           userEmail: email.get(p.userId) ?? p.userId,
+          /** Matches the reference the user writes in the UPI remark. */
+          reference: paymentReference(p.userId),
           plan: PLANS[p.plan]?.label ?? p.plan,
           amountPaise: p.amountPaise,
           orderId: `ORD-${p.id.slice(-6)}`,
@@ -107,8 +148,9 @@ export const createAdminService = (deps: { store: AdminStore; adminEmails: strin
       return rows.map((t) => ({
         id: t.id,
         project: t.projectName ?? "—",
-        category: t.category ?? (t.type ? t.type[0].toUpperCase() + t.type.slice(1) : "—"),
-        counterparty: t.party ?? "—",
+        // Privacy: the console never shows what a user typed (names, categories, notes), only the type and amount.
+        category: t.type ? t.type[0].toUpperCase() + t.type.slice(1) : "—",
+        counterparty: "Hidden",
         amountPaise: t.amountPaise,
         mode: t.paymentMode ? t.paymentMode.replace(/_/g, " ").toUpperCase() : "—",
         // Wealthspan records money that already moved; there is no pending/in-transit state.

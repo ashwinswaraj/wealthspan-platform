@@ -341,7 +341,7 @@ function UpiQueue() {
               rows.map((p) => (
                 <tr key={p.id} className="hover:bg-[#f9f9f9]/70 dark:hover:bg-[#383838]/40 transition-colors">
                   <td className="py-3.5 px-6 font-mono font-semibold text-xs text-[#0d0d0d] dark:text-[#ececec]">{p.utr || "—"}</td>
-                  <td className="py-3.5 px-4 text-[#0d0d0d] dark:text-[#ececec]">{p.userEmail || "—"}</td>
+                  <td className="py-3.5 px-4 text-[#0d0d0d] dark:text-[#ececec]">{p.userEmail || "—"}{p.reference ? <span className="block font-mono text-[11px] text-[#737373] dark:text-[#b4b4b4]">{p.reference}</span> : null}</td>
                   <td className="py-3.5 px-4">
                     <span className="inline-flex px-4 py-1.5 rounded-full text-[13px] font-semibold whitespace-nowrap shadow-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">{p.plan || "—"}</span>
                   </td>
@@ -408,7 +408,7 @@ function ApprovedPayments() {
                   <td className="py-3.5 px-6 font-mono font-semibold text-xs text-[#0d0d0d] dark:text-[#ececec]">{p.orderId || "—"}</td>
                   <td className="py-3.5 px-4">
                     <div className="font-semibold text-[#0d0d0d] dark:text-[#ececec]">{p.userEmail || "—"}</div>
-                    <div className="text-xs text-[#737373] dark:text-[#b4b4b4]">UTR {p.utr || "—"} • {fmtDate(p.createdAt)}</div>
+                    <div className="text-xs text-[#737373] dark:text-[#b4b4b4]">UTR {p.utr || "—"} • {p.reference ? `${p.reference} • ` : ""}{fmtDate(p.createdAt)}</div>
                   </td>
                   <td className="py-3.5 px-4">
                     <span className="inline-flex px-6 py-2 sm:px-7 sm:py-2.5 rounded-full text-[13px] sm:text-[14px] font-semibold whitespace-nowrap shadow-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">{p.plan || "—"}</span>

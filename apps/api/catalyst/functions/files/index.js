@@ -201,6 +201,7 @@ var FinanceError = class extends Error {
     this.fields = fields;
   }
 };
+var MAX_TRANSACTIONS_PER_USER = 5e3;
 var IST_OFFSET_MS = 5.5 * 36e5;
 var FIELDS = [
   "type",
@@ -274,12 +275,14 @@ var createFinanceService = ({
       if (i.eventId) {
         const ev = await store.getEvent(userId, i.eventId);
         if (!ev) e.eventId = "That event was not found.";
-        else if (project && ev.projectId !== project.id) e.eventId = "That event belongs to a different project.";
+        else if (project && ev.projectId !== project.id)
+          e.eventId = "That event belongs to a different project.";
       }
       if (i.loanId) {
         const loan = await store.getLoan(userId, i.loanId);
         if (!loan) e.loanId = "That loan was not found.";
-        else if (project && loan.projectId !== project.id) e.loanId = "That loan belongs to a different project.";
+        else if (project && loan.projectId !== project.id)
+          e.loanId = "That loan belongs to a different project.";
       }
     }
     if (Object.keys(e).length) fail(e);
@@ -311,7 +314,9 @@ var createFinanceService = ({
   const warningsFor = async (userId, row) => {
     const w = [];
     if (row.type === "expense" && looksLikeCardBillPayment(row.party, row.note, row.category)) {
-      w.push("This looks like a credit card bill payment. Paying a card bill is a transfer from your bank, not an expense, otherwise the spending is counted twice.");
+      w.push(
+        "This looks like a credit card bill payment. Paying a card bill is a transfer from your bank, not an expense, otherwise the spending is counted twice."
+      );
       const existing = await store.listTransactions(userId);
       if (findSameAmountCardExpenses(row, existing).length)
         w.push("You already have credit card spending of exactly this amount in the last 45 days.");
@@ -322,6 +327,12 @@ var createFinanceService = ({
     async createTransaction(userId, raw, source = "manual") {
       const input = clean(raw);
       await validate(userId, input);
+      if (store.countTransactions && await store.countTransactions(userId) >= MAX_TRANSACTIONS_PER_USER)
+        throw new FinanceError(
+          "invalid",
+          `You have reached the limit of ${MAX_TRANSACTIONS_PER_USER} entries. Export and delete old ones to add more.`,
+          429
+        );
       const row = toRow(userId, input, source);
       const warnings = await warningsFor(userId, row);
       const transaction = await store.insertTransaction(row);
@@ -380,11 +391,16 @@ var createFinanceService = ({
     async listTransactions(userId, f = {}) {
       const limit = Math.min(Math.max(f.limit ?? 50, 1), 200);
       const offset = Math.max(f.offset ?? 0, 0);
-      const all = (await store.listTransactions(userId)).filter((t) => (!f.from || t.date >= f.from) && (!f.to || t.date <= f.to)).filter((t) => !f.projectId || t.projectId === f.projectId).filter((t) => !f.type || t.type === f.type).filter((t) => !f.accountId || [t.accountId, t.fromAccountId, t.toAccountId].includes(f.accountId)).sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+      const all = (await store.listTransactions(userId)).filter((t) => (!f.from || t.date >= f.from) && (!f.to || t.date <= f.to)).filter((t) => !f.projectId || t.projectId === f.projectId).filter((t) => !f.type || t.type === f.type).filter(
+        (t) => !f.accountId || [t.accountId, t.fromAccountId, t.toAccountId].includes(f.accountId)
+      ).sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
       return { total: all.length, items: all.slice(offset, offset + limit) };
     },
     async getSummary(userId, filter = {}) {
-      const [txs, events] = await Promise.all([store.listTransactions(userId), store.listEvents(userId)]);
+      const [txs, events] = await Promise.all([
+        store.listTransactions(userId),
+        store.listEvents(userId)
+      ]);
       return summarize(txs, events, filter);
     }
   };
@@ -457,7 +473,10 @@ var createCatalystFinanceStore = (app2) => {
   const queryAll = async (select, table, where, order = "") => {
     const out = [];
     for (let offset = 0; ; offset += PAGE) {
-      const rows = await query(`${select} FROM ${table} WHERE ${where} ${order} LIMIT ${offset},${PAGE}`, table);
+      const rows = await query(
+        `${select} FROM ${table} WHERE ${where} ${order} LIMIT ${offset},${PAGE}`,
+        table
+      );
       out.push(...rows);
       if (rows.length < PAGE) return out;
     }
@@ -471,7 +490,12 @@ var createCatalystFinanceStore = (app2) => {
   };
   const archived = (r) => str(r.archived_at);
   return {
-    getProject: (u, i) => getOne("projects", u, i, (r) => ({ ...base(r), name: String(r.name), kind: r.kind, archivedAt: archived(r) })),
+    getProject: (u, i) => getOne("projects", u, i, (r) => ({
+      ...base(r),
+      name: String(r.name),
+      kind: r.kind,
+      archivedAt: archived(r)
+    })),
     getAccount: (u, i) => getOne("accounts", u, i, (r) => ({
       ...base(r),
       name: String(r.name),
@@ -512,11 +536,21 @@ var createCatalystFinanceStore = (app2) => {
       folioNo: str(r.folio_no)
     })),
     async listTransactions(userId) {
-      const rows = await queryAll("SELECT *", "transactions", `user_id = '${esc(userId)}' AND deleted_at IS NULL`, "ORDER BY ROWID");
+      const rows = await queryAll(
+        "SELECT *",
+        "transactions",
+        `user_id = '${esc(userId)}' AND deleted_at IS NULL`,
+        "ORDER BY ROWID"
+      );
       return rows.map(rowToTransaction);
     },
     async listEvents(userId) {
-      const rows = await queryAll("SELECT *", "events", `user_id = '${esc(userId)}' AND deleted_at IS NULL`, "ORDER BY ROWID");
+      const rows = await queryAll(
+        "SELECT *",
+        "events",
+        `user_id = '${esc(userId)}' AND deleted_at IS NULL`,
+        "ORDER BY ROWID"
+      );
       return rows.map((r) => ({
         ...base(r),
         projectId: String(r.project_id),
@@ -529,6 +563,18 @@ var createCatalystFinanceStore = (app2) => {
       }));
     },
     getTransaction: (u, i) => getOne("transactions", u, i, rowToTransaction),
+    async countTransactions(userId) {
+      const rows = await app2.zcql().executeZCQLQuery(
+        `SELECT COUNT(ROWID) FROM transactions WHERE user_id = '${esc(userId)}' AND deleted_at IS NULL`
+      );
+      const first = rows[0]?.transactions ?? Object.values(rows[0] ?? {})[0] ?? {};
+      const n = Number(Object.values(first)[0]);
+      return Number.isFinite(n) ? n : (await queryAll(
+        "SELECT ROWID",
+        "transactions",
+        `user_id = '${esc(userId)}' AND deleted_at IS NULL`
+      )).length;
+    },
     async insertTransaction(row) {
       const saved = await app2.datastore().table("transactions").insertRow(transactionToColumns(row));
       return rowToTransaction(saved);
@@ -565,7 +611,14 @@ var createCatalystFinanceStore = (app2) => {
 
 // src/features/catalog/catalyst-store.ts
 var SPEC = {
-  projects: { table: "projects", fields: [["name", "name", "reqstr"], ["kind", "kind", "reqstr"], ["archivedAt", "archived_at", "str"]] },
+  projects: {
+    table: "projects",
+    fields: [
+      ["name", "name", "reqstr"],
+      ["kind", "kind", "reqstr"],
+      ["archivedAt", "archived_at", "str"]
+    ]
+  },
   accounts: {
     table: "accounts",
     fields: [
@@ -605,7 +658,13 @@ var SPEC = {
   },
   investments: {
     table: "investments",
-    fields: [["projectId", "project_id", "reqstr"], ["name", "name", "reqstr"], ["kind", "kind", "reqstr"], ["currentValuePaise", "current_value_paise", "int"], ["folioNo", "folio_no", "str"]]
+    fields: [
+      ["projectId", "project_id", "reqstr"],
+      ["name", "name", "reqstr"],
+      ["kind", "kind", "reqstr"],
+      ["currentValuePaise", "current_value_paise", "int"],
+      ["folioNo", "folio_no", "str"]
+    ]
   }
 };
 var PAGE2 = 250;
@@ -642,7 +701,10 @@ var createCatalystCatalogStore = (app2) => {
   };
   const getOne = async (entity, userId, rowId) => {
     const t = SPEC[entity].table;
-    const rows = await run(`SELECT * FROM ${t} WHERE ROWID = ${id2(rowId)} AND user_id = '${esc2(userId)}' AND deleted_at IS NULL LIMIT 0,1`, t);
+    const rows = await run(
+      `SELECT * FROM ${t} WHERE ROWID = ${id2(rowId)} AND user_id = '${esc2(userId)}' AND deleted_at IS NULL LIMIT 0,1`,
+      t
+    );
     return rows[0] ? toRecord(entity, rows[0]) : null;
   };
   return {
@@ -650,7 +712,10 @@ var createCatalystCatalogStore = (app2) => {
       const t = SPEC[entity].table;
       const out = [];
       for (let offset = 0; ; offset += PAGE2) {
-        const rows = await run(`SELECT * FROM ${t} WHERE user_id = '${esc2(userId)}' AND deleted_at IS NULL ORDER BY ROWID LIMIT ${offset},${PAGE2}`, t);
+        const rows = await run(
+          `SELECT * FROM ${t} WHERE user_id = '${esc2(userId)}' AND deleted_at IS NULL ORDER BY ROWID LIMIT ${offset},${PAGE2}`,
+          t
+        );
         out.push(...rows);
         if (rows.length < PAGE2) break;
       }
@@ -894,9 +959,81 @@ async function renderFile(format, report) {
   return { body, mime: FILE_MIME[format], fileName: fileName(format, report) };
 }
 
+// src/middleware/security.ts
+var CSRF_HEADER = "x-requested-with";
+var CSRF_VALUE = "wealthspan";
+var SAFE_METHODS = /* @__PURE__ */ new Set(["GET", "HEAD", "OPTIONS"]);
+function hardenApp(app2) {
+  process.env.NODE_ENV = process.env.NODE_ENV || "production";
+  app2.disable("x-powered-by");
+  app2.set("etag", false);
+}
+var requestGuard = () => (req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Cache-Control", "no-store");
+  if (SAFE_METHODS.has(req.method)) return next();
+  const site = String(req.headers["sec-fetch-site"] ?? "");
+  if (site === "cross-site") return deny(res);
+  if (req.headers[CSRF_HEADER] !== CSRF_VALUE) return deny(res);
+  next();
+};
+var deny = (res) => {
+  res.status(403).json({ error: "forbidden", message: "Request blocked." });
+};
+function rateLimit(opts) {
+  const hits = /* @__PURE__ */ new Map();
+  const now = opts.now ?? Date.now;
+  const keyOf = opts.key ?? ((req) => String(req.userId ?? req.ip ?? "anon"));
+  return (req, res, next) => {
+    if (opts.methods && !opts.methods.includes(req.method)) return next();
+    const t = now();
+    if (hits.size > 5e3) {
+      for (const [k, v] of hits) if (v.reset <= t) hits.delete(k);
+    }
+    const key = keyOf(req);
+    const h = hits.get(key);
+    if (!h || h.reset <= t) {
+      hits.set(key, { n: 1, reset: t + opts.windowMs });
+      return next();
+    }
+    h.n += 1;
+    if (h.n > opts.max) {
+      res.setHeader("Retry-After", String(Math.max(1, Math.ceil((h.reset - t) / 1e3))));
+      return void res.status(429).json({ error: "rate_limited", message: "Too many requests. Please slow down." });
+    }
+    next();
+  };
+}
+var jsonErrors = () => (err, _req, res, _next) => {
+  const status = Number(
+    err?.status ?? err?.statusCode ?? 500
+  );
+  if (status === 413)
+    return void res.status(413).json({ error: "too_large", message: "That request is too large." });
+  if (status >= 400 && status < 500)
+    return void res.status(400).json({ error: "bad_request", message: "That request could not be read." });
+  console.error(
+    "unhandled error:",
+    String(err?.message ?? typeof err).slice(0, 200)
+  );
+  res.status(500).json({ error: "server", message: "Something went wrong. Try again." });
+};
+var notFound = () => (_req, res) => {
+  res.status(404).json({ error: "not_found", message: "Not found." });
+};
+
 // catalyst/functions/files/src/entry.ts
 var catalyst = require("zcatalyst-sdk-node");
 var app = (0, import_express.default)();
+hardenApp(app);
+app.use(requestGuard());
+app.use(
+  rateLimit({
+    windowMs: 6e4,
+    max: 5,
+    key: (req) => String(req.headers["x-forwarded-for"] ?? req.ip ?? "anon").split(",")[0].trim()
+  })
+);
 var DATE = /^\d{4}-\d{2}-\d{2}$/;
 var q = (v) => typeof v === "string" && v ? v : void 0;
 var date = (v) => {
@@ -918,10 +1055,12 @@ app.get("/export", async (req, res) => {
     return res.status(401).json({ error: "unauthorized", message: "Please log in." });
   }
   const format = FILE_FORMATS.find((f) => f === req.query.format);
-  if (!format) return res.status(400).json({ error: "validation", message: `format must be one of: ${FILE_FORMATS.join(", ")}` });
+  if (!format)
+    return res.status(400).json({ error: "validation", message: `format must be one of: ${FILE_FORMATS.join(", ")}` });
   const from = date(req.query.from);
   const to = date(req.query.to);
-  if (req.query.from && !from || req.query.to && !to) return res.status(400).json({ error: "validation", message: "Dates must look like 2026-04-01." });
+  if (req.query.from && !from || req.query.to && !to)
+    return res.status(400).json({ error: "validation", message: "Dates must look like 2026-04-01." });
   try {
     const projectId = q(req.query.projectId);
     const [list, summary] = await Promise.all([
@@ -930,7 +1069,13 @@ app.get("/export", async (req, res) => {
     ]);
     const transactions = [...list.items];
     while (transactions.length < list.total) {
-      const next = await svc.listTransactions(userId, { from, to, projectId, limit: 200, offset: transactions.length });
+      const next = await svc.listTransactions(userId, {
+        from,
+        to,
+        projectId,
+        limit: 200,
+        offset: transactions.length
+      });
       if (!next.items.length) break;
       transactions.push(...next.items);
     }
@@ -947,8 +1092,13 @@ app.get("/export", async (req, res) => {
     res.setHeader("Cache-Control", "no-store");
     res.send(out.body);
   } catch (e) {
-    console.error("files error:", String(e?.message ?? typeof e).slice(0, 300));
+    console.error(
+      "files error:",
+      String(e?.message ?? typeof e).slice(0, 300)
+    );
     res.status(500).json({ error: "server", message: "Could not make the file. Try again." });
   }
 });
+app.use(notFound());
+app.use(jsonErrors());
 module.exports = app;

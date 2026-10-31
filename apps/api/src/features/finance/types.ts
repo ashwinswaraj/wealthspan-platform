@@ -9,7 +9,10 @@ import type {
 } from "@jobrio/types";
 
 /** A transaction row before the database gives it an id and timestamps. */
-export type NewTransaction = Omit<FinanceTransaction, "id" | "createdAt" | "updatedAt" | "deletedAt">;
+export type NewTransaction = Omit<
+  FinanceTransaction,
+  "id" | "createdAt" | "updatedAt" | "deletedAt"
+>;
 
 /**
  * Everything the finance service needs from the database. Every method takes
@@ -25,9 +28,15 @@ export interface FinanceStore {
   /** Live (not soft-deleted) rows only. */
   listTransactions(userId: string): Promise<FinanceTransaction[]>;
   listEvents(userId: string): Promise<FinanceEvent[]>;
+  /** Optional fast count of live rows (used for the per-user entry cap). */
+  countTransactions?(userId: string): Promise<number>;
   getTransaction(userId: string, id: string): Promise<FinanceTransaction | null>;
   insertTransaction(row: NewTransaction): Promise<FinanceTransaction>;
-  updateTransaction(userId: string, id: string, patch: Partial<NewTransaction>): Promise<FinanceTransaction>;
+  updateTransaction(
+    userId: string,
+    id: string,
+    patch: Partial<NewTransaction>,
+  ): Promise<FinanceTransaction>;
   softDeleteTransaction(userId: string, id: string, deletedAtIso: string): Promise<void>;
   insertAudit(entry: Omit<FinanceAuditEntry, "id">): Promise<void>;
 }

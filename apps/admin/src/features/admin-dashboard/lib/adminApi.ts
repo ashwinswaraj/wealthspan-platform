@@ -28,7 +28,10 @@ async function call<T>(path: string, init: { method?: string; body?: unknown } =
   const res = await fetch(`${base()}/finance/admin${path}`, {
     method: init.method ?? "GET",
     credentials: "include",
-    headers: init.body ? { "Content-Type": "application/json" } : undefined,
+    headers: {
+      "X-Requested-With": "wealthspan",
+      ...(init.body ? { "Content-Type": "application/json" } : {}),
+    },
     body: init.body ? JSON.stringify(init.body) : undefined,
   });
   if (!res.ok) throw new AdminApiError(res.status, `Admin API ${res.status}`);
@@ -44,7 +47,11 @@ export const useAdminSession = () =>
   });
 
 export const useAdminOverview = () =>
-  useQuery({ queryKey: ["admin", "overview"], retry: false, queryFn: () => call<AdminOverview>("/overview") });
+  useQuery({
+    queryKey: ["admin", "overview"],
+    retry: false,
+    queryFn: () => call<AdminOverview>("/overview"),
+  });
 
 export const useAdminUsers = () =>
   useQuery({

@@ -17,6 +17,11 @@ export interface Subscription {
   startsOn: string; // YYYY-MM-DD
   endsOn: string; // YYYY-MM-DD, last day with access
   paymentId: string | null;
+  /**
+   * Unique in the database: `trial:<userId>` for a trial, `pay:<paymentId>` for a paid plan.
+   * So two parallel requests can never create two trials or approve one payment twice.
+   */
+  subKey?: string | null;
   createdAt: string;
 }
 
@@ -46,7 +51,11 @@ export interface SubscriptionStore {
 }
 
 export class SubscriptionError extends Error {
-  constructor(public code: "validation" | "conflict" | "not_found" | "forbidden", message: string, public status = 400) {
+  constructor(
+    public code: "validation" | "conflict" | "not_found" | "forbidden",
+    message: string,
+    public status = 400,
+  ) {
     super(message);
   }
 }

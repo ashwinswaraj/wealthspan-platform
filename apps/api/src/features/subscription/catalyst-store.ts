@@ -4,7 +4,13 @@
  * `payment_submissions.utr` is UNIQUE in the table, so a duplicate UTR fails even if two requests race.
  */
 import type { CatalystLike } from "../finance/catalyst-store";
-import type { PaymentStatus, PaymentSubmission, PlanId, Subscription, SubscriptionStore } from "./types";
+import type {
+  PaymentStatus,
+  PaymentSubmission,
+  PlanId,
+  Subscription,
+  SubscriptionStore,
+} from "./types";
 
 type Row = Record<string, unknown>;
 const PAGE = 250;
@@ -40,7 +46,9 @@ export const rowToPayment = (r: Row): PaymentSubmission => ({
   reviewedBy: str(r.reviewed_by),
 });
 
-export const createCatalystSubscriptionStore = (app: CatalystLike): SubscriptionStore & {
+export const createCatalystSubscriptionStore = (
+  app: CatalystLike,
+): SubscriptionStore & {
   listAllPayments(status?: PaymentStatus): Promise<PaymentSubmission[]>;
   listAllSubscriptions(): Promise<Subscription[]>;
 } => {
@@ -49,7 +57,10 @@ export const createCatalystSubscriptionStore = (app: CatalystLike): Subscription
   const queryAll = async (table: string, where: string): Promise<Row[]> => {
     const out: Row[] = [];
     for (let offset = 0; ; offset += PAGE) {
-      const rows = await query(`SELECT * FROM ${table} WHERE ${where} ORDER BY ROWID DESC LIMIT ${offset},${PAGE}`, table);
+      const rows = await query(
+        `SELECT * FROM ${table} WHERE ${where} ORDER BY ROWID DESC LIMIT ${offset},${PAGE}`,
+        table,
+      );
       out.push(...rows);
       if (rows.length < PAGE) return out;
     }
@@ -60,26 +71,48 @@ export const createCatalystSubscriptionStore = (app: CatalystLike): Subscription
       return (await queryAll("subscriptions", `user_id = '${esc(userId)}'`)).map(rowToSubscription);
     },
     async insertSubscription(s) {
-      const saved = await app.datastore().table("subscriptions").insertRow({
-        user_id: s.userId, plan: s.plan, starts_on: s.startsOn, ends_on: s.endsOn, payment_id: s.paymentId,
-      });
+      const saved = await app
+        .datastore()
+        .table("subscriptions")
+        .insertRow({
+          user_id: s.userId,
+          plan: s.plan,
+          starts_on: s.startsOn,
+          ends_on: s.endsOn,
+          payment_id: s.paymentId,
+          ...(s.subKey ? { sub_key: s.subKey } : {}),
+        });
       return rowToSubscription(saved);
     },
     async listPayments(userId) {
-      return (await queryAll("payment_submissions", `user_id = '${esc(userId)}'`)).map(rowToPayment);
+      return (await queryAll("payment_submissions", `user_id = '${esc(userId)}'`)).map(
+        rowToPayment,
+      );
     },
     async getPayment(paymentId) {
-      const rows = await query(`SELECT * FROM payment_submissions WHERE ROWID = ${rid(paymentId)} LIMIT 0,1`, "payment_submissions");
+      const rows = await query(
+        `SELECT * FROM payment_submissions WHERE ROWID = ${rid(paymentId)} LIMIT 0,1`,
+        "payment_submissions",
+      );
       return rows[0] ? rowToPayment(rows[0]) : null;
     },
     async findPaymentByUtr(utr) {
-      const rows = await query(`SELECT * FROM payment_submissions WHERE utr = '${esc(utr)}' LIMIT 0,1`, "payment_submissions");
+      const rows = await query(
+        `SELECT * FROM payment_submissions WHERE utr = '${esc(utr)}' LIMIT 0,1`,
+        "payment_submissions",
+      );
       return rows[0] ? rowToPayment(rows[0]) : null;
     },
     async insertPayment(p) {
       const saved = await app.datastore().table("payment_submissions").insertRow({
-        user_id: p.userId, plan: p.plan, amount_paise: p.amountPaise, utr: p.utr, status: p.status,
-        note: p.note, reviewed_at: p.reviewedAt, reviewed_by: p.reviewedBy,
+        user_id: p.userId,
+        plan: p.plan,
+        amount_paise: p.amountPaise,
+        utr: p.utr,
+        status: p.status,
+        note: p.note,
+        reviewed_at: p.reviewedAt,
+        reviewed_by: p.reviewedBy,
       });
       return rowToPayment(saved);
     },
@@ -98,7 +131,9 @@ export const createCatalystSubscriptionStore = (app: CatalystLike): Subscription
       return (await queryAll("payment_submissions", "status = 'pending'")).map(rowToPayment);
     },
     async listAllPayments(status) {
-      return (await queryAll("payment_submissions", status ? `status = '${esc(status)}'` : "ROWID > 0")).map(rowToPayment);
+      return (
+        await queryAll("payment_submissions", status ? `status = '${esc(status)}'` : "ROWID > 0")
+      ).map(rowToPayment);
     },
     async listAllSubscriptions() {
       return (await queryAll("subscriptions", "ROWID > 0")).map(rowToSubscription);
