@@ -7,6 +7,10 @@ import { useAdminSession } from "@admin/features/admin-dashboard/lib/adminApi";
 import { catalystSignOut } from "@admin/features/admin-dashboard/lib/catalystAuth";
 import AdminAuthPage from "@admin/pages/auth";
 
+/** Where Catalyst sends people after sign-in/out: this console, and the main app (same hosted client, /app/). */
+const ADMIN_HOME = `${import.meta.env.BASE_URL}index.html`;
+const APP_HOME = import.meta.env.BASE_URL.replace(/admin\/$/, "") + "index.html";
+
 /**
  * Every non-default section is code-split: each `lazy()` import creates its own chunk,
  * so opening the admin only downloads the layout and the Overview section first.
@@ -55,7 +59,8 @@ export default function AdminDashboardPage() {
 
   if (session.isLoading) return <Fallback />;
   // 401 = not signed in. Any other failure means the API is unreachable, not "signed out".
-  if (session.error && (session.error as { status?: number }).status === 401) return <AdminAuthPage />;
+  if (session.error && (session.error as { status?: number }).status === 401)
+    return <AdminAuthPage />;
   if (session.error || !session.data)
     return (
       <Centered>
@@ -70,7 +75,7 @@ export default function AdminDashboardPage() {
       <Centered>
         <p className="font-medium text-[#0d0d0d] dark:text-white">No admin access</p>
         <p className="mt-1 text-sm">{session.data.email} is not an administrator.</p>
-        <button className="mt-3 underline" onClick={() => catalystSignOut("/admin/")}>
+        <button className="mt-3 underline" onClick={() => catalystSignOut(ADMIN_HOME)}>
           Sign out
         </button>
       </Centered>
@@ -81,8 +86,8 @@ export default function AdminDashboardPage() {
       active={section}
       onSelect={setSection}
       user={{ name: session.data.name, email: session.data.email }}
-      onSwitchToApp={() => window.location.assign("/")}
-      onLogout={() => catalystSignOut("/admin/")}
+      onSwitchToApp={() => window.location.assign(APP_HOME)}
+      onLogout={() => catalystSignOut(ADMIN_HOME)}
     >
       <Suspense fallback={<Fallback />}>
         {section === "dashboard" && <DashboardSection onManageUsers={() => setSection("users")} />}

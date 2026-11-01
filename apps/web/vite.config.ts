@@ -36,6 +36,8 @@ export default defineConfig({
     ...(process.env.WEALTHSPAN_STATIC ? { spa: { enabled: true } } : {}),
   },
   vite: {
+    // Catalyst Web Client Hosting serves the client under /app/ (https://<domain>/app/index.html).
+    base: process.env.WEALTHSPAN_STATIC ? "/app/" : "/",
     resolve: {
       alias,
       dedupe: ["react", "react-dom", "@tanstack/react-router", "@tanstack/react-start"],

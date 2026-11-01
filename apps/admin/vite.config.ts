@@ -32,11 +32,11 @@ const alias = [
 export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
-    // `pnpm build:static`: a plain static SPA for Catalyst Web Client Hosting, served under /admin/.
+    // `pnpm build:static`: a plain static SPA for Catalyst Web Client Hosting, served under /app/admin/.
     ...(process.env.WEALTHSPAN_STATIC ? { spa: { enabled: true } } : {}),
   },
   vite: {
-    base: process.env.WEALTHSPAN_STATIC ? "/admin/" : "/",
+    base: process.env.WEALTHSPAN_STATIC ? "/app/admin/" : "/",
     resolve: {
       alias,
       dedupe: ["react", "react-dom", "@tanstack/react-router", "@tanstack/react-start"],
