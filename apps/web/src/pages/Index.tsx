@@ -4,12 +4,14 @@ import { Spinner } from "@jobrio/ui/design-system";
 import { LoginScreen, useSession } from "@/features/wealthspan-auth";
 import { HomeScreen, SideDrawer } from "@/features/wealthspan-shell";
 import type { Project } from "@/features/projects";
+import { SheetScreen, type SheetTarget } from "@/features/sheets";
 
 export default function AppHome() {
   const session = useSession();
   const qc = useQueryClient();
   const [drawer, setDrawer] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
+  const [sheet, setSheet] = useState<SheetTarget | null>(null);
 
   if (session.status === "loading")
     return (
@@ -47,10 +49,25 @@ export default function AppHome() {
         onClose={() => setDrawer(false)}
         user={{ name: "Ashwin", subtitle: "Personal Finance & Wealth Tracker" }}
         activeProjectId={project?.id ?? null}
-        onSelectProject={setProject}
-        onOpenSection={() => setDrawer(false)}
+        onSelectProject={(p) => {
+          setProject(p);
+          setSheet({ kind: "project", project: p });
+          setDrawer(false);
+        }}
+        onOpenSection={(key) => {
+          setSheet({ kind: "section", key });
+          setDrawer(false);
+        }}
         onOpenSettings={() => undefined}
       />
+      {sheet ? (
+        <SheetScreen
+          target={sheet}
+          activeProject={project}
+          onBack={() => setSheet(null)}
+          onOpenAccounts={() => setSheet({ kind: "accounts" })}
+        />
+      ) : null}
     </>
   );
 }

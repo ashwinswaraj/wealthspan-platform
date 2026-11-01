@@ -53,7 +53,16 @@ describe("summarize", () => {
       tx({ type: "income", amountPaise: 40000_00, source: "Salary", category: "Salary" }),
       tx({ type: "expense", amountPaise: 5000_00, paymentMode: "credit_card", accountId: "card" }),
       // paying the card bill from the bank = transfer
-      tx({ type: "transfer", amountPaise: 5000_00, accountId: null, fromAccountId: "bank", toAccountId: "card", projectId: null, paymentMode: null, category: null }),
+      tx({
+        type: "transfer",
+        amountPaise: 5000_00,
+        accountId: null,
+        fromAccountId: "bank",
+        toAccountId: "card",
+        projectId: null,
+        paymentMode: null,
+        category: null,
+      }),
     ];
     const s = summarize(rows, []);
     expect(s.incomePaise).toBe(40000_00);
@@ -68,13 +77,21 @@ describe("summarize", () => {
       tx({ type: "expense", amountPaise: 300_00, projectId: "p2" }),
       tx({ type: "expense", amountPaise: 700_00, date: "2026-09-30" }),
     ];
-    expect(summarize(rows, [], { projectId: "p1", from: "2026-10-01", to: "2026-10-31" }).expensePaise).toBe(100_00);
+    expect(
+      summarize(rows, [], { projectId: "p1", from: "2026-10-01", to: "2026-10-31" }).expensePaise,
+    ).toBe(100_00);
   });
 
   it("open event spending is shown separately; concluding it moves the same rows into expense", () => {
     const rows = [
       tx({ type: "expense", amountPaise: 20000_00, eventId: "e1", category: "Shopping" }),
-      tx({ type: "expense", amountPaise: 12000_00, eventId: "e1", category: "Dining Out", date: "2026-11-02" }),
+      tx({
+        type: "expense",
+        amountPaise: 12000_00,
+        eventId: "e1",
+        category: "Dining Out",
+        date: "2026-11-02",
+      }),
       tx({ type: "expense", amountPaise: 500_00 }),
     ];
     const open = summarize(rows, [{ id: "e1", name: "Diwali 2026", status: "open" }]);
@@ -87,7 +104,12 @@ describe("summarize", () => {
     expect(done.openEventsPaise).toBe(0);
     expect(done.byEvent["Diwali 2026"]).toBe(32000_00);
     // on their own dates
-    expect(summarize(rows, [{ id: "e1", name: "Diwali 2026", status: "concluded" }], { from: "2026-11-01", to: "2026-11-30" }).expensePaise).toBe(12000_00);
+    expect(
+      summarize(rows, [{ id: "e1", name: "Diwali 2026", status: "concluded" }], {
+        from: "2026-11-01",
+        to: "2026-11-30",
+      }).expensePaise,
+    ).toBe(12000_00);
   });
 
   it("groups income by source", () => {
@@ -121,7 +143,15 @@ describe("accountBalances", () => {
       tx({ type: "expense", amountPaise: 5000_00, accountId: "card", paymentMode: "credit_card" }),
     ];
     expect(accountBalances(accounts, rows).card).toBe(-5000_00);
-    rows.push(tx({ type: "transfer", amountPaise: 5000_00, accountId: null, fromAccountId: "bank", toAccountId: "card" }));
+    rows.push(
+      tx({
+        type: "transfer",
+        amountPaise: 5000_00,
+        accountId: null,
+        fromAccountId: "bank",
+        toAccountId: "card",
+      }),
+    );
     const b = accountBalances(accounts, rows);
     expect(b.card).toBe(0);
     expect(b.bank).toBe(5000_00);
@@ -129,15 +159,28 @@ describe("accountBalances", () => {
   it("income adds, open-event expenses still reduce the balance, deleted rows ignored", () => {
     const rows = [
       tx({ type: "income", amountPaise: 2000_00, accountId: "bank" }),
-      tx({ type: "expense", amountPaise: 300_00, accountId: "cash", eventId: "e1", paymentMode: "cash" }),
-      tx({ type: "expense", amountPaise: 999_00, accountId: "cash", deletedAt: "2026-10-07T00:00:00Z" }),
+      tx({
+        type: "expense",
+        amountPaise: 300_00,
+        accountId: "cash",
+        eventId: "e1",
+        paymentMode: "cash",
+      }),
+      tx({
+        type: "expense",
+        amountPaise: 999_00,
+        accountId: "cash",
+        deletedAt: "2026-10-07T00:00:00Z",
+      }),
     ];
     const b = accountBalances(accounts, rows);
     expect(b.bank).toBe(12000_00);
     expect(b.cash).toBe(200_00);
   });
   it("respects the upTo date", () => {
-    const rows = [tx({ type: "income", amountPaise: 100_00, accountId: "bank", date: "2026-11-01" })];
+    const rows = [
+      tx({ type: "income", amountPaise: 100_00, accountId: "bank", date: "2026-11-01" }),
+    ];
     expect(accountBalances(accounts, rows, "2026-10-31").bank).toBe(10000_00);
   });
 });
@@ -149,7 +192,12 @@ describe("loanOutstanding", () => {
       tx({ type: "expense", amountPaise: 3000_00, loanId: "l1" }),
       tx({ type: "expense", amountPaise: 3000_00, loanId: "l1" }),
       tx({ type: "expense", amountPaise: 3000_00, loanId: "other" }),
-      tx({ type: "expense", amountPaise: 3000_00, loanId: "l1", deletedAt: "2026-10-01T00:00:00Z" }),
+      tx({
+        type: "expense",
+        amountPaise: 3000_00,
+        loanId: "l1",
+        deletedAt: "2026-10-01T00:00:00Z",
+      }),
     ];
     expect(loanOutstanding(loan, rows)).toBe(44000_00);
     expect(loanOutstanding({ id: "l1", principalPaise: 100_00 }, rows)).toBe(0);
@@ -168,6 +216,8 @@ describe("double-counting guards", () => {
       tx({ type: "expense", amountPaise: 5000_00, paymentMode: "upi", date: "2026-10-03" }),
       tx({ type: "expense", amountPaise: 5000_00, paymentMode: "credit_card", date: "2026-05-01" }),
     ];
-    expect(findSameAmountCardExpenses({ amountPaise: 5000_00, date: "2026-10-20" }, rows)).toHaveLength(1);
+    expect(
+      findSameAmountCardExpenses({ amountPaise: 5000_00, date: "2026-10-20" }, rows),
+    ).toHaveLength(1);
   });
 });

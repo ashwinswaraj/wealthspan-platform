@@ -691,6 +691,9 @@ importers:
 
   packages/utils:
     dependencies:
+      '@jobrio/constants':
+        specifier: workspace:*
+        version: link:../constants
       '@jobrio/types':
         specifier: workspace:*
         version: link:../types

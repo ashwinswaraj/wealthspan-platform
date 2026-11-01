@@ -38,6 +38,7 @@ var PAYMENT_MODES = [
   { id: "wallet", label: "Wallet" }
 ];
 var PAYMENT_MODE_IDS = PAYMENT_MODES.map((m) => m.id);
+var ACCOUNT_KINDS = ["cash", "bank", "credit_card", "wallet"];
 var PAYMENT_MODE_ACCOUNT_KINDS = {
   cash: ["cash"],
   upi: ["bank", "wallet"],
@@ -47,6 +48,40 @@ var PAYMENT_MODE_ACCOUNT_KINDS = {
   cheque: ["bank"],
   wallet: ["wallet"]
 };
+var EXPENSE_CATEGORIES = [
+  "Food & Groceries",
+  "Rent & Housing",
+  "Utilities & Bills",
+  "Travel & Fuel",
+  "Medical & Health",
+  "Shopping",
+  "Dining Out",
+  "Office & Operations",
+  "Stock & Inventory",
+  "Salaries & Wages",
+  "Loan EMI",
+  "Other"
+];
+var INCOME_CATEGORIES = [
+  "Salary",
+  "Business Sales",
+  "Freelance & Services",
+  "Rent Received",
+  "Interest & Dividends",
+  "Other"
+];
+var LOAN_STATUSES = ["active", "closed"];
+var INVESTMENT_KINDS = [
+  "fixed_deposit",
+  "recurring_deposit",
+  "sip",
+  "mutual_fund",
+  "stocks",
+  "gold",
+  "ppf_epf_nps",
+  "real_estate",
+  "other"
+];
 
 // ../../packages/validation/src/finance.ts
 var MAX_AMOUNT_RUPEES = 1e9;
@@ -88,7 +123,7 @@ var validatePaymentMode = (value, label = "Payment mode") => {
 };
 var validatePaymentModeForAccount = (mode, accountKind) => PAYMENT_MODE_ACCOUNT_KINDS[mode].includes(accountKind) ? null : `A ${accountKind.replace("_", " ")} account can't be used with this payment mode.`;
 var maxLen = (v, max, label) => typeof v === "string" && v.trim().length > max ? `${label} must be at most ${max} characters.` : null;
-var validateTransactionInput = (input, opts = {}) => {
+var validateTransactionInput = (input, opts2 = {}) => {
   const e = {};
   const set = (field, msg) => {
     if (msg && !e[field]) e[field] = msg;
@@ -97,7 +132,7 @@ var validateTransactionInput = (input, opts = {}) => {
   else if (!TRANSACTION_TYPES.includes(input.type))
     set("type", "Type must be income, expense or transfer.");
   set("amount", validateAmountRupees(input.amount));
-  set("date", validateDate(input.date, opts.today));
+  set("date", validateDate(input.date, opts2.today));
   set("party", maxLen(input.party, 120, "Name"));
   set("note", maxLen(input.note, 500, "Note"));
   const type = input.type;
@@ -743,6 +778,279 @@ var createCatalystCatalogStore = (app2) => {
   };
 };
 
+// ../../packages/constants/src/sheets.ts
+var SHEET_KEYS = [
+  "income",
+  "expense",
+  "debt-loan",
+  "savings-investing",
+  "festivals-functions",
+  "accounts",
+  "project"
+];
+var opts = (list) => list.map((v) => ({ value: v, label: v }));
+var pretty = (v) => v.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
+var enumOpts = (list) => list.map((v) => ({ value: v, label: pretty(v) }));
+var modeOpts = PAYMENT_MODES.map((m) => ({ value: m.id, label: m.label }));
+var common = {
+  date: { key: "date", label: "Date", type: "date", width: 128, required: true },
+  amount: {
+    key: "amount",
+    label: "Amount (\u20B9)",
+    type: "money",
+    width: 120,
+    required: true,
+    sum: true
+  },
+  project: {
+    key: "projectId",
+    label: "Project",
+    type: "ref",
+    ref: "projects",
+    width: 140,
+    required: true
+  },
+  account: {
+    key: "accountId",
+    label: "Account",
+    type: "ref",
+    ref: "accounts",
+    width: 140,
+    required: true
+  },
+  mode: {
+    key: "paymentMode",
+    label: "Mode",
+    type: "select",
+    options: modeOpts,
+    width: 130,
+    required: true
+  },
+  note: { key: "note", label: "Note", type: "text", width: 200 }
+};
+var SHEETS = {
+  income: {
+    key: "income",
+    title: "Income",
+    subtitle: "Wealthspan \xB7 Ledger",
+    source: "transactions",
+    fixed: { type: "income" },
+    noun: "income",
+    addLabel: "Record income entry",
+    sortKey: "date",
+    columns: [
+      common.date,
+      common.amount,
+      {
+        key: "category",
+        label: "Category",
+        type: "select",
+        options: opts(INCOME_CATEGORIES),
+        width: 170,
+        required: true
+      },
+      { key: "source", label: "Income source", type: "text", width: 150 },
+      { key: "party", label: "From", type: "text", width: 140 },
+      common.project,
+      common.account,
+      common.mode,
+      common.note
+    ]
+  },
+  expense: {
+    key: "expense",
+    title: "Expense",
+    subtitle: "Wealthspan \xB7 Ledger",
+    source: "transactions",
+    fixed: { type: "expense" },
+    noun: "expense",
+    addLabel: "Record expense entry",
+    sortKey: "date",
+    columns: [
+      common.date,
+      common.amount,
+      {
+        key: "category",
+        label: "Category",
+        type: "select",
+        options: opts(EXPENSE_CATEGORIES),
+        width: 170,
+        required: true
+      },
+      { key: "party", label: "Paid to", type: "text", width: 140 },
+      common.project,
+      common.account,
+      common.mode,
+      { key: "eventId", label: "Festival / function", type: "ref", ref: "events", width: 160 },
+      { key: "loanId", label: "Loan (EMI)", type: "ref", ref: "loans", width: 140 },
+      common.note
+    ]
+  },
+  "debt-loan": {
+    key: "debt-loan",
+    title: "Debt & loan/EMI etc",
+    subtitle: "Wealthspan \xB7 Ledger",
+    source: "loans",
+    noun: "debt / EMI",
+    addLabel: "Record debt / EMI entry",
+    sortKey: "startDate",
+    columns: [
+      { key: "lender", label: "Lender", type: "text", width: 160, required: true },
+      {
+        key: "principal",
+        label: "Loan amount (\u20B9)",
+        type: "money",
+        width: 130,
+        required: true,
+        sum: true
+      },
+      { key: "interestRatePct", label: "Interest %", type: "number", width: 100 },
+      { key: "emi", label: "EMI (\u20B9)", type: "money", width: 110, sum: true },
+      { key: "emiDayOfMonth", label: "EMI day", type: "number", width: 90 },
+      { key: "startDate", label: "Start date", type: "date", width: 128 },
+      { key: "tenureMonths", label: "Months", type: "number", width: 90 },
+      common.project,
+      {
+        key: "status",
+        label: "Status",
+        type: "select",
+        options: enumOpts(LOAN_STATUSES),
+        width: 110
+      }
+    ]
+  },
+  "savings-investing": {
+    key: "savings-investing",
+    title: "Savings & Investing",
+    subtitle: "Wealthspan \xB7 Ledger",
+    source: "investments",
+    noun: "savings / investment",
+    addLabel: "Record savings / investment entry",
+    sortKey: "name",
+    columns: [
+      { key: "name", label: "Name", type: "text", width: 180, required: true },
+      {
+        key: "kind",
+        label: "Type",
+        type: "select",
+        options: enumOpts(INVESTMENT_KINDS),
+        width: 170,
+        required: true
+      },
+      { key: "currentValue", label: "Current value (\u20B9)", type: "money", width: 140, sum: true },
+      { key: "folioNo", label: "Folio / account no.", type: "text", width: 160 },
+      common.project
+    ]
+  },
+  "festivals-functions": {
+    key: "festivals-functions",
+    title: "Festivals & functions",
+    subtitle: "Wealthspan \xB7 Ledger",
+    source: "events",
+    noun: "festival / function",
+    addLabel: "Record festival / function entry",
+    sortKey: "startDate",
+    columns: [
+      { key: "name", label: "Festival / function", type: "text", width: 200, required: true },
+      common.project,
+      { key: "budget", label: "Budget (\u20B9)", type: "money", width: 120, sum: true },
+      { key: "startDate", label: "Start", type: "date", width: 128 },
+      { key: "endDate", label: "End", type: "date", width: 128 },
+      {
+        key: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { value: "open", label: "Open" },
+          { value: "concluded", label: "Concluded" }
+        ],
+        width: 120
+      }
+    ]
+  },
+  accounts: {
+    key: "accounts",
+    title: "Accounts",
+    subtitle: "Wealthspan \xB7 Ledger",
+    source: "accounts",
+    noun: "account",
+    addLabel: "Add account",
+    sortKey: "name",
+    columns: [
+      { key: "name", label: "Account name", type: "text", width: 180, required: true },
+      {
+        key: "kind",
+        label: "Type",
+        type: "select",
+        options: enumOpts(ACCOUNT_KINDS),
+        width: 130,
+        required: true
+      },
+      { key: "openingBalance", label: "Opening balance (\u20B9)", type: "money", width: 150, sum: true },
+      { key: "creditLimit", label: "Credit limit (\u20B9)", type: "money", width: 140 }
+    ]
+  },
+  // A project's own dashboard: every income and expense of that project in one sheet.
+  project: {
+    key: "project",
+    title: "Project",
+    subtitle: "Wealthspan \xB7 Project sheet",
+    source: "transactions",
+    noun: "project",
+    addLabel: "Add entry",
+    sortKey: "date",
+    columns: [
+      common.date,
+      {
+        key: "type",
+        label: "Type",
+        type: "select",
+        options: [
+          { value: "income", label: "Income" },
+          { value: "expense", label: "Expense" }
+        ],
+        width: 110,
+        required: true
+      },
+      common.amount,
+      {
+        key: "category",
+        label: "Category",
+        type: "select",
+        options: opts([
+          ...INCOME_CATEGORIES,
+          ...EXPENSE_CATEGORIES.filter(
+            (c) => !INCOME_CATEGORIES.includes(c)
+          )
+        ]),
+        width: 170,
+        required: true
+      },
+      { key: "party", label: "Party", type: "text", width: 140 },
+      common.account,
+      common.mode,
+      common.note
+    ]
+  }
+};
+
+// ../../packages/utils/src/sheet.ts
+var IST_OFFSET_MS2 = 5.5 * 36e5;
+var DATE = /^\d{4}-\d{2}-\d{2}$/;
+var monthRange = (month) => {
+  const m = /^(\d{4})-(\d{2})$/.exec(month);
+  if (!m) return {};
+  const last = new Date(Date.UTC(Number(m[1]), Number(m[2]), 0)).getUTCDate();
+  return { from: `${month}-01`, to: `${month}-${String(last).padStart(2, "0")}` };
+};
+var recordDate = (r) => {
+  for (const k of ["date", "startDate"]) {
+    const v = r[k];
+    if (typeof v === "string" && DATE.test(v)) return v;
+  }
+  return String(r.createdAt ?? "").slice(0, 10);
+};
+
 // src/features/files/writers.ts
 var import_exceljs = __toESM(require("exceljs"), 1);
 var import_pdfkit = __toESM(require("pdfkit"), 1);
@@ -768,7 +1076,7 @@ var REPORT_COLUMNS = [
   { key: "note", header: "Note" }
 ];
 var rupees = (paise) => Math.round(paise) / 100;
-var pretty = (s) => s ? s.replace(/_/g, " ") : "";
+var pretty2 = (s) => s ? s.replace(/_/g, " ") : "";
 function buildReport(input) {
   const n = input.names ?? {};
   const name = (map, id3) => id3 ? map?.[id3] ?? id3 : "";
@@ -779,12 +1087,12 @@ function buildReport(input) {
     amount: rupees(t.amountPaise),
     project: name(n.projects, t.projectId),
     account: t.type === "transfer" ? `${name(n.accounts, t.fromAccountId)} \u2192 ${name(n.accounts, t.toAccountId)}` : name(n.accounts, t.accountId),
-    paymentMode: pretty(t.paymentMode),
-    category: pretty(t.category),
+    paymentMode: pretty2(t.paymentMode),
+    category: pretty2(t.category),
     party: t.party ?? "",
     note: t.note ?? ""
   }));
-  const lines = (rec, map) => Object.entries(rec).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ label: pretty(map?.[k] ?? k), amount: rupees(v) }));
+  const lines = (rec, map) => Object.entries(rec).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ label: pretty2(map?.[k] ?? k), amount: rupees(v) }));
   const breakdowns = [
     { title: "Expense by category", lines: lines(s.byCategory) },
     { title: "By payment mode", lines: lines(s.byPaymentMode) },
@@ -806,7 +1114,10 @@ function buildReport(input) {
     columns: REPORT_COLUMNS
   };
 }
-var inr = (n) => n.toLocaleString("en-IN", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
+var inr = (n) => n.toLocaleString("en-IN", {
+  minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+  maximumFractionDigits: 2
+});
 var safeText = (v) => /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
 function fileName(format, r) {
   const tag = r.period === "All time" ? "all" : r.period.replace(/ to /g, "_to_").replace(/[^0-9a-z_-]/gi, "");
@@ -838,36 +1149,70 @@ async function toXlsx(r) {
   for (const b of r.breakdowns) {
     sum.addRow([]);
     sum.addRow([b.title]).font = { bold: true };
-    for (const l of b.lines) sum.addRow([safeText(l.label), l.amount]).getCell(2).numFmt = "#,##0.00";
+    for (const l of b.lines)
+      sum.addRow([safeText(l.label), l.amount]).getCell(2).numFmt = "#,##0.00";
   }
   sum.getColumn(1).width = 40;
   sum.getColumn(2).width = 18;
   const ws = wb.addWorksheet("Transactions", { views: [{ state: "frozen", ySplit: 1 }] });
-  ws.columns = r.columns.map((c) => ({ header: c.header, key: c.key, width: c.key === "note" ? 40 : c.key === "amount" ? 14 : 18 }));
+  ws.columns = r.columns.map((c) => ({
+    header: c.header,
+    key: c.key,
+    width: c.key === "note" ? 40 : c.key === "amount" ? 14 : 18
+  }));
   ws.getRow(1).font = { bold: true };
   for (const row of r.rows) {
-    ws.addRow(Object.fromEntries(r.columns.map((c) => [c.key, typeof row[c.key] === "string" ? safeText(row[c.key]) : row[c.key]])));
+    ws.addRow(
+      Object.fromEntries(
+        r.columns.map((c) => [
+          c.key,
+          typeof row[c.key] === "string" ? safeText(row[c.key]) : row[c.key]
+        ])
+      )
+    );
   }
   ws.getColumn("amount").numFmt = "#,##0.00";
   ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: r.columns.length } };
   return Buffer.from(await wb.xlsx.writeBuffer());
 }
 var cell = (text, bold = false, right = false) => new import_docx.TableCell({
-  children: [new import_docx.Paragraph({ alignment: right ? import_docx.AlignmentType.RIGHT : import_docx.AlignmentType.LEFT, children: [new import_docx.TextRun({ text, bold, size: 18 })] })]
+  children: [
+    new import_docx.Paragraph({
+      alignment: right ? import_docx.AlignmentType.RIGHT : import_docx.AlignmentType.LEFT,
+      children: [new import_docx.TextRun({ text, bold, size: 18 })]
+    })
+  ]
 });
 async function toDocx(r) {
-  const para = (text, o = {}) => new import_docx.Paragraph({ spacing: { after: 80 }, children: [new import_docx.TextRun({ text, bold: o.bold, size: o.size })] });
+  const para = (text, o = {}) => new import_docx.Paragraph({
+    spacing: { after: 80 },
+    children: [new import_docx.TextRun({ text, bold: o.bold, size: o.size })]
+  });
   const kv = (rows) => new import_docx.Table({
     width: { size: 100, type: import_docx.WidthType.PERCENTAGE },
-    rows: rows.map((x) => new import_docx.TableRow({ children: [cell(x.label), cell(`\u20B9${inr(x.amount)}`, false, true)] }))
+    rows: rows.map(
+      (x) => new import_docx.TableRow({ children: [cell(x.label), cell(`\u20B9${inr(x.amount)}`, false, true)] })
+    )
   });
   const txTable = new import_docx.Table({
     width: { size: 100, type: import_docx.WidthType.PERCENTAGE },
     rows: [
-      new import_docx.TableRow({ tableHeader: true, children: ["Date", "Type", "Amount (\u20B9)", "Project", "Category", "Party / note"].map((h) => cell(h, true)) }),
+      new import_docx.TableRow({
+        tableHeader: true,
+        children: ["Date", "Type", "Amount (\u20B9)", "Project", "Category", "Party / note"].map(
+          (h) => cell(h, true)
+        )
+      }),
       ...r.rows.map(
         (x) => new import_docx.TableRow({
-          children: [cell(x.date), cell(x.type), cell(inr(x.amount), false, true), cell(x.project), cell(x.category), cell([x.party, x.note].filter(Boolean).join(" \u2014 "))]
+          children: [
+            cell(x.date),
+            cell(x.type),
+            cell(inr(x.amount), false, true),
+            cell(x.project),
+            cell(x.category),
+            cell([x.party, x.note].filter(Boolean).join(" \u2014 "))
+          ]
         })
       )
     ]
@@ -894,7 +1239,11 @@ async function toDocx(r) {
 var rs = (n) => `Rs. ${inr(n)}`;
 function toPdf(r) {
   return new Promise((resolve, reject) => {
-    const doc = new import_pdfkit.default({ size: "A4", margin: 40, info: { Title: r.title, Author: "Wealthspan" } });
+    const doc = new import_pdfkit.default({
+      size: "A4",
+      margin: 40,
+      info: { Title: r.title, Author: "Wealthspan" }
+    });
     const chunks = [];
     doc.on("data", (c) => chunks.push(c));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
@@ -939,19 +1288,32 @@ function toPdf(r) {
       let maxY = y;
       doc.font(bold ? "Helvetica-Bold" : "Helvetica").fontSize(9);
       cols.forEach((c, i) => {
-        doc.text(vals[i], x + (i === 3 ? 8 : 0), y, { width: width * c.w - 4 - (i === 3 ? 8 : 0), align: c.a });
+        doc.text(vals[i], x + (i === 3 ? 8 : 0), y, {
+          width: width * c.w - 4 - (i === 3 ? 8 : 0),
+          align: c.a
+        });
         maxY = Math.max(maxY, doc.y);
         x += width * c.w;
       });
       doc.x = left;
       doc.y = maxY + 3;
     };
-    line(cols.map((c) => c.h), true);
-    for (const x of r.rows) line([x.date, x.type, rs(x.amount), x.category, [x.party, x.note].filter(Boolean).join(" \u2014 ")], false);
+    line(
+      cols.map((c) => c.h),
+      true
+    );
+    for (const x of r.rows)
+      line(
+        [x.date, x.type, rs(x.amount), x.category, [x.party, x.note].filter(Boolean).join(" \u2014 ")],
+        false
+      );
     if (!r.rows.length) doc.font("Helvetica").fontSize(10).text("No transactions in this period.");
     doc.end();
   });
 }
+
+// src/features/files/sheet.ts
+var import_exceljs2 = __toESM(require("exceljs"), 1);
 
 // src/features/files/index.ts
 async function renderFile(format, report) {
@@ -980,12 +1342,12 @@ var requestGuard = () => (req, res, next) => {
 var deny = (res) => {
   res.status(403).json({ error: "forbidden", message: "Request blocked." });
 };
-function rateLimit(opts) {
+function rateLimit(opts2) {
   const hits = /* @__PURE__ */ new Map();
-  const now = opts.now ?? Date.now;
-  const keyOf = opts.key ?? ((req) => String(req.userId ?? req.ip ?? "anon"));
+  const now = opts2.now ?? Date.now;
+  const keyOf = opts2.key ?? ((req) => String(req.userId ?? req.ip ?? "anon"));
   return (req, res, next) => {
-    if (opts.methods && !opts.methods.includes(req.method)) return next();
+    if (opts2.methods && !opts2.methods.includes(req.method)) return next();
     const t = now();
     if (hits.size > 5e3) {
       for (const [k, v] of hits) if (v.reset <= t) hits.delete(k);
@@ -993,11 +1355,11 @@ function rateLimit(opts) {
     const key = keyOf(req);
     const h = hits.get(key);
     if (!h || h.reset <= t) {
-      hits.set(key, { n: 1, reset: t + opts.windowMs });
+      hits.set(key, { n: 1, reset: t + opts2.windowMs });
       return next();
     }
     h.n += 1;
-    if (h.n > opts.max) {
+    if (h.n > opts2.max) {
       res.setHeader("Retry-After", String(Math.max(1, Math.ceil((h.reset - t) / 1e3))));
       return void res.status(429).json({ error: "rate_limited", message: "Too many requests. Please slow down." });
     }
@@ -1034,11 +1396,11 @@ app.use(
     key: (req) => String(req.headers["x-forwarded-for"] ?? req.ip ?? "anon").split(",")[0].trim()
   })
 );
-var DATE = /^\d{4}-\d{2}-\d{2}$/;
+var DATE2 = /^\d{4}-\d{2}-\d{2}$/;
 var q = (v) => typeof v === "string" && v ? v : void 0;
 var date = (v) => {
   const s = q(v);
-  return s && DATE.test(s) ? s : void 0;
+  return s && DATE2.test(s) ? s : void 0;
 };
 app.get("/export", async (req, res) => {
   let userId;
@@ -1094,6 +1456,79 @@ app.get("/export", async (req, res) => {
   } catch (e) {
     console.error(
       "files error:",
+      String(e?.message ?? typeof e).slice(0, 300)
+    );
+    res.status(500).json({ error: "server", message: "Could not make the file. Try again." });
+  }
+});
+app.get("/sheet", async (req, res) => {
+  let userId;
+  let c;
+  try {
+    c = catalyst.initialize(req);
+    const user = await c.userManagement().getCurrentUser();
+    userId = String(user?.user_id ?? user?.userId ?? "");
+    if (!userId) throw new Error("no user");
+  } catch {
+    return res.status(401).json({ error: "unauthorized", message: "Please log in." });
+  }
+  const key = SHEET_KEYS.find((k) => k === req.query.sheet);
+  if (!key)
+    return res.status(400).json({ error: "validation", message: `sheet must be one of: ${SHEET_KEYS.join(", ")}` });
+  const month = typeof req.query.month === "string" && /^\d{4}-\d{2}$/.test(req.query.month) ? req.query.month : "all";
+  const projectId = q(req.query.projectId);
+  if (projectId && !/^\d{1,20}$/.test(projectId))
+    return res.status(400).json({ error: "validation", message: "Bad project." });
+  const def = SHEETS[key];
+  try {
+    const catalog = createCatalystCatalogStore(c);
+    const svc = createFinanceService({ store: createCatalystFinanceStore(c) });
+    let rows;
+    if (def.source === "transactions") {
+      const { from, to } = monthRange(month);
+      const type = def.fixed?.type;
+      const first = await svc.listTransactions(userId, { from, to, projectId, type, limit: 200 });
+      const all = [...first.items];
+      while (all.length < first.total) {
+        const next = await svc.listTransactions(userId, {
+          from,
+          to,
+          projectId,
+          type,
+          limit: 200,
+          offset: all.length
+        });
+        if (!next.items.length) break;
+        all.push(...next.items);
+      }
+      rows = all;
+    } else {
+      const list = await catalog.list(def.source, userId);
+      const { from, to } = monthRange(month);
+      rows = list.filter(
+        (r) => (!projectId || r.projectId === projectId) && (!from || recordDate(r) >= from && recordDate(r) <= to)
+      );
+    }
+    const refs = ["projects", "accounts", "events", "loans", "investments"];
+    const names = {};
+    for (const ref of refs) {
+      if (!def.columns.some((col) => col.ref === ref) && !(ref === "projects" && projectId))
+        continue;
+      const items = await catalog.list(ref, userId);
+      names[ref] = Object.fromEntries(items.map((i) => [i.id, i.name ?? i.lender ?? i.id]));
+    }
+    const title = key === "project" && projectId ? names.projects?.[projectId] ?? def.title : def.title;
+    const body = await buildSheetXlsx(def, rows, names, title);
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", `attachment; filename="${sheetFileName(def, month)}"`);
+    res.setHeader("Cache-Control", "no-store");
+    res.send(body);
+  } catch (e) {
+    console.error(
+      "sheet error:",
       String(e?.message ?? typeof e).slice(0, 300)
     );
     res.status(500).json({ error: "server", message: "Could not make the file. Try again." });

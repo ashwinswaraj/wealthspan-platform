@@ -12,6 +12,8 @@ import express from "express";
 const catalyst = require("zcatalyst-sdk-node");
 import { createCatalystFinanceStore, createFinanceService } from "../../../../src/features/finance";
 import { createCatalystCatalogStore } from "../../../../src/features/catalog";
+import { SHEETS, SHEET_KEYS, type SheetKey, type SheetRef } from "@jobrio/constants/sheets";
+import { monthRange, recordDate, type SheetRecord } from "@jobrio/utils/sheet";
 import {
   buildReport,
   FILE_FORMATS,
@@ -109,6 +111,97 @@ app.get("/export", async (req, res) => {
   } catch (e) {
     console.error(
       "files error:",
+      String((e as { message?: string })?.message ?? typeof e).slice(0, 300),
+    );
+    res.status(500).json({ error: "server", message: "Could not make the file. Try again." });
+  }
+});
+
+/**
+ * GET /sheet?sheet=income|expense|debt-loan|savings-investing|festivals-functions|accounts|project&month=YYYY-MM|all&projectId=
+ * The dashboard's own sheet as a real .xlsx (same columns as the app). The user always comes from the session.
+ */
+app.get("/sheet", async (req, res) => {
+  let userId: string;
+  let c: ReturnType<typeof catalyst.initialize>;
+  try {
+    c = catalyst.initialize(req);
+    const user = await c.userManagement().getCurrentUser();
+    userId = String(user?.user_id ?? user?.userId ?? "");
+    if (!userId) throw new Error("no user");
+  } catch {
+    return res.status(401).json({ error: "unauthorized", message: "Please log in." });
+  }
+  const key = SHEET_KEYS.find((k) => k === req.query.sheet) as SheetKey | undefined;
+  if (!key)
+    return res
+      .status(400)
+      .json({ error: "validation", message: `sheet must be one of: ${SHEET_KEYS.join(", ")}` });
+  const month =
+    typeof req.query.month === "string" && /^\d{4}-\d{2}$/.test(req.query.month)
+      ? req.query.month
+      : "all";
+  const projectId = q(req.query.projectId);
+  if (projectId && !/^\d{1,20}$/.test(projectId))
+    return res.status(400).json({ error: "validation", message: "Bad project." });
+  const def = SHEETS[key];
+
+  try {
+    const catalog = createCatalystCatalogStore(c);
+    const svc = createFinanceService({ store: createCatalystFinanceStore(c) });
+    let rows: SheetRecord[];
+    if (def.source === "transactions") {
+      const { from, to } = monthRange(month);
+      const type = def.fixed?.type as "income" | "expense" | undefined;
+      const first = await svc.listTransactions(userId, { from, to, projectId, type, limit: 200 });
+      const all = [...first.items];
+      while (all.length < first.total) {
+        const next = await svc.listTransactions(userId, {
+          from,
+          to,
+          projectId,
+          type,
+          limit: 200,
+          offset: all.length,
+        });
+        if (!next.items.length) break;
+        all.push(...next.items);
+      }
+      rows = all as unknown as SheetRecord[];
+    } else {
+      const list = (await catalog.list(def.source, userId)) as unknown as SheetRecord[];
+      const { from, to } = monthRange(month);
+      rows = list.filter(
+        (r) =>
+          (!projectId || r.projectId === projectId) &&
+          (!from || (recordDate(r) >= from && recordDate(r) <= (to as string))),
+      );
+    }
+    const refs: SheetRef[] = ["projects", "accounts", "events", "loans", "investments"];
+    const names: Partial<Record<SheetRef, Record<string, string>>> = {};
+    for (const ref of refs) {
+      if (!def.columns.some((col) => col.ref === ref) && !(ref === "projects" && projectId))
+        continue;
+      const items = (await catalog.list(ref, userId)) as unknown as Array<{
+        id: string;
+        name?: string;
+        lender?: string;
+      }>;
+      names[ref] = Object.fromEntries(items.map((i) => [i.id, i.name ?? i.lender ?? i.id]));
+    }
+    const title =
+      key === "project" && projectId ? (names.projects?.[projectId] ?? def.title) : def.title;
+    const body = await buildSheetXlsx(def, rows, names, title);
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+    res.setHeader("Content-Disposition", `attachment; filename="${sheetFileName(def, month)}"`);
+    res.setHeader("Cache-Control", "no-store");
+    res.send(body);
+  } catch (e) {
+    console.error(
+      "sheet error:",
       String((e as { message?: string })?.message ?? typeof e).slice(0, 300),
     );
     res.status(500).json({ error: "server", message: "Could not make the file. Try again." });
