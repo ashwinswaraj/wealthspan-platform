@@ -1,6 +1,6 @@
 # Architecture Documentation
 
-Architectural patterns, standards, and decisions for the JOBRIO monorepo.
+Architectural patterns, standards, and decisions for the WEALTHSPAN monorepo.
 
 | File | Contents |
 | --- | --- |

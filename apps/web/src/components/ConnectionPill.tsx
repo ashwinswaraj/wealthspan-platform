@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-import { cn } from "@jobrio/utils/utils";
+import { cn } from "@wealthspan/utils/utils";
 
 /**
  * Global connection-status pill.

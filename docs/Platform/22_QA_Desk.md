@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **QA Desk** for the Jobrio platform.
+Describe the scope and intent of **QA Desk** for the Wealthspan platform.
 
 ## Scope
 

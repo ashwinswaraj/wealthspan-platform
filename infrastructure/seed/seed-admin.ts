@@ -1,5 +1,5 @@
 /**
- * Seeds the first Jobrio super-admin account.
+ * Seeds the first Wealthspan super-admin account.
  *
  * Usage (never run against production without an explicit approval):
  *   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \

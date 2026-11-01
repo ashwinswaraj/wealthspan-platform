@@ -1,9 +1,9 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@jobrio/utils/utils";
+import { cn } from "@wealthspan/utils/utils";
 
 /**
- * Jobrio Button — canonical.
+ * Wealthspan Button — canonical.
  *
  * Primary + Secondary are pixel-locked to the Super Admin
  * "Professional Application" review action cluster:

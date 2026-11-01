@@ -11,7 +11,7 @@ changes to it, so structure doesn't drift back to being ad hoc.
 
 | Folder | Reason it exists | Review path |
 | --- | --- | --- |
-| `apps/web` | Public client/professional app | `@jobrio/web` app maintainers (see `.github/CODEOWNERS`) |
+| `apps/web` | Public client/professional app | `@wealthspan/web` app maintainers (see `.github/CODEOWNERS`) |
 | `apps/admin` | Highest-privilege surface — super-admin panel | Admin maintainers; every mutating action needs an audit trail (see `apps/admin/AGENTS.md`) |
 | `apps/api` | Thin edge layer in front of Supabase Auth | API maintainers |
 | `packages/*` | Shared code, never depends on an app | Cross-app; changes affect every consumer, check all of them |

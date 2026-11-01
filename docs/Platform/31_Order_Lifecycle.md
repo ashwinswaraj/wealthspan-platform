@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Order Lifecycle** for the Jobrio platform.
+Describe the scope and intent of **Order Lifecycle** for the Wealthspan platform.
 
 ## Scope
 
@@ -27,14 +27,14 @@ _TODO: fill in._
 # Order → Fulfilment → Settlement: End-to-End Cross-Module UX Spec
 
 > Status: Draft v1 · Owner: Product/UX Systems · Last updated: 2026-08-24
-> Scope: Jobrio multi-role web app — Client App, Super Admin Panel, Sub-admin workspace, Professional Panel, Delivery/Logistics Panel, Support/Helpdesk, Finance/Accounting, Notification Engine, Analytics/Reporting.
+> Scope: Wealthspan multi-role web app — Client App, Super Admin Panel, Sub-admin workspace, Professional Panel, Delivery/Logistics Panel, Support/Helpdesk, Finance/Accounting, Notification Engine, Analytics/Reporting.
 > Canonical IDs used everywhere: `ORDER_ID` (`JR-#####`), `CLIENT_ID` (`CLI-#####`), `PROFESSIONAL_ID` (`PRO-#####`), `PAYMENT_ID` (`PAY-#####`), `SHIPMENT_ID` (`SHP-#####`), `TICKET_ID` (`TKT-#####`), `REFUND_ID` (`RFD-#####`), `PAYOUT_ID` (`POU-#####`), `LEDGER_ID` (`LGR-#####`), `NOTIF_ID` (`NTF-#####`), `AUDIT_ID` (`AUD-#####`).
 
 ---
 
 ## 0. Canonical Status Vocabulary
 
-Terminology rule: this lifecycle does **not** use a vendor/seller model. The order creator is the `Client`; Jobrio owns assignment through Super Admin/Sub-admin/Assignment Team workflows; the assigned worker who performs the job is the `Professional`.
+Terminology rule: this lifecycle does **not** use a vendor/seller model. The order creator is the `Client`; Wealthspan owns assignment through Super Admin/Sub-admin/Assignment Team workflows; the assigned worker who performs the job is the `Professional`.
 
 Order statuses: `DRAFT`, `SUBMITTED`, `PENDING_REVIEW`, `ON_HOLD`, `REJECTED`, `ACCEPTED`, `AWAITING_PROFESSIONAL`, `PROFESSIONAL_REJECTED`, `PROFESSIONAL_ACCEPTED`, `IN_FULFILMENT`, `PARTIALLY_FULFILLED`, `READY_FOR_DISPATCH`, `DISPATCHED`, `OUT_FOR_DELIVERY`, `DELIVERED`, `DELIVERY_FAILED`, `RETURN_REQUESTED`, `RETURN_IN_TRANSIT`, `RETURNED`, `EXCHANGE_IN_PROGRESS`, `CANCELLED_BY_CLIENT`, `CANCELLED_BY_ADMIN`, `DISPUTED`, `REFUND_PENDING`, `REFUND_PARTIAL`, `REFUNDED`, `REFUND_FAILED`, `COMPLETED`, `CLOSED`.
 
@@ -81,7 +81,7 @@ Ticket states: `OPEN`, `IN_PROGRESS`, `ESCALATED_L2`, `ESCALATED_L3`, `PENDING_C
     Dispute/Escalate -> Support ticket -> evidence -> resolution
     Print Invoice/Label -> document log -> package operations
     Bulk Actions -> batch validation -> per-row success/failure report
-    Stock-out -> professional/Jobrio admin remedy -> substitute/partial/cancel/refund
+    Stock-out -> professional/Wealthspan admin remedy -> substitute/partial/cancel/refund
 
 [V1] Professional Panel
   new order alert -> accept or reject
@@ -132,7 +132,7 @@ Ticket states: `OPEN`, `IN_PROGRESS`, `ESCALATED_L2`, `ESCALATED_L3`, `PENDING_C
 
 - **Purpose:** operational command center for every incoming `ORDER_ID`.
 - **Key UI elements:** queue tabs by status, SLA badges, fraud/duplicate flags, payment badge, inventory badge, professional recommendation panel, assignment panel, bulk-selection toolbar, action drawer, audit timeline.
-- **Actions available:** accept, reject, assign professional, Jobrio auto-assign, edit, cancel, hold/flag, refund, return/exchange, assign/reassign delivery, status transitions, dispute escalation, print invoice, generate shipping label, bulk actions.
+- **Actions available:** accept, reject, assign professional, Wealthspan auto-assign, edit, cancel, hold/flag, refund, return/exchange, assign/reassign delivery, status transitions, dispute escalation, print invoice, generate shipping label, bulk actions.
 - **States:** loading queue, empty queue, filter no-results, action in progress, confirmation modal, partial batch success, permission-disabled controls, optimistic update rollback.
 - **Permission UI:** Super Admin sees all actions; Sub-admin sees only actions granted by RBAC. If a Sub-admin lacks `refund:write`, Refund is disabled with tooltip and an approval-request link.
 
@@ -187,7 +187,7 @@ Ticket states: `OPEN`, `IN_PROGRESS`, `ESCALATED_L2`, `ESCALATED_L3`, `PENDING_C
 2. **Screen/UI:** admin selects Accept in Order Desk row or detail drawer; modal shows payment, stock, SLA, duplicate status, and professional assignment recommendation.
 3. **Confirmation:** primary button `Accept & continue to professional assignment`; optional internal note.
 4. **Data written:** `orders.status=ACCEPTED`, `accepted_at`, `accepted_by`, `AUDIT_ID`, analytics `order_accepted`, notification log.
-5. **Who else is affected:** client sees `Accepted`; professional pool receives eligibility only after Jobrio assignment; Finance keeps escrow held; SLA changes from review SLA to fulfilment SLA.
+5. **Who else is affected:** client sees `Accepted`; professional pool receives eligibility only after Wealthspan assignment; Finance keeps escrow held; SLA changes from review SLA to fulfilment SLA.
 6. **Next screens:** admin is moved to assignment drawer; client order timeline advances; analytics acceptance rate updates.
 
 ### 3.2 Reject Order
@@ -199,14 +199,14 @@ Ticket states: `OPEN`, `IN_PROGRESS`, `ESCALATED_L2`, `ESCALATED_L3`, `PENDING_C
 5. **Who else is affected:** client receives rejection + refund ETA; Finance sees void/refund record; Support gets auto-ticket if reason is client-impacting; Analytics rejection reason updates.
 6. **Next screens:** admin row moves to Rejected; client order detail shows terminal rejection; refund branch proceeds until `REFUNDED` then `CLOSED`.
 
-### 3.3 Jobrio Assigns to Professional / Auto-Assign Logic
+### 3.3 Wealthspan Assigns to Professional / Auto-Assign Logic
 
-1. **Pre-condition:** `status=ACCEPTED` or `PROFESSIONAL_REJECTED`; inventory/capacity can be fulfilled; Jobrio assignment permission present.
-2. **Screen/UI:** Jobrio assignment panel ranks professionals by coverage, stock/capacity, rating, SLA, cancellation rate, payout health, and workload.
-3. **Auto-assign:** system selects best eligible professional according to Jobrio rules; Jobrio manual override requires reason when bypassing the top recommendation.
+1. **Pre-condition:** `status=ACCEPTED` or `PROFESSIONAL_REJECTED`; inventory/capacity can be fulfilled; Wealthspan assignment permission present.
+2. **Screen/UI:** Wealthspan assignment panel ranks professionals by coverage, stock/capacity, rating, SLA, cancellation rate, payout health, and workload.
+3. **Auto-assign:** system selects best eligible professional according to Wealthspan rules; Wealthspan manual override requires reason when bypassing the top recommendation.
 4. **Data written:** `order_professional_assignments` row, `PROFESSIONAL_ID`, `orders.status=AWAITING_PROFESSIONAL`, professional SLA timer, audit, notification.
 5. **Professional sees:** New Order card with accept/reject countdown, line items, masked client details, payout preview.
-6. **Client sees:** `Jobrio is assigning a professional` or named professional if policy allows.
+6. **Client sees:** `Wealthspan is assigning a professional` or named professional if policy allows.
 7. **Professional accept:** writes `PROFESSIONAL_ACCEPTED`, stock `HARD_DEDUCTED`, payout preview `ACCRUED`, order `IN_FULFILMENT`.
 8. **Professional reject/timeout:** writes `PROFESSIONAL_REJECTED`, reason, releases professional reservation; reassignment loop runs up to 3 attempts; after 3 failures admin sees manual rescue queue and client sees delay apology.
 
@@ -216,7 +216,7 @@ Ticket states: `OPEN`, `IN_PROGRESS`, `ESCALATED_L2`, `ESCALATED_L3`, `PENDING_C
 2. **Screen/UI:** Edit drawer shows current items, proposed items, inventory delta, tax/delivery recalculation, client payable/refundable delta, professional impact.
 3. **Price increase branch:** system creates `PAYMENT_ID` delta authorization; client must approve and pay delta before order returns to previous workflow.
 4. **Price decrease branch:** system creates partial refund or wallet credit based on policy; ledger posts negative adjustment.
-5. **Quantity/item change:** inventory releases removed items and reserves added items; professional assignment is invalidated and returns to Jobrio Assignment Team if current professional cannot fulfil.
+5. **Quantity/item change:** inventory releases removed items and reserves added items; professional assignment is invalidated and returns to Wealthspan Assignment Team if current professional cannot fulfil.
 6. **Data written:** `order_revision`, new totals, inventory movements, payment/refund records, tax adjustment, `AUDIT_ID`.
 7. **Who else is affected:** client receives approval request; professional sees revised packing list; Finance sees amended invoice/tax record; Analytics records edit reason.
 8. **Next screens:** if approved, order resumes prior status; if client rejects/timeout, admin chooses keep original, cancel, or support escalation.

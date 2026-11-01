@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Release Checklist** for the Jobrio platform.
+Describe the scope and intent of **Release Checklist** for the Wealthspan platform.
 
 ## Scope
 

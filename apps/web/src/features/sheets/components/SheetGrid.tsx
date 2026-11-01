@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { SheetColumn, SheetDef, SheetOption } from "@jobrio/constants/sheets";
+import type { SheetColumn, SheetDef, SheetOption } from "@wealthspan/constants/sheets";
 import {
   buildInput,
   cellValue,
@@ -10,7 +10,7 @@ import {
   sortRecords,
   type CellValue,
   type SheetRecord,
-} from "@jobrio/utils/sheet";
+} from "@wealthspan/utils/sheet";
 import type { Refs } from "../hooks/useSheet";
 
 const letter = (i: number) => String.fromCharCode(65 + (i % 26));

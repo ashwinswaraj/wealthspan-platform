@@ -1,4 +1,4 @@
-# Jobrio — Coding Standards & Refactoring Guide
+# Wealthspan — Coding Standards & Refactoring Guide
 
 This document is the single source of truth for how code gets written and
 refactored in this repository. Every future change — by a human or by

@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Phase 2** for the Jobrio platform.
+Describe the scope and intent of **Phase 2** for the Wealthspan platform.
 
 ## Scope
 

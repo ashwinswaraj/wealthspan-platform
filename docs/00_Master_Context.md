@@ -4,9 +4,9 @@ Status: MASTER / CANONICAL · Owner: Ashwin Swaraj · Last updated: 2026-08-24
 
 ## Purpose
 
-Define the canonical product, business, operational, terminology, workflow, ownership, and system principles of the Jobrio platform.
+Define the canonical product, business, operational, terminology, workflow, ownership, and system principles of the Wealthspan platform.
 
-This document is the primary reference for understanding how Jobrio is intended to operate.
+This document is the primary reference for understanding how Wealthspan is intended to operate.
 
 Product requirements, technical architecture, UI decisions, workflows, and future documentation should remain consistent with this document unless an explicitly approved change supersedes it.
 
@@ -16,7 +16,7 @@ Product requirements, technical architecture, UI decisions, workflows, and futur
 
 This document covers:
 
-- Jobrio project identity
+- Wealthspan project identity
 - Core business model
 - Client-side workflow
 - Professional-side workflow
@@ -78,7 +78,7 @@ Those areas should be defined in their respective documents while remaining cons
 
 ## Details
 
-# JOBRIO — MASTER CONTEXT
+# WEALTHSPAN — MASTER CONTEXT
 
 Version: 1.0
 
@@ -90,12 +90,12 @@ Last Updated: 2026-08-24
 
 # 1. PROJECT IDENTITY
 
-Product Name: Jobrio
+Product Name: Wealthspan
 
 Brand capitalization:
-- Correct: Jobrio
-- Incorrect: JOBRIO
-- Do not use "JOBRIO" unless explicitly requested.
+- Correct: Wealthspan
+- Incorrect: WEALTHSPAN
+- Do not use "WEALTHSPAN" unless explicitly requested.
 
 Founder:
 - Ashwin Swaraj
@@ -103,25 +103,25 @@ Founder:
 Current stage:
 - Product/platform actively being built.
 - MVP architecture is being designed with long-term scalability in mind.
-- Do not claim that Jobrio is fully launched unless explicitly confirmed.
+- Do not claim that Wealthspan is fully launched unless explicitly confirmed.
 
 Official Instagram:
-- @jobrio.in
+- @wealthspan.in
 
 Brand positioning:
 - Workforce-as-a-Service (WaaS)
-- Jobrio is not a traditional freelancing marketplace.
-- Jobrio is not primarily a bidding marketplace.
+- Wealthspan is not a traditional freelancing marketplace.
+- Wealthspan is not primarily a bidding marketplace.
 - Clients do not browse a public marketplace and manually hire individual freelancers.
-- Professionals are managed within Jobrio's workforce system.
+- Professionals are managed within Wealthspan's workforce system.
 
 Core concept:
 
-Businesses submit work to Jobrio.
-Jobrio manages the workflow.
-Jobrio matches the work with an eligible professional.
-The professional executes the work under Jobrio's operational system.
-Jobrio manages QA, payment/escrow, disputes, tracking and delivery.
+Businesses submit work to Wealthspan.
+Wealthspan manages the workflow.
+Wealthspan matches the work with an eligible professional.
+The professional executes the work under Wealthspan's operational system.
+Wealthspan manages QA, payment/escrow, disputes, tracking and delivery.
 
 ---
 
@@ -154,7 +154,7 @@ Create Order
 Clients should not:
 - Manually choose professionals
 - Directly control the assignment engine
-- Bypass Jobrio QA
+- Bypass Wealthspan QA
 - Directly control escrow release
 - Execute internal operational actions
 
@@ -162,7 +162,7 @@ Clients should not:
 
 # 2.2 Professional Side
 
-Professionals are Jobrio-managed workforce members.
+Professionals are Wealthspan-managed workforce members.
 
 They are not treated as ordinary public freelancers.
 
@@ -196,7 +196,7 @@ Professionals receive assignments through the Assignment Engine.
 
 # 3. CORE DIFFERENTIATION
 
-Jobrio's operational differentiation is not simply:
+Wealthspan's operational differentiation is not simply:
 
 "Find a freelancer."
 
@@ -227,7 +227,7 @@ Client:
 The customer placing an order.
 
 Professional:
-Jobrio's managed workforce member.
+Wealthspan's managed workforce member.
 
 Order:
 A client's requested piece of work.
@@ -895,7 +895,7 @@ After Trial 3:
 
 ## Core Philosophy
 
-Jobrio does not manually assign professionals during normal operation.
+Wealthspan does not manually assign professionals during normal operation.
 
 Admin role:
 

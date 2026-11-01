@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Admin Security** for the Jobrio platform.
+Describe the scope and intent of **Admin Security** for the Wealthspan platform.
 
 ## Scope
 

@@ -4,8 +4,8 @@ Newest first. One entry per decision: what, why, who, what it replaces.
 
 ## 2026-10-24 — Wealthspan direction (owner: Ashwin Swaraj)
 
-1. **Product:** this repo is being converted from Jobrio to **Wealthspan**
-   (AI personal accountant). Jobrio-specific code (orders, professionals,
+1. **Product:** this repo is being converted from Wealthspan to **Wealthspan**
+   (AI personal accountant). Wealthspan-specific code (orders, professionals,
    QA, escrow registries) stays untouched until the owner approves removing it.
 2. **Frontend:** the owner's existing Wealthspan frontend exists only as a
    compiled single HTML file (no source). It is used as the visual and
@@ -21,7 +21,7 @@ Newest first. One entry per decision: what, why, who, what it replaces.
    create/edit/delete actions.
 5. **Database and login:** **everything on Zoho Catalyst** (owner: "Sab
    catalyst pr") — Data Store (ZCQL) + Catalyst Authentication. Supabase is
-   dropped for Wealthspan; old Jobrio Supabase code stays until removal is
+   dropped for Wealthspan; old Wealthspan Supabase code stays until removal is
    approved. Verified from Catalyst docs: Advanced I/O timeout 30 s; Express
    supported; ZCQL has SUM/COUNT/MIN/MAX/AVG, GROUP BY, HAVING, LIMIT
    offset,count, max 4 JOINs, no documented row cap; column types Text, Var

@@ -3,9 +3,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { Toaster as Sonner } from "@jobrio/ui/components/sonner";
-import { Toaster } from "@jobrio/ui/components/toaster";
-import { TooltipProvider } from "@jobrio/ui/components/tooltip";
+import { Toaster as Sonner } from "@wealthspan/ui/components/sonner";
+import { Toaster } from "@wealthspan/ui/components/toaster";
+import { TooltipProvider } from "@wealthspan/ui/components/tooltip";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({

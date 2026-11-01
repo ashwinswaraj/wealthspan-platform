@@ -2,7 +2,7 @@
  * Pure helpers behind the Excel-style sheets (no React, no network), so the rules are unit-tested.
  * A sheet row is the API record as it comes back (money as `<key>Paise`); cells are shown in rupees.
  */
-import type { SheetColumn, SheetDef } from "@jobrio/constants/sheets";
+import type { SheetColumn, SheetDef } from "@wealthspan/constants/sheets";
 
 export type SheetRecord = Record<string, unknown> & { id: string };
 export type CellValue = string | number | null;

@@ -1,9 +1,9 @@
 import * as React from "react";
 import { AlertCircle } from "lucide-react";
-import { cn } from "@jobrio/utils/utils";
+import { cn } from "@wealthspan/utils/utils";
 
 /**
- * FieldError — Jobrio's custom inline validation message.
+ * FieldError — Wealthspan's custom inline validation message.
  *
  * Replaces the browser's native validation bubble everywhere. Forms MUST set
  * `noValidate` so the native tooltip never renders and this component is the

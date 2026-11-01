@@ -1,6 +1,6 @@
 # Admin Documentation
 
-Specs for the Jobrio Super Admin panel (`apps/admin`).
+Specs for the Wealthspan Super Admin panel (`apps/admin`).
 
 Files are numbered by topic and organized flat in this folder:
 

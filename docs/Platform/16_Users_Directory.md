@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Users Directory** for the Jobrio platform.
+Describe the scope and intent of **Users Directory** for the Wealthspan platform.
 
 ## Scope
 

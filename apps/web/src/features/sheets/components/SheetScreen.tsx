@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
-import { SHEETS, type SheetKey } from "@jobrio/constants/sheets";
+import { SHEETS, type SheetKey } from "@wealthspan/constants/sheets";
 import {
   columnTotals,
   incomeExpenseNet,
   monthOptions,
   todayIST,
   type CellValue,
-} from "@jobrio/utils/sheet";
+} from "@wealthspan/utils/sheet";
 import { apiUrl } from "@/services/api";
 import type { LedgerSectionKey } from "@/features/wealthspan-shell/lib/sections";
 import type { Project } from "@/features/projects";

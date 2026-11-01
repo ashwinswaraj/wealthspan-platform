@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Value Proposition** for the Jobrio platform.
+Describe the scope and intent of **Value Proposition** for the Wealthspan platform.
 
 ## Scope
 

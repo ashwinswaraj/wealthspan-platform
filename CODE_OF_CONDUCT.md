@@ -2,7 +2,7 @@
 
 ## Our Pledge
 
-We pledge to make participation in the Jobrio project a harassment-free
+We pledge to make participation in the Wealthspan project a harassment-free
 experience for everyone, regardless of background, identity or experience level.
 
 ## Our Standards
@@ -21,6 +21,6 @@ Unacceptable behaviour:
 
 ## Enforcement
 
-Report issues to **conduct@jobrio.com**. Maintainers will review and respond
+Report issues to **conduct@wealthspan.com**. Maintainers will review and respond
 confidentially, and may warn, temporarily block, or permanently remove
 contributors who violate this policy.

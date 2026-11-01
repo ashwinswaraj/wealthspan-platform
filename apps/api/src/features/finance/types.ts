@@ -6,7 +6,7 @@ import type {
   FinanceLoan,
   FinanceProject,
   FinanceTransaction,
-} from "@jobrio/types";
+} from "@wealthspan/types";
 
 /** A transaction row before the database gives it an id and timestamps. */
 export type NewTransaction = Omit<

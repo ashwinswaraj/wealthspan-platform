@@ -25,28 +25,28 @@ in [§9](#9-known-deviations--do-not-silently-fix-these) as intentional.
 
 ```
 apps/
-  web/      @jobrio/web    — public client + professional web app (Vite + TanStack Start)
-  admin/    @jobrio/admin  — super-admin panel (Vite + TanStack Start)
-  api/      @jobrio/api    — backend edge service (currently a thin scaffold — see apps/api/AGENTS.md)
+  web/      @wealthspan/web    — public client + professional web app (Vite + TanStack Start)
+  admin/    @wealthspan/admin  — super-admin panel (Vite + TanStack Start)
+  api/      @wealthspan/api    — backend edge service (currently a thin scaffold — see apps/api/AGENTS.md)
 packages/
-  ui/           @jobrio/ui           — design system + shared components (single source of UI truth)
-  auth/         @jobrio/auth         — auth logic, shared across apps
-  database/     @jobrio/database     — DB client/types
-  types/        @jobrio/types        — shared TS types (frontend/backend contract)
-  hooks/        @jobrio/hooks        — shared React hooks
-  constants/    @jobrio/constants    — cross-app constants + the reactive order/service registries
-  utils/        @jobrio/utils        — shared utility functions
-  validation/   @jobrio/validation   — shared zod schemas (client + server use the same rules)
-  config/       @jobrio/config       — shared tsconfig/testing config
-  sdk/          @jobrio/sdk          — public npm package for external consumers
+  ui/           @wealthspan/ui           — design system + shared components (single source of UI truth)
+  auth/         @wealthspan/auth         — auth logic, shared across apps
+  database/     @wealthspan/database     — DB client/types
+  types/        @wealthspan/types        — shared TS types (frontend/backend contract)
+  hooks/        @wealthspan/hooks        — shared React hooks
+  constants/    @wealthspan/constants    — cross-app constants + the reactive order/service registries
+  utils/        @wealthspan/utils        — shared utility functions
+  validation/   @wealthspan/validation   — shared zod schemas (client + server use the same rules)
+  config/       @wealthspan/config       — shared tsconfig/testing config
+  sdk/          @wealthspan/sdk          — public npm package for external consumers
 infrastructure/  — ops/security only (db config, proxy, secrets docs, seed scripts) — no app code
 docs/            — product & architecture docs, organized by domain
 tests/           — root-level cross-app E2E/integration tests only (unit tests live inside each feature)
 ```
 
 **Known stale doc**: `README.md`'s tree diagram and its `pnpm --filter` example
-still call the web app `apps/platform` / `@jobrio/platform`. That name no
-longer exists — the real app is `apps/web`, package `@jobrio/web` (confirmed
+still call the web app `apps/platform` / `@wealthspan/platform`. That name no
+longer exists — the real app is `apps/web`, package `@wealthspan/web` (confirmed
 in `apps/web/package.json`). Don't "helpfully" rename `apps/web` back to
 `platform` to match the README — the README is what's outdated. Feel free to
 fix the README itself if you're touching it anyway.
@@ -62,16 +62,16 @@ fix the README itself if you're touching it anyway.
 - Database: Supabase (Postgres)
 - Package manager: **pnpm only**. Never generate or commit a `package-lock.json`,
   `yarn.lock`, or `bun.lock` — `pnpm-lock.yaml` is the single lockfile. Internal
-  cross-package dependencies use `"@jobrio/x": "workspace:*"`, never a version
+  cross-package dependencies use `"@wealthspan/x": "workspace:*"`, never a version
   number or a relative path.
 - Build orchestration: Turborepo. Root `package.json`'s `build`, `typecheck`,
   and `test` scripts delegate to `turbo run <task>`, fanning out to every
   app per `turbo.json`'s pipeline. `dev` is intentionally scoped to
-  `apps/web` only — `turbo run dev --filter=@jobrio/web --` — because `web`
+  `apps/web` only — `turbo run dev --filter=@wealthspan/web --` — because `web`
   and `admin` currently default to the same dev port and running both
   under one unscoped `turbo run dev` collides (and `turbo` doesn't accept a
   `--port` override to route around it). Run `admin`'s dev server
-  separately: `pnpm --filter @jobrio/admin dev`. **Never** widen the root
+  separately: `pnpm --filter @wealthspan/admin dev`. **Never** widen the root
   `dev` script back to unscoped `turbo run dev` without first giving `web`
   and `admin` distinct ports. **Never** add a root script that calls
   `vite`/`tsc`/etc. directly — that only touches one app and silently skips
@@ -141,9 +141,9 @@ the folder/file structure directly determines URL structure, and
 
 ## 5. Design system — one source of truth
 
-`packages/ui/src/design-system/` (imported as `@jobrio/ui/design-system`) is
+`packages/ui/src/design-system/` (imported as `@wealthspan/ui/design-system`) is
 the **only** source of design-system UI. Every app and feature must import
-from `@jobrio/ui/design-system` — never reach into `@jobrio/ui/src/components/*`
+from `@wealthspan/ui/design-system` — never reach into `@wealthspan/ui/src/components/*`
 directly from feature code, and never recreate a button/input/container
 locally. If a required component doesn't exist yet, add it inside
 `packages/ui/src/design-system/`, re-export it from
@@ -258,7 +258,7 @@ left as-is or flagged rather than resolved unilaterally. Full reasoning in
 
 ## 12. Wealthspan direction (owner decisions, 2026-10-24)
 
-This repo is being converted from Jobrio to Wealthspan. Where this section
+This repo is being converted from Wealthspan to Wealthspan. Where this section
 conflicts with §2 (Stack), **this section wins**. Full reasoning in
 `docs/Architecture/Decision_Log.md`.
 
@@ -268,7 +268,7 @@ conflicts with §2 (Stack), **this section wins**. Full reasoning in
   directly from feature code).
 - Database + login: **Zoho Catalyst too** (Data Store + Authentication) — the
   owner chose "everything on Catalyst"; Supabase is dropped for Wealthspan.
-  Existing `@jobrio/database` / `@jobrio/auth` Supabase code stays until the
+  Existing `@wealthspan/database` / `@wealthspan/auth` Supabase code stays until the
   owner approves replacing it; new finance code must not depend on Supabase.
   Catalyst constraints to design around: ZCQL has no documented row cap
   (always paginate with `LIMIT offset,count`), max 4 JOINs, Var Char ≤ 255,
@@ -282,9 +282,9 @@ conflicts with §2 (Stack), **this section wins**. Full reasoning in
   `packages/utils/src/finance.ts`; the spec is
   `docs/Database/41_Wealthspan_Data_Model.md`. All money is integer paise.
   Never do money arithmetic in a component or in the chatbot prompt — call
-  `@jobrio/utils`.
-- Jobrio-specific code (orders, professionals, QA, escrow) is being removed:
+  `@wealthspan/utils`.
+- Wealthspan-specific code (orders, professionals, QA, escrow) is being removed:
   the owner approved the clean-up on 2026-10-30. The architecture (folders,
-  feature-driven layout, `@jobrio/*` package scope) stays; Wealthspan code
-  goes where the Jobrio code was. `apps/web` is already clean (route `/` is
+  feature-driven layout, `@wealthspan/*` package scope) stays; Wealthspan code
+  goes where the Wealthspan code was. `apps/web` is already clean (route `/` is
   the Wealthspan home); `apps/admin` and the shared packages are next.

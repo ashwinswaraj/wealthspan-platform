@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Client Agreement** for the Jobrio platform.
+Describe the scope and intent of **Client Agreement** for the Wealthspan platform.
 
 ## Scope
 

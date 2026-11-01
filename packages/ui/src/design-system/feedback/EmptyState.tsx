@@ -1,8 +1,8 @@
 import * as React from "react";
 import type { LucideIcon } from "lucide-react";
 import { Inbox } from "lucide-react";
-import { cn } from "@jobrio/utils/utils";
-import { Button } from "@jobrio/ui/design-system/primitives/Button";
+import { cn } from "@wealthspan/utils/utils";
+import { Button } from "@wealthspan/ui/design-system/primitives/Button";
 
 export interface EmptyStateProps {
   icon?: LucideIcon;

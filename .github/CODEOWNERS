@@ -1,9 +1,9 @@
 # Default owners for everything in the repo
-*                       @jobrio/core
+*                       @wealthspan/core
 
-/apps/web/         @jobrio/platform-team
-/apps/admin/            @jobrio/admin-team
-/apps/api/              @jobrio/backend-team
-/packages/              @jobrio/core
-/infrastructure/        @jobrio/devops
-/docs/                  @jobrio/product
+/apps/web/         @wealthspan/platform-team
+/apps/admin/            @wealthspan/admin-team
+/apps/api/              @wealthspan/backend-team
+/packages/              @wealthspan/core
+/infrastructure/        @wealthspan/devops
+/docs/                  @wealthspan/product

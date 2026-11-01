@@ -1,6 +1,6 @@
 # Documentation Index
 
-This directory contains comprehensive documentation for the JOBRIO platform.
+This directory contains comprehensive documentation for the WEALTHSPAN platform.
 
 ## Getting Started
 

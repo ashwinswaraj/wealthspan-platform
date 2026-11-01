@@ -35,7 +35,7 @@ function readReadmeManifest() {
   const manifest = new Map();
 
   for (const line of lines.slice(fenceStart + 1, fenceEnd)) {
-    if (line.trim() === "JOBRIO/") continue;
+    if (line.trim() === "WEALTHSPAN/") continue;
     const branchIndex = [line.indexOf("├── "), line.indexOf("└── ")]
       .filter((index) => index >= 0)
       .sort((a, b) => a - b)[0];

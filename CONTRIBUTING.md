@@ -1,4 +1,4 @@
-# Contributing to Jobrio
+# Contributing to Wealthspan
 
 ## Branching
 - `main` — production
@@ -15,5 +15,5 @@ Conventional Commits: `feat(orders): add escrow release`
 4. Fill the PR template and request review
 
 ## Code standards
-- UI must come from `@jobrio/ui/design-system` (see `packages/ui/src/design-system/README.md`)
+- UI must come from `@wealthspan/ui/design-system` (see `packages/ui/src/design-system/README.md`)
 - Brand blue is flat `#004AC6` — no gradients, no other blues

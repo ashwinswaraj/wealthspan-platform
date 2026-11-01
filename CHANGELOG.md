@@ -14,7 +14,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), versioning per 
 - Split `apps/web`'s flat `components/`/`pages/`/`lib/` into
   `features/{marketing,auth,signup,dashboard-client,dashboard-professional,legal}/`
 - Root `dev` script scoped to `apps/web` only
-  (`turbo run dev --filter=@jobrio/web --`) — `web` and `admin` currently
+  (`turbo run dev --filter=@wealthspan/web --`) — `web` and `admin` currently
   share a default dev port; see `.lovable/plan.md`
 - Upgraded pinned `@tanstack/{react-start,react-router,router-plugin,react-query}`,
   `@lovable.dev/vite-tanstack-config`, and `nitro` versions in `apps/web`
@@ -25,7 +25,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), versioning per 
   dependency list; `dev`/`build` now delegate to Turborepo instead of
   calling `vite` directly (previously only started `apps/web`, silently
   skipping `apps/admin`/`apps/api`)
-- `apps/web/package.json` now declares the `@jobrio/*` workspace packages
+- `apps/web/package.json` now declares the `@wealthspan/*` workspace packages
   it imports (previously only resolved via a Vite alias)
 - Two instances of business logic misplaced in generic `lib/` folders
   moved into their owning feature (`apps/web`'s order-related files,

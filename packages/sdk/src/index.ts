@@ -1,4 +1,4 @@
-// @jobrio/sdk — public SDK package.
+// @wealthspan/sdk — public SDK package.
 //
 // Scaffold placeholder: package.json already pointed "main"/"types" at
 // src/index.ts, but no src/ directory existed, so the declared entry point

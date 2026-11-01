@@ -8,22 +8,22 @@ Last updated: 2026-08-24
 
 ## Purpose
 
-Define the canonical vision, mission, long-term direction, strategic intent, and fundamental purpose of Jobrio.
+Define the canonical vision, mission, long-term direction, strategic intent, and fundamental purpose of Wealthspan.
 
 This document explains:
 
-- Why Jobrio exists
-- What future Jobrio is trying to create
-- What Jobrio is fundamentally responsible for
-- Who Jobrio serves
-- What Jobrio is trying to change about the way work is bought and delivered
+- Why Wealthspan exists
+- What future Wealthspan is trying to create
+- What Wealthspan is fundamentally responsible for
+- Who Wealthspan serves
+- What Wealthspan is trying to change about the way work is bought and delivered
 - The principles that should guide major product, business, operational, and strategic decisions
 
 This document is intentionally higher-level than product requirements and operational documentation.
 
-The Master Context defines how Jobrio operates.
+The Master Context defines how Wealthspan operates.
 
-This document defines why Jobrio exists and what Jobrio is ultimately trying to become.
+This document defines why Wealthspan exists and what Wealthspan is ultimately trying to become.
 
 All major product, business, operational, and strategic decisions should remain consistent with this document unless an explicitly approved change supersedes it.
 
@@ -35,19 +35,19 @@ All major product, business, operational, and strategic decisions should remain 
 
 This document covers:
 
-- Jobrio's purpose
-- Jobrio's vision
-- Jobrio's mission
-- The future Jobrio intends to create
-- The problem Jobrio exists to solve
-- The role Jobrio intends to play in the future of work
-- The value Jobrio creates for clients
-- The value Jobrio creates for professionals
-- Jobrio's core strategic principles
-- Jobrio's long-term direction
-- The fundamental relationship between clients, professionals, and Jobrio
-- The standard Jobrio should pursue for reliability, quality, and execution
-- The boundaries that distinguish Jobrio from traditional freelancing marketplaces
+- Wealthspan's purpose
+- Wealthspan's vision
+- Wealthspan's mission
+- The future Wealthspan intends to create
+- The problem Wealthspan exists to solve
+- The role Wealthspan intends to play in the future of work
+- The value Wealthspan creates for clients
+- The value Wealthspan creates for professionals
+- Wealthspan's core strategic principles
+- Wealthspan's long-term direction
+- The fundamental relationship between clients, professionals, and Wealthspan
+- The standard Wealthspan should pursue for reliability, quality, and execution
+- The boundaries that distinguish Wealthspan from traditional freelancing marketplaces
 
 ### What this document explicitly does not cover
 
@@ -82,7 +82,7 @@ Those areas must be defined in their respective canonical documents while remain
 
 ## Details
 
-# 1. WHY JOBRIO EXISTS
+# 1. WHY WEALTHSPAN EXISTS
 
 The way work is purchased and delivered is still fragmented.
 
@@ -105,11 +105,11 @@ The business is effectively forced to become the manager of the work.
 
 Traditional freelancing marketplaces primarily solve the problem of connecting a buyer with an individual seller.
 
-Jobrio is designed to solve a broader problem:
+Wealthspan is designed to solve a broader problem:
 
 How can a business submit work and receive reliable execution without having to manage the entire workforce process itself?
 
-Jobrio exists to move the responsibility for workforce coordination, assignment, quality control, payment operations, and delivery management from the client into a managed execution system.
+Wealthspan exists to move the responsibility for workforce coordination, assignment, quality control, payment operations, and delivery management from the client into a managed execution system.
 
 The fundamental idea is:
 
@@ -117,15 +117,15 @@ Work should be submitted to a system, not simply posted to a marketplace.
 
 ---
 
-# 2. JOBRIO'S CORE PURPOSE
+# 2. WEALTHSPAN'S CORE PURPOSE
 
-Jobrio exists to make professional work easier for businesses to buy and easier for qualified professionals to execute.
+Wealthspan exists to make professional work easier for businesses to buy and easier for qualified professionals to execute.
 
-For businesses, Jobrio aims to transform fragmented hiring and project coordination into a managed execution experience.
+For businesses, Wealthspan aims to transform fragmented hiring and project coordination into a managed execution experience.
 
-For professionals, Jobrio aims to transform inconsistent freelance opportunity into structured access to legitimate work through a managed workforce system.
+For professionals, Wealthspan aims to transform inconsistent freelance opportunity into structured access to legitimate work through a managed workforce system.
 
-Jobrio therefore operates between two sides of the market:
+Wealthspan therefore operates between two sides of the market:
 
 Client Demand
 +
@@ -133,9 +133,9 @@ Professional Capability
 =
 Managed Work Execution
 
-Jobrio's role is not merely to introduce these two sides.
+Wealthspan's role is not merely to introduce these two sides.
 
-Jobrio is responsible for managing the system that connects them and governs the execution.
+Wealthspan is responsible for managing the system that connects them and governs the execution.
 
 ---
 
@@ -145,13 +145,13 @@ Jobrio is responsible for managing the system that connects them and governs the
 
 To build a global managed workforce infrastructure where businesses can submit work and reliably get it executed without having to manage the underlying workforce themselves.
 
-Jobrio envisions a future in which obtaining professional work becomes as simple as placing an order:
+Wealthspan envisions a future in which obtaining professional work becomes as simple as placing an order:
 
 Define the outcome  
 → Submit the work  
-→ Jobrio manages the workforce  
+→ Wealthspan manages the workforce  
 → Qualified professional executes  
-→ Jobrio verifies quality  
+→ Wealthspan verifies quality  
 → Client receives the completed work
 
 The long-term vision is to make professional work:
@@ -163,13 +163,13 @@ The long-term vision is to make professional work:
 - More accountable
 - More scalable
 
-Jobrio aims to become an infrastructure layer for professional work execution rather than simply another marketplace for finding freelancers.
+Wealthspan aims to become an infrastructure layer for professional work execution rather than simply another marketplace for finding freelancers.
 
 ---
 
 # 4. VISION OF THE FUTURE OF WORK
 
-Jobrio believes the future of work will not be defined only by where people work.
+Wealthspan believes the future of work will not be defined only by where people work.
 
 It will increasingly be defined by how work is coordinated.
 
@@ -183,7 +183,7 @@ Business
 → Review
 → Replace if necessary
 
-Jobrio's intended model is:
+Wealthspan's intended model is:
 
 Business
 → Define work
@@ -202,7 +202,7 @@ rather than:
 
 "Which person should I find?"
 
-Jobrio's long-term objective is to abstract away unnecessary workforce-management complexity while preserving human expertise where it creates real value.
+Wealthspan's long-term objective is to abstract away unnecessary workforce-management complexity while preserving human expertise where it creates real value.
 
 ---
 
@@ -212,7 +212,7 @@ Jobrio's long-term objective is to abstract away unnecessary workforce-managemen
 
 To provide businesses with reliable professional work execution through a managed workforce system that handles matching, workflow coordination, quality assurance, payment operations, and delivery while creating structured and sustainable work opportunities for qualified professionals.
 
-Jobrio's mission has two connected responsibilities:
+Wealthspan's mission has two connected responsibilities:
 
 ### For Clients
 
@@ -226,17 +226,17 @@ Create a structured system through which qualified professionals can access mean
 
 # 6. CLIENT MISSION
 
-Jobrio must continuously reduce the operational burden placed on businesses when purchasing professional services.
+Wealthspan must continuously reduce the operational burden placed on businesses when purchasing professional services.
 
 The client experience should move toward:
 
-"Tell Jobrio what you need."
+"Tell Wealthspan what you need."
 
 instead of:
 
 "Find someone, negotiate with them, manage them, and hope the result is good."
 
-Jobrio should therefore pursue:
+Wealthspan should therefore pursue:
 
 - Simple work submission
 - Clear service definitions
@@ -250,7 +250,7 @@ Jobrio should therefore pursue:
 - Accountable dispute resolution
 - Reliable delivery
 
-The client should not need to understand Jobrio's internal workforce machinery in order to receive value from it.
+The client should not need to understand Wealthspan's internal workforce machinery in order to receive value from it.
 
 Complexity should remain inside the system whenever that complexity does not create value for the client.
 
@@ -258,7 +258,7 @@ Complexity should remain inside the system whenever that complexity does not cre
 
 # 7. PROFESSIONAL MISSION
 
-Jobrio must build a workforce system in which qualified professionals can focus more on doing high-quality work and less on constantly searching for their next client.
+Wealthspan must build a workforce system in which qualified professionals can focus more on doing high-quality work and less on constantly searching for their next client.
 
 Professionals should be evaluated and managed through a structured system rather than treated as anonymous marketplace listings.
 
@@ -277,7 +277,7 @@ The intended professional experience includes:
 - Appropriate payment processes
 - Opportunities to build a strong professional record
 
-Jobrio does not exist to maximize the number of professionals registered on the platform.
+Wealthspan does not exist to maximize the number of professionals registered on the platform.
 
 It exists to build a capable, reliable, and appropriately matched professional workforce.
 
@@ -285,9 +285,9 @@ Quality of workforce matters more than raw workforce size.
 
 ---
 
-# 8. WHAT JOBRIO IS BUILDING
+# 8. WHAT WEALTHSPAN IS BUILDING
 
-Jobrio is building a managed workforce execution platform.
+Wealthspan is building a managed workforce execution platform.
 
 Its core system connects:
 
@@ -320,11 +320,11 @@ The long-term system should become increasingly intelligent through accumulated 
 
 ---
 
-# 9. JOBRIO IS NOT A FREELANCING MARKETPLACE
+# 9. WEALTHSPAN IS NOT A FREELANCING MARKETPLACE
 
-Jobrio must not lose its strategic identity by gradually becoming a conventional freelancer marketplace.
+Wealthspan must not lose its strategic identity by gradually becoming a conventional freelancer marketplace.
 
-Jobrio is not fundamentally built around:
+Wealthspan is not fundamentally built around:
 
 - Public freelancer listings
 - Client-side freelancer selection
@@ -333,7 +333,7 @@ Jobrio is not fundamentally built around:
 - Random professional discovery
 - Unmanaged direct hiring
 
-Jobrio is fundamentally built around:
+Wealthspan is fundamentally built around:
 
 - Managed workforce
 - Structured services
@@ -349,15 +349,15 @@ The distinction is important.
 
 A marketplace primarily facilitates a transaction between two parties.
 
-Jobrio intends to manage the execution system surrounding the transaction.
+Wealthspan intends to manage the execution system surrounding the transaction.
 
 ---
 
-# 10. THE JOBRIO VALUE PROPOSITION
+# 10. THE WEALTHSPAN VALUE PROPOSITION
 
 ## For Businesses
 
-Jobrio aims to provide:
+Wealthspan aims to provide:
 
 "Professional work without the workforce-management burden."
 
@@ -381,7 +381,7 @@ Delivery
 
 ## For Professionals
 
-Jobrio aims to provide:
+Wealthspan aims to provide:
 
 "Work opportunities through a managed professional system rather than constant marketplace competition."
 
@@ -407,7 +407,7 @@ Payment
 
 # 11. CORE STRATEGIC PRINCIPLE
 
-Jobrio should optimize for reliable outcomes rather than maximum transactions.
+Wealthspan should optimize for reliable outcomes rather than maximum transactions.
 
 A large number of orders with:
 
@@ -419,9 +419,9 @@ A large number of orders with:
 - Professional abandonment
 - Client dissatisfaction
 
-does not represent a successful Jobrio system.
+does not represent a successful Wealthspan system.
 
-Jobrio's objective is to create a system in which increasing transaction volume does not require proportionally increasing operational chaos.
+Wealthspan's objective is to create a system in which increasing transaction volume does not require proportionally increasing operational chaos.
 
 The platform must therefore be designed around:
 
@@ -435,11 +435,11 @@ Reliability
 
 # 12. QUALITY PRINCIPLE
 
-Quality is not an optional feature of Jobrio.
+Quality is not an optional feature of Wealthspan.
 
 Quality is part of the product.
 
-Jobrio should not simply deliver whatever a professional submits.
+Wealthspan should not simply deliver whatever a professional submits.
 
 The system should maintain a controlled quality gate appropriate to the service being delivered.
 
@@ -457,7 +457,7 @@ Quality data should also improve future workforce decisions where appropriate.
 
 # 13. RELIABILITY PRINCIPLE
 
-Jobrio should be judged by whether it can reliably fulfill the work it accepts.
+Wealthspan should be judged by whether it can reliably fulfill the work it accepts.
 
 Reliability includes:
 
@@ -470,7 +470,7 @@ Reliability includes:
 - Transparent communication
 - Controlled financial handling
 
-Jobrio should not accept demand simply because an order can technically be created.
+Wealthspan should not accept demand simply because an order can technically be created.
 
 The system must progressively become capable of determining whether it can realistically fulfill the requested work.
 
@@ -509,7 +509,7 @@ A managed workforce system without accountability eventually becomes an unmanage
 
 # 15. SYSTEM-FIRST PRINCIPLE
 
-Jobrio should solve recurring operational problems through systems rather than repeatedly relying on manual intervention.
+Wealthspan should solve recurring operational problems through systems rather than repeatedly relying on manual intervention.
 
 Manual intervention may be necessary for:
 
@@ -536,7 +536,7 @@ The objective is to ensure human operators spend their time on decisions that ac
 
 # 16. HUMAN + SYSTEM PRINCIPLE
 
-Jobrio should not attempt to replace professional expertise with automation merely for the sake of automation.
+Wealthspan should not attempt to replace professional expertise with automation merely for the sake of automation.
 
 The system should handle:
 
@@ -559,7 +559,7 @@ Humans should remain involved wherever judgment, expertise, accountability, or c
 
 Trust must be engineered into the system.
 
-Jobrio should create trust through:
+Wealthspan should create trust through:
 
 - Verified professionals
 - Structured onboarding
@@ -581,7 +581,7 @@ It should emerge from the actual operating system.
 
 # 18. TRANSPARENCY PRINCIPLE
 
-Jobrio should provide the right level of transparency to each participant.
+Wealthspan should provide the right level of transparency to each participant.
 
 Clients should understand:
 
@@ -612,7 +612,7 @@ It means providing the information necessary for informed action and trust.
 
 # 19. SCALABILITY PRINCIPLE
 
-Jobrio should be designed so that growth in:
+Wealthspan should be designed so that growth in:
 
 - Clients
 - Orders
@@ -640,7 +640,7 @@ Scale must come from better systems, not simply from hiring more administrators.
 
 # 20. WORKFORCE QUALITY OVER WORKFORCE QUANTITY
 
-Jobrio should not pursue vanity metrics such as:
+Wealthspan should not pursue vanity metrics such as:
 
 - Number of registered professionals
 - Number of applications
@@ -660,13 +660,13 @@ A smaller workforce with:
 
 can be more valuable than a much larger inactive workforce.
 
-Jobrio should therefore optimize for usable workforce capacity.
+Wealthspan should therefore optimize for usable workforce capacity.
 
 ---
 
 # 21. DEMAND AND SUPPLY PRINCIPLE
 
-Jobrio operates as a system connecting demand with professional capacity.
+Wealthspan operates as a system connecting demand with professional capacity.
 
 The platform should continuously learn:
 
@@ -699,7 +699,7 @@ The long-term system should use these signals to improve:
 
 A system should not be judged only by its happy path.
 
-Jobrio must be designed to handle what happens when:
+Wealthspan must be designed to handle what happens when:
 
 - No professional is available
 - Professionals reject work
@@ -713,11 +713,11 @@ Jobrio must be designed to handle what happens when:
 - A financial issue occurs
 - A service cannot currently be fulfilled
 
-Exceptions are not peripheral to the Jobrio system.
+Exceptions are not peripheral to the Wealthspan system.
 
 They are part of the system.
 
-A mature Jobrio platform should know:
+A mature Wealthspan platform should know:
 
 Normal path
 → Detect deviation
@@ -732,7 +732,7 @@ Normal path
 
 Every completed order should create useful operational knowledge.
 
-Over time, Jobrio should be able to understand relationships between:
+Over time, Wealthspan should be able to understand relationships between:
 
 - Service
 - Client requirements
@@ -756,7 +756,7 @@ It should become operational intelligence.
 
 # 24. LONG-TERM STRATEGIC DIRECTION
 
-Jobrio's long-term direction is to move through several stages of capability.
+Wealthspan's long-term direction is to move through several stages of capability.
 
 ### Stage 1 — Managed Service Execution
 
@@ -784,9 +784,9 @@ They are not commitments to specific launch dates, technologies, or features.
 
 ---
 
-# 25. WHAT JOBRIO SHOULD OPTIMIZE FOR
+# 25. WHAT WEALTHSPAN SHOULD OPTIMIZE FOR
 
-Jobrio should optimize for:
+Wealthspan should optimize for:
 
 1. Successful work completion
 2. Client trust
@@ -799,7 +799,7 @@ Jobrio should optimize for:
 9. Capacity utilization
 10. Scalable execution
 
-Jobrio should not optimize blindly for:
+Wealthspan should not optimize blindly for:
 
 - Signups
 - Registered professionals
@@ -813,11 +813,11 @@ Jobrio should not optimize blindly for:
 
 # 26. STRATEGIC DECISION FILTER
 
-When evaluating a major Jobrio product, business, or operational decision, ask:
+When evaluating a major Wealthspan product, business, or operational decision, ask:
 
 ### 1. Does this strengthen the managed-workforce model?
 
-If it pushes Jobrio toward a conventional freelancer marketplace without a strong strategic reason, it should be questioned.
+If it pushes Wealthspan toward a conventional freelancer marketplace without a strong strategic reason, it should be questioned.
 
 ### 2. Does this improve the client's ability to get work completed?
 
@@ -843,13 +843,13 @@ A feature or workflow that materially increases operational cost without corresp
 
 Copying a common marketplace feature is not automatically strategic differentiation.
 
-### 8. Does this move Jobrio closer to its long-term vision?
+### 8. Does this move Wealthspan closer to its long-term vision?
 
 If not, the reason for building it should be explicit.
 
 ---
 
-# 27. CORE JOBRIO PRINCIPLES
+# 27. CORE WEALTHSPAN PRINCIPLES
 
 The following principles are foundational:
 
@@ -865,21 +865,21 @@ The following principles are foundational:
 10. Automation should reduce repetitive work, not remove necessary judgment.
 11. Data should improve the operating system.
 12. Scale should come from systems, not uncontrolled manual operations.
-13. Jobrio should optimize for completed outcomes, not activity metrics.
+13. Wealthspan should optimize for completed outcomes, not activity metrics.
 14. Trust should be earned through system behavior.
 15. Every accepted order should be treated as an operational commitment.
 
 ---
 
-# 28. THE JOBRIO PROMISE
+# 28. THE WEALTHSPAN PROMISE
 
-Jobrio's fundamental promise is:
+Wealthspan's fundamental promise is:
 
 "Give us the work. We manage the system required to get it executed."
 
-This promise does not mean Jobrio guarantees every possible type of work regardless of capacity, complexity, or circumstances.
+This promise does not mean Wealthspan guarantees every possible type of work regardless of capacity, complexity, or circumstances.
 
-It means that when Jobrio accepts work, it should take responsibility for managing the execution system around that work.
+It means that when Wealthspan accepts work, it should take responsibility for managing the execution system around that work.
 
 That responsibility includes, where applicable:
 
@@ -892,13 +892,13 @@ That responsibility includes, where applicable:
 - Payment operations
 - Delivery
 
-The credibility of this promise depends on Jobrio's ability to operationally fulfill it.
+The credibility of this promise depends on Wealthspan's ability to operationally fulfill it.
 
 ---
 
 # 29. WHAT SUCCESS LOOKS LIKE
 
-Jobrio should ultimately reach a state where a business does not need to think deeply about the underlying workforce mechanics.
+Wealthspan should ultimately reach a state where a business does not need to think deeply about the underlying workforce mechanics.
 
 A successful experience should feel like:
 
@@ -906,11 +906,11 @@ A successful experience should feel like:
 
 →
 
-"I submitted it to Jobrio."
+"I submitted it to Wealthspan."
 
 →
 
-"Jobrio handled the workforce."
+"Wealthspan handled the workforce."
 
 →
 
@@ -924,13 +924,13 @@ The complexity exists inside the platform.
 
 The outcome exists outside it.
 
-That is the fundamental product experience Jobrio is trying to create.
+That is the fundamental product experience Wealthspan is trying to create.
 
 ---
 
 # 30. NORTH STAR
 
-Jobrio's long-term north star is:
+Wealthspan's long-term north star is:
 
 ## Reliable Professional Work, Delivered Through a Managed Workforce.
 
@@ -945,15 +945,15 @@ More scalable to operate.**
 
 # 31. FINAL CANONICAL STATEMENT
 
-Jobrio exists to build a managed workforce system that changes how businesses obtain professional work.
+Wealthspan exists to build a managed workforce system that changes how businesses obtain professional work.
 
-Instead of forcing businesses to search for, hire, coordinate, monitor, and replace individual professionals, Jobrio aims to provide a system where businesses can submit work and rely on Jobrio to manage the workforce and execution process behind it.
+Instead of forcing businesses to search for, hire, coordinate, monitor, and replace individual professionals, Wealthspan aims to provide a system where businesses can submit work and rely on Wealthspan to manage the workforce and execution process behind it.
 
-Jobrio's mission is to connect business demand with qualified professional capability through a controlled system of matching, execution, quality assurance, financial operations, and accountability.
+Wealthspan's mission is to connect business demand with qualified professional capability through a controlled system of matching, execution, quality assurance, financial operations, and accountability.
 
-Jobrio's vision is a future where professional work can be accessed as reliably as other essential services: the customer defines the outcome, the system coordinates the capability, and the work gets done.
+Wealthspan's vision is a future where professional work can be accessed as reliably as other essential services: the customer defines the outcome, the system coordinates the capability, and the work gets done.
 
-Jobrio is therefore not being built simply to create another marketplace.
+Wealthspan is therefore not being built simply to create another marketplace.
 
 It is being built to create infrastructure for professional work execution.
 
@@ -964,18 +964,18 @@ It is being built to create infrastructure for professional work execution.
 The following strategic questions remain open and should be resolved through validated business and market evidence rather than assumptions:
 
 - Which initial service categories provide the strongest combination of demand, margin, repeat usage, and operational feasibility?
-- Which client segment should Jobrio prioritize initially?
+- Which client segment should Wealthspan prioritize initially?
 - Which professional segments can provide reliable supply at sustainable economics?
 - What level of service standardization is required for each category?
 - Which services can realistically be delivered through a managed workforce model?
 - What level of human operations is required before automation becomes economically justified?
-- What service-level commitments can Jobrio reliably make at each stage of scale?
+- What service-level commitments can Wealthspan reliably make at each stage of scale?
 - What pricing structure produces sustainable unit economics for both clients and professionals?
-- Which operational metrics should define Jobrio's true North Star and supporting metrics as the business develops?
-- Which geographic markets should Jobrio enter first and why?
+- Which operational metrics should define Wealthspan's true North Star and supporting metrics as the business develops?
+- Which geographic markets should Wealthspan enter first and why?
 - Which parts of the workforce-management system can become durable competitive advantages?
 - Which parts of the model are operational necessities versus genuine differentiation?
-- What must be true for Jobrio to scale without proportional growth in operational headcount?
+- What must be true for Wealthspan to scale without proportional growth in operational headcount?
 
 These questions do not override the principles defined in this document.
 

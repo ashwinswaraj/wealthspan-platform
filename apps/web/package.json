@@ -1,8 +1,8 @@
 {
-  "name": "@jobrio/web",
+  "name": "@wealthspan/web",
   "private": true,
   "version": "0.0.0",
-  "description": "Jobrio user platform app",
+  "description": "Wealthspan user platform app",
   "type": "module",
   "sideEffects": false,
   "scripts": {
@@ -16,13 +16,13 @@
     "build:static": "node scripts/build-static.mjs"
   },
   "dependencies": {
-    "@jobrio/auth": "workspace:*",
-    "@jobrio/constants": "workspace:*",
-    "@jobrio/hooks": "workspace:*",
-    "@jobrio/types": "workspace:*",
-    "@jobrio/ui": "workspace:*",
-    "@jobrio/utils": "workspace:*",
-    "@jobrio/validation": "workspace:*",
+    "@wealthspan/auth": "workspace:*",
+    "@wealthspan/constants": "workspace:*",
+    "@wealthspan/hooks": "workspace:*",
+    "@wealthspan/types": "workspace:*",
+    "@wealthspan/ui": "workspace:*",
+    "@wealthspan/utils": "workspace:*",
+    "@wealthspan/validation": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "@lovable.dev/vite-tanstack-config": "^2.19.5",
     "@radix-ui/react-accordion": "^1.2.12",

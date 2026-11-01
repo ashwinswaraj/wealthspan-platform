@@ -27,8 +27,8 @@ so features stay independently reasoned-about and code-splitting keeps working.
 - **`lib/` is third-party glue only** (router adapters, SDK wrappers) —
   never business logic. A `lib/` file only ever imported by one feature is
   misplaced; move it into that feature's own `lib/`.
-- **UI comes from `@jobrio/ui/design-system` only** — never reach into
-  `@jobrio/ui/src/components/*` directly from feature code, and never
+- **UI comes from `@wealthspan/ui/design-system` only** — never reach into
+  `@wealthspan/ui/src/components/*` directly from feature code, and never
   recreate a design-system primitive locally.
 
 ## Enforcement

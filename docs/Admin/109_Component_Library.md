@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Component Library** for the Jobrio platform.
+Describe the scope and intent of **Component Library** for the Wealthspan platform.
 
 ## Scope
 

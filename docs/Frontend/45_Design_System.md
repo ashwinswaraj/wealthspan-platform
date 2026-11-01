@@ -9,7 +9,7 @@ Describe where the design system lives and how apps are meant to consume it.
 ## Details
 
 The design system is `packages/ui/src/design-system/`, imported by every
-app as `@jobrio/ui/design-system` — **the single sanctioned UI import
+app as `@wealthspan/ui/design-system` — **the single sanctioned UI import
 surface** (see that folder's own `README.md`, and root `AGENTS.md` §5).
 Neither `apps/web` nor `apps/admin` has (or should create) a local
 design-system folder of its own.
@@ -30,7 +30,7 @@ design-system/
 
 Rule from the package's own header comment: don't add a new token value
 without design-lead approval, and consumers must import from
-`@jobrio/ui/design-system` rather than hardcoding raw values.
+`@wealthspan/ui/design-system` rather than hardcoding raw values.
 
 ## Open Questions
 

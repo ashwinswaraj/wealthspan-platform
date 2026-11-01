@@ -3,7 +3,7 @@
  * Same rules as transactions: owner comes from the login, every referenced id must be
  * the user's own, deletes are soft (30 days), every change is audited.
  */
-import type { FinanceChangeSource } from "@jobrio/types";
+import type { FinanceChangeSource } from "@wealthspan/types";
 import {
   validateAccountInput,
   validateEventInput,
@@ -11,8 +11,8 @@ import {
   validateLoanInput,
   validateProjectInput,
   type FieldErrors,
-} from "@jobrio/validation";
-import { rupeesToPaise } from "@jobrio/utils/finance";
+} from "@wealthspan/validation";
+import { rupeesToPaise } from "@wealthspan/utils/finance";
 import type { FinanceStore } from "../finance/types";
 import {
   CatalogError,

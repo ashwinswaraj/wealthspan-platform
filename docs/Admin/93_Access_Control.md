@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Access Control** for the Jobrio platform.
+Describe the scope and intent of **Access Control** for the Wealthspan platform.
 
 ## Scope
 

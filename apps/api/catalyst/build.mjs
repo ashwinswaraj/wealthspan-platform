@@ -1,4 +1,4 @@
-// Bundles each Catalyst function's src/entry.ts into index.js. Run: pnpm --filter @jobrio/api build:catalyst
+// Bundles each Catalyst function's src/entry.ts into index.js. Run: pnpm --filter @wealthspan/api build:catalyst
 import { build } from "esbuild";
 
 const common = ["express", "zcatalyst-sdk-node"];

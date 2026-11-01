@@ -9,9 +9,9 @@ import {
 import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
-import { Toaster as Sonner } from "@jobrio/ui/components/sonner";
-import { Toaster } from "@jobrio/ui/components/toaster";
-import { TooltipProvider } from "@jobrio/ui/components/tooltip";
+import { Toaster as Sonner } from "@wealthspan/ui/components/sonner";
+import { Toaster } from "@wealthspan/ui/components/toaster";
+import { TooltipProvider } from "@wealthspan/ui/components/tooltip";
 import ConnectionPill from "@/components/ConnectionPill";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({

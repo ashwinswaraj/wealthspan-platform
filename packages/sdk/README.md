@@ -1,7 +1,7 @@
-# @jobrio/sdk
+# @wealthspan/sdk
 
 Public SDK package — the only thing in this monorepo meant to be consumed
-by *external* code outside the Jobrio apps themselves (integration
+by *external* code outside the Wealthspan apps themselves (integration
 partners, third-party tooling). Everything else under `packages/` is
 internal-only (`"private": true` and workspace-scoped).
 
@@ -31,6 +31,6 @@ nothing has shipped yet.
 
 - `[RULE]` Never depend on this package from another package inside the
   monorepo (`apps/*` and other `packages/*` should get the same
-  functionality from the internal package directly, e.g. `@jobrio/types`,
+  functionality from the internal package directly, e.g. `@wealthspan/types`,
   not by routing through the public SDK) — that would make an internal
   change accidentally a public breaking change.

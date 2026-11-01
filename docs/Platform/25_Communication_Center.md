@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Communication Center** for the Jobrio platform.
+Describe the scope and intent of **Communication Center** for the Wealthspan platform.
 
 ## Scope
 

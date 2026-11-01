@@ -3,7 +3,7 @@
  * CSV / Excel / Word / PDF writers all take this same object, so the four
  * files always show the same numbers.
  */
-import type { FinanceSummary, FinanceTransaction } from "@jobrio/types";
+import type { FinanceSummary, FinanceTransaction } from "@wealthspan/types";
 
 export const FILE_FORMATS = ["csv", "xlsx", "docx", "pdf"] as const;
 export type FileFormat = (typeof FILE_FORMATS)[number];

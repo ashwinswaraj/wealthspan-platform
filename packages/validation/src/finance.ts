@@ -9,7 +9,7 @@
  * chatbot) for a different reason.
  *
  * `amount` inputs are RUPEES typed by a person (number or "1,200.50");
- * conversion to integer paise happens in @jobrio/utils.
+ * conversion to integer paise happens in @wealthspan/utils.
  */
 
 import {
@@ -23,7 +23,7 @@ import {
   TRANSACTION_TYPES,
   type AccountKind,
   type PaymentModeId,
-} from "@jobrio/constants/finance";
+} from "@wealthspan/constants/finance";
 
 export type FieldErrors = Record<string, string>;
 

@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **System Architecture** for the Jobrio platform.
+Describe the scope and intent of **System Architecture** for the Wealthspan platform.
 
 ## Scope
 

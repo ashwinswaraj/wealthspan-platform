@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@jobrio/utils/utils";
+import { cn } from "@wealthspan/utils/utils";
 
 export interface PageHeaderProps {
   eyebrow?: string;

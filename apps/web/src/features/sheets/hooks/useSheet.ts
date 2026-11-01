@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SHEETS, type SheetDef, type SheetOption, type SheetRef } from "@jobrio/constants/sheets";
-import { monthRange, recordDate, type CellValue, type SheetRecord } from "@jobrio/utils/sheet";
+import { SHEETS, type SheetDef, type SheetOption, type SheetRef } from "@wealthspan/constants/sheets";
+import { monthRange, recordDate, type CellValue, type SheetRecord } from "@wealthspan/utils/sheet";
 import { api } from "@/services/api";
 
 /** The API paths that change a row's status (they are not plain edits). */

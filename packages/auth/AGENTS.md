@@ -6,7 +6,7 @@ Auth is sensitive — confirm before changing. Falls back to root
 ## Current state
 
 Shared by `apps/web` and `apps/admin` (both declare
-`"@jobrio/auth": "workspace:*"`). Contains `SignIn.tsx`, `SignUp.tsx`,
+`"@wealthspan/auth": "workspace:*"`). Contains `SignIn.tsx`, `SignUp.tsx`,
 `useSession.ts`, and `signupStorage.ts` (client-side signup-flow draft
 persistence — not a token store). `apps/api` does not depend on this
 package; it talks to Supabase Auth directly (see `apps/api/AGENTS.md`).

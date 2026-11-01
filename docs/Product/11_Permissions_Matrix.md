@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Permissions Matrix** for the Jobrio platform.
+Describe the scope and intent of **Permissions Matrix** for the Wealthspan platform.
 
 ## Scope
 

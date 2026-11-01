@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react";
-import { cn } from "@jobrio/utils/utils";
+import { cn } from "@wealthspan/utils/utils";
 
 const sizes = {
   xs: "w-3 h-3",

@@ -12,10 +12,10 @@ without explicit confirmation.
 
 - **pnpm only.** No `package-lock.json`, `yarn.lock`, or `bun.lock` —
   `pnpm-lock.yaml` is the single lockfile. Internal cross-package
-  dependencies use `"@jobrio/x": "workspace:*"`, never a version number.
+  dependencies use `"@wealthspan/x": "workspace:*"`, never a version number.
 - **Root `build`/`typecheck`/`test` stay `turbo run <task>`**, fanning out
   to every app. Root `dev` stays scoped to `apps/web`
-  (`--filter=@jobrio/web`) until `apps/web` and `apps/admin` have distinct
+  (`--filter=@wealthspan/web`) until `apps/web` and `apps/admin` have distinct
   dev ports — see `.lovable/plan.md`. Never add a root script that calls
   `vite`/`tsc` directly.
 - **Never hand-edit a generated file**: `apps/{web,admin}/src/routeTree.gen.ts`

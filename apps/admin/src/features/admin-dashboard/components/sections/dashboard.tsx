@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { formatINR } from "@jobrio/utils/finance";
+import { formatINR } from "@wealthspan/utils/finance";
 import { useAdminHealth, useAdminLedger, useAdminOverview } from "../../lib/adminApi";
 import type { AdminHealthRow, AdminLedgerRow } from "../../lib/types";
 

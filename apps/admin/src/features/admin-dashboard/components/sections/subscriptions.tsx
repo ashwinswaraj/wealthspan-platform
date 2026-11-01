@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { formatINR, paiseToRupees, rupeesToPaise } from "@jobrio/utils/finance";
+import { formatINR, paiseToRupees, rupeesToPaise } from "@wealthspan/utils/finance";
 import { useAdminOverview, useAdminPayments, useReviewPayment } from "../../lib/adminApi";
 import type { AdminPaymentRow, PaymentStatusLabel } from "../../lib/types";
 

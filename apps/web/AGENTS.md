@@ -38,7 +38,7 @@ pattern to new routes.
   of holding state client-side.
 - `[CLR]` `docs/Platform/` has a numbered spec per module (15–36) — check
   there before designing new client-facing flows from scratch.
-- `[RULE]` UI comes from `@jobrio/ui/design-system` only — this app has no
+- `[RULE]` UI comes from `@wealthspan/ui/design-system` only — this app has no
   local `design-system/` folder of its own; don't create one.
 
 ## Never do without confirmation

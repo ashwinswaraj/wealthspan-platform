@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Illustrations** for the Jobrio platform.
+Describe the scope and intent of **Illustrations** for the Wealthspan platform.
 
 ## Scope
 

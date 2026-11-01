@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Event System** for the Jobrio platform.
+Describe the scope and intent of **Event System** for the Wealthspan platform.
 
 ## Scope
 

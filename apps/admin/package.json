@@ -1,8 +1,8 @@
 {
-  "name": "@jobrio/admin",
+  "name": "@wealthspan/admin",
   "private": true,
   "version": "0.0.0",
-  "description": "Jobrio admin panel app",
+  "description": "Wealthspan admin panel app",
   "type": "module",
   "sideEffects": false,
   "scripts": {
@@ -16,13 +16,13 @@
     "build:static": "node scripts/build-static.mjs"
   },
   "dependencies": {
-    "@jobrio/auth": "workspace:*",
-    "@jobrio/constants": "workspace:*",
-    "@jobrio/database": "workspace:*",
-    "@jobrio/hooks": "workspace:*",
-    "@jobrio/types": "workspace:*",
-    "@jobrio/ui": "workspace:*",
-    "@jobrio/utils": "workspace:*",
+    "@wealthspan/auth": "workspace:*",
+    "@wealthspan/constants": "workspace:*",
+    "@wealthspan/database": "workspace:*",
+    "@wealthspan/hooks": "workspace:*",
+    "@wealthspan/types": "workspace:*",
+    "@wealthspan/ui": "workspace:*",
+    "@wealthspan/utils": "workspace:*",
     "@lovable.dev/vite-tanstack-config": "^2.19.5",
     "@supabase/supabase-js": "^2.110.0",
     "@tailwindcss/vite": "^4.2.1",

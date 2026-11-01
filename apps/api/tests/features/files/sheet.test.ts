@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import ExcelJS from "exceljs";
-import { SHEETS } from "@jobrio/constants/sheets";
+import { SHEETS } from "@wealthspan/constants/sheets";
 import { buildSheetXlsx, sheetFileName } from "../../../src/features/files";
 
 const load = async (buf: Buffer) => {

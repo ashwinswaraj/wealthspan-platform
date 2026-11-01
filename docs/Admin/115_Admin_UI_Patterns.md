@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Admin UI Patterns** for the Jobrio platform.
+Describe the scope and intent of **Admin UI Patterns** for the Wealthspan platform.
 
 ## Scope
 

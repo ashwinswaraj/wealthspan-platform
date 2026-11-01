@@ -4,13 +4,13 @@
 
 ## Purpose
 
-Inventory of what actually exists in `@jobrio/ui/design-system` today.
+Inventory of what actually exists in `@wealthspan/ui/design-system` today.
 
 ## Details
 
 ### `primitives/`
 `Button`, `Input`, `AuthInput`, `Avatar`, `Badge`, `ProgressBar`,
-`PasswordStrength`, `Skeleton`, `Spinner`, `JobrioToolbar`
+`PasswordStrength`, `Skeleton`, `Spinner`, `WealthspanToolbar`
 
 ### `layout/`
 `Card`, `Container`, `PageHeader`, `StatCard`
@@ -26,7 +26,7 @@ Inventory of what actually exists in `@jobrio/ui/design-system` today.
 ### `icons/`
 A single `index.ts` export surface
 
-Beyond the design system, `@jobrio/ui` has two more layers:
+Beyond the design system, `@wealthspan/ui` has two more layers:
 - `packages/ui/src/components/` — the underlying shadcn/ui primitive layer
   (49 components: `button`, `card`, `dialog`, `dropdown-menu`, `form`,
   `calendar`, `chart`, etc.) that `design-system/primitives/` and
@@ -42,7 +42,7 @@ Beyond the design system, `@jobrio/ui` has two more layers:
 - [ ] No Storybook or visual catalog exists yet — this file is the only
       current inventory
 - [ ] No documented criteria for what belongs in `design-system/` vs.
-      `shared/` vs. `components/` within `@jobrio/ui`
+      `shared/` vs. `components/` within `@wealthspan/ui`
 
 ## References
 

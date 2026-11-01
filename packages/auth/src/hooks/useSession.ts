@@ -10,7 +10,7 @@ export interface SessionState {
 
 // The generated Supabase browser client binds `localStorage` at module scope,
 // so it is imported lazily and only in the browser to keep SSR safe.
-const getSupabase = async () => (await import("@jobrio/database")).supabase;
+const getSupabase = async () => (await import("@wealthspan/database")).supabase;
 
 /**
  * Single source of truth for the signed-in session across both apps.

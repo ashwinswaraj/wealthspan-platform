@@ -1,4 +1,4 @@
-# Changelog — @jobrio/sdk
+# Changelog — @wealthspan/sdk
 
 Format based on [Keep a Changelog](https://keepachangelog.com/), versioning per [SemVer](https://semver.org/), once this package actually publishes.
 

@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Backup Strategy** for the Jobrio platform.
+Describe the scope and intent of **Backup Strategy** for the Wealthspan platform.
 
 ## Scope
 

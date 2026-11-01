@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **ADR-004 Finance** for the Jobrio platform.
+Describe the scope and intent of **ADR-004 Finance** for the Wealthspan platform.
 
 ## Scope
 

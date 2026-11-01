@@ -1,7 +1,7 @@
-import "@jobrio/utils/error-capture";
+import "@wealthspan/utils/error-capture";
 
-import { consumeLastCapturedError } from "@jobrio/utils/error-capture";
-import { renderErrorPage } from "@jobrio/utils/error-page";
+import { consumeLastCapturedError } from "@wealthspan/utils/error-capture";
+import { renderErrorPage } from "@wealthspan/utils/error-page";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;

@@ -1,4 +1,4 @@
-# JOBRIO
+# WEALTHSPAN
 
 Workforce-as-a-Service platform. Monorepo containing the client/professional web app, the super-admin panel, the API service, shared packages, and full product documentation.
 
@@ -11,7 +11,7 @@ Built and maintained with [Lovable](https://lovable.dev/projects/1b3730be-b1ba-4
 ## Repository structure
 
 ```
-JOBRIO/
+WEALTHSPAN/
 ├── .github/             workflows, issue/PR templates, CODEOWNERS, dependabot
 │   ├── ISSUE_TEMPLATE/
 │   └── workflows/
@@ -20,7 +20,7 @@ JOBRIO/
 │   └── plan/                archived implementation plans
 ├── .vscode/             editor settings & recommended extensions
 ├── apps/                deployable apps — web, admin, api
-│   ├── admin/               @jobrio/admin — super-admin panel
+│   ├── admin/               @wealthspan/admin — super-admin panel
 │   │   ├── public/
 │   │   ├── scripts/
 │   │   └── src/
@@ -42,7 +42,7 @@ JOBRIO/
 │   │       │   └── dashboard/
 │   │       ├── services/
 │   │       └── utils/
-│   ├── api/                 @jobrio/api — backend edge service
+│   ├── api/                 @wealthspan/api — backend edge service
 │   │   ├── catalyst/
 │   │   │   └── functions/
 │   │   │       ├── chat/
@@ -73,7 +73,7 @@ JOBRIO/
 │   │       │   ├── finance/
 │   │       │   └── subscription/
 │   │       └── middleware/
-│   └── web/                 @jobrio/web — client & professional web app
+│   └── web/                 @wealthspan/web — client & professional web app
 │       ├── public/
 │       ├── scripts/
 │       └── src/
@@ -167,8 +167,8 @@ JOBRIO/
 **Key notes:**
 - Each app under `apps/` is a standalone Vite/React project with its own `package.json`. `build`, `typecheck`, and `test` run from the repo root via Turborepo, fanning out to every app in parallel. `dev` is scoped to `apps/web` only (see below) — `web` and `admin` currently default to the same dev port, so running both via one root command isn't safe yet.
 - Every `apps/*/src/` follows the same shape: `features/<domain>/` for business logic (each with an `index.ts` barrel — see [`AGENTS.md`](AGENTS.md) §3), plus top-level `components/`, `pages/`, `routes/`, `layouts/`, `hooks/`, `utils/`, `lib/`, `services/`, `config/`, `store/` for cross-feature or infrastructural code.
-- Shared packages are managed as workspace dependencies (referenced via `"@jobrio/x": "workspace:*"`, never a version number).
-- `packages/ui/src/design-system/` is the single source of UI truth — feature code imports from `@jobrio/ui/design-system`, never by reaching into another package's internals.
+- Shared packages are managed as workspace dependencies (referenced via `"@wealthspan/x": "workspace:*"`, never a version number).
+- `packages/ui/src/design-system/` is the single source of UI truth — feature code imports from `@wealthspan/ui/design-system`, never by reaching into another package's internals.
 
 ## Development
 
@@ -195,14 +195,14 @@ pnpm test                       # Run tests across all workspaces via turbo
 `dev` is different: `web` and `admin` currently default to the same dev
 port (`8080`, from `@lovable.dev/vite-tanstack-config`), so running both at
 once from one root command isn't safe yet — `pnpm dev` is scoped to
-`apps/web` only (`turbo run dev --filter=@jobrio/web`). To run `admin`'s
+`apps/web` only (`turbo run dev --filter=@wealthspan/web`). To run `admin`'s
 dev server, use pnpm's `--filter` directly, which runs that app's own
 `package.json` script on its own terminal/port:
 
 ```sh
-pnpm --filter @jobrio/web dev         # Web app dev server (same as root `pnpm dev`)
-pnpm --filter @jobrio/admin dev       # Admin panel dev server
-pnpm --filter @jobrio/api typecheck   # API service (no dev server yet — see apps/api/AGENTS.md)
+pnpm --filter @wealthspan/web dev         # Web app dev server (same as root `pnpm dev`)
+pnpm --filter @wealthspan/admin dev       # Admin panel dev server
+pnpm --filter @wealthspan/api typecheck   # API service (no dev server yet — see apps/api/AGENTS.md)
 ```
 
 Giving `web` and `admin` distinct dev ports (so both could run together
@@ -215,10 +215,10 @@ and local preview are per-app (they only make sense for one app at a time):
 
 ```sh
 pnpm build                                    # Production build, all apps
-pnpm --filter @jobrio/web build:dev           # Web: development-mode build with debug info
-pnpm --filter @jobrio/web preview             # Web: preview a production build locally
-pnpm --filter @jobrio/admin build:dev         # Admin: same, for the admin app
-pnpm --filter @jobrio/admin preview
+pnpm --filter @wealthspan/web build:dev           # Web: development-mode build with debug info
+pnpm --filter @wealthspan/web preview             # Web: preview a production build locally
+pnpm --filter @wealthspan/admin build:dev         # Admin: same, for the admin app
+pnpm --filter @wealthspan/admin preview
 ```
 
 ## Documentation

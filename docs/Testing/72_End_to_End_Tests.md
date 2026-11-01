@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **End to End Tests** for the Jobrio platform.
+Describe the scope and intent of **End to End Tests** for the Wealthspan platform.
 
 ## Scope
 

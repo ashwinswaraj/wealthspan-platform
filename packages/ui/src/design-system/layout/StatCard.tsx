@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { LucideIcon } from "lucide-react";
-import { cn } from "@jobrio/utils/utils";
+import { cn } from "@wealthspan/utils/utils";
 
 export interface StatCardProps {
   label: string;

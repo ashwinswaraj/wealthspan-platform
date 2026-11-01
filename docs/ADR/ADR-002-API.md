@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **ADR-002 API** for the Jobrio platform.
+Describe the scope and intent of **ADR-002 API** for the Wealthspan platform.
 
 ## Scope
 

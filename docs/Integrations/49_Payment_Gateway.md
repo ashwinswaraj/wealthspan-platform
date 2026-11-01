@@ -22,8 +22,8 @@ Document the actual state of payment integration — which is currently
   which found the same pattern across "payment-provider transactions and
   QR/UPI collection").
 - `packages/constants/src/services.ts` mentions "Stripe, PayPal, Razorpay"
-  as an example of a *service Jobrio professionals might offer clients*
-  (payment-integration consulting) — unrelated to Jobrio's own payment
+  as an example of a *service Wealthspan professionals might offer clients*
+  (payment-integration consulting) — unrelated to Wealthspan's own payment
   processing.
 
 ## What this means

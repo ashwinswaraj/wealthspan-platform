@@ -1,7 +1,7 @@
 import * as React from "react";
 import { AlertTriangle } from "lucide-react";
-import { cn } from "@jobrio/utils/utils";
-import { Button } from "@jobrio/ui/design-system/primitives/Button";
+import { cn } from "@wealthspan/utils/utils";
+import { Button } from "@wealthspan/ui/design-system/primitives/Button";
 
 export const ErrorState = ({
   title = "Something went wrong",

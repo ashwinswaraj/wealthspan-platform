@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Encryption** for the Jobrio platform.
+Describe the scope and intent of **Encryption** for the Wealthspan platform.
 
 ## Scope
 

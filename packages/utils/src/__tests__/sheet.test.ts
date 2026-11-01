@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SHEETS } from "@jobrio/constants/sheets";
+import { SHEETS } from "@wealthspan/constants/sheets";
 import type { SheetRecord } from "../sheet";
 import {
   buildInput,

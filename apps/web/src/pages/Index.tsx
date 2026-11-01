@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Spinner } from "@jobrio/ui/design-system";
+import { Spinner } from "@wealthspan/ui/design-system";
 import { LoginScreen, useSession } from "@/features/wealthspan-auth";
 import { HomeScreen, SideDrawer } from "@/features/wealthspan-shell";
 import type { Project } from "@/features/projects";

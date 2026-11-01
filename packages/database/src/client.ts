@@ -8,7 +8,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 
 // Import the supabase client like this:
-// import { supabase } from "@jobrio/database/client";
+// import { supabase } from "@wealthspan/database/client";
 
 let instance: SupabaseClient<Database> | null = null;
 

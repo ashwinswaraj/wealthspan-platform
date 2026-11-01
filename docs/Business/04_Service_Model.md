@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Service Model** for the Jobrio platform.
+Describe the scope and intent of **Service Model** for the Wealthspan platform.
 
 ## Scope
 

@@ -71,28 +71,14 @@ export function LoginScreen(_props: { onLoggedIn?: () => void }) {
                   fill="#EA4335"
                 />
               </svg>
-              <span>Google</span>
+              <span>Continue with Google</span>
             </button>
             <button
               type="button"
               onClick={() => setSheet(true)}
               className="h-13 sm:h-14 min-h-[48px] rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
             >
-              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                <defs>
-                  <mask id="zoho-ring">
-                    <rect x="2" y="2" width="20" height="20" rx="7" fill="#fff" />
-                    <rect x="6.8" y="6.8" width="10.4" height="10.4" rx="2.2" fill="#000" />
-                  </mask>
-                </defs>
-                <g transform="rotate(-8 12 12)" mask="url(#zoho-ring)">
-                  <rect x="0" y="0" width="12" height="11.5" fill="#E42527" />
-                  <rect x="12" y="0" width="12" height="13" fill="#089949" />
-                  <rect x="12" y="13" width="12" height="11" fill="#226DB4" />
-                  <rect x="0" y="11.5" width="12" height="12.5" fill="#F9B21D" />
-                </g>
-              </svg>
-              <span>Zoho</span>
+              <span>Continue with Zoho</span>
             </button>
           </div>
           <div className="w-full flex items-center my-0.5 select-none">

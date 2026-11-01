@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { formatINR } from "@jobrio/utils/finance";
+import { formatINR } from "@wealthspan/utils/finance";
 import { useAdminLedger } from "../../lib/adminApi";
 import type { AdminLedgerRow } from "../../lib/types";
 

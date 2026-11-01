@@ -10,7 +10,7 @@ import * as React from "react";
  *
  * Validation UI: pass `invalid` to paint the error state, and render the
  * message through `AuthFieldShell`'s `error` prop (or `AuthErrorText`).
- * Jobrio NEVER uses the browser's native validation bubble — every form that
+ * Wealthspan NEVER uses the browser's native validation bubble — every form that
  * uses these primitives must set `noValidate`.
  */
 
@@ -115,7 +115,7 @@ export const AuthSelect = React.forwardRef<
 AuthSelect.displayName = "AuthSelect";
 
 /**
- * AuthErrorText — Jobrio's custom validation message.
+ * AuthErrorText — Wealthspan's custom validation message.
  * Replaces the browser's native validation bubble everywhere.
  */
 export const AuthErrorText = ({ children }: { children: React.ReactNode }) => {

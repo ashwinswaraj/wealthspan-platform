@@ -1,5 +1,5 @@
 {
-  "name": "@jobrio/auth",
+  "name": "@wealthspan/auth",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,8 +9,8 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@jobrio/ui": "workspace:*",
-    "@jobrio/validation": "workspace:*",
+    "@wealthspan/ui": "workspace:*",
+    "@wealthspan/validation": "workspace:*",
     "@supabase/supabase-js": "^2.110.0",
     "react": "^19.2.0"
   },

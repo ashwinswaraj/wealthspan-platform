@@ -1,7 +1,7 @@
 name: publish-sdk
 
 # Runs on tags like sdk-v1.2.0. Requires the NPM_TOKEN secret.
-# @jobrio/sdk is currently "private": true, so the publish step is skipped until that is removed.
+# @wealthspan/sdk is currently "private": true, so the publish step is skipped until that is removed.
 # Disabled for Wealthspan: runs only manually until the deploy target (Catalyst) and its secrets are set up.
 on:
   workflow_dispatch:
@@ -30,10 +30,10 @@ jobs:
         run: echo "private=$(node -p \"require('./packages/sdk/package.json').private === true\")" >> "$GITHUB_OUTPUT"
       - name: Publish to npm
         if: steps.check.outputs.private != 'true'
-        run: pnpm --filter @jobrio/sdk publish --access public --no-git-checks --provenance
+        run: pnpm --filter @wealthspan/sdk publish --access public --no-git-checks --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
       - name: Skipped (package is private)
         if: steps.check.outputs.private == 'true'
-        run: echo "::notice::@jobrio/sdk is private — publish skipped."
+        run: echo "::notice::@wealthspan/sdk is private — publish skipped."

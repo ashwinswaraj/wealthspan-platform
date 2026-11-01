@@ -1,10 +1,10 @@
 /**
- * A real .xlsx of one dashboard sheet: the same columns the user sees in the app (from @jobrio/constants/sheets),
+ * A real .xlsx of one dashboard sheet: the same columns the user sees in the app (from @wealthspan/constants/sheets),
  * dropdown lists on the choice columns, a frozen bold header, filters, and a SUM row for money columns.
  */
 import ExcelJS from "exceljs";
-import type { SheetDef, SheetRef } from "@jobrio/constants/sheets";
-import { cellValue, type SheetRecord } from "@jobrio/utils/sheet";
+import type { SheetDef, SheetRef } from "@wealthspan/constants/sheets";
+import { cellValue, type SheetRecord } from "@wealthspan/utils/sheet";
 import { safeText } from "./report";
 
 export type RefNames = Partial<Record<SheetRef, Record<string, string>>>;

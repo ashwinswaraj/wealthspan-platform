@@ -1,18 +1,18 @@
-import type { FinanceChangeSource, FinanceSummary, FinanceTransaction } from "@jobrio/types";
-import type { PaymentModeId } from "@jobrio/constants/finance";
+import type { FinanceChangeSource, FinanceSummary, FinanceTransaction } from "@wealthspan/types";
+import type { PaymentModeId } from "@wealthspan/constants/finance";
 import {
   validatePaymentModeForAccount,
   validateTransactionInput,
   type FieldErrors,
   type TransactionInput,
-} from "@jobrio/validation";
+} from "@wealthspan/validation";
 import {
   findSameAmountCardExpenses,
   looksLikeCardBillPayment,
   rupeesToPaise,
   summarize,
   type SummaryFilter,
-} from "@jobrio/utils/finance";
+} from "@wealthspan/utils/finance";
 import type { FinanceStore, NewTransaction, TransactionListFilter } from "./types";
 
 export class FinanceError extends Error {

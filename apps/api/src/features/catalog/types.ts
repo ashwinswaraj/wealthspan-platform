@@ -4,7 +4,7 @@ import type {
   FinanceInvestment,
   FinanceLoan,
   FinanceProject,
-} from "@jobrio/types";
+} from "@wealthspan/types";
 
 export type CatalogEntity = "projects" | "accounts" | "events" | "loans" | "investments";
 export const CATALOG_ENTITIES: readonly CatalogEntity[] = [

@@ -16,8 +16,8 @@ code reads the same regardless of which part of the repo you're in.
 - **Feature folders**: kebab-case, a real domain name — never
   `example-feature` or another placeholder
   (`dashboard-client`, `admin-dashboard`, not `DashboardClient`)
-- **Workspace packages**: `@jobrio/<name>`, kebab-case after the scope
-  (`@jobrio/ui`, `@jobrio/database`)
+- **Workspace packages**: `@wealthspan/<name>`, kebab-case after the scope
+  (`@wealthspan/ui`, `@wealthspan/database`)
 - **Barrel files**: always `index.ts` at the feature root, re-exporting the
   feature's public API
 

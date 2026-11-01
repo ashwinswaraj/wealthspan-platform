@@ -1,6 +1,6 @@
 import { createStart, createMiddleware } from "@tanstack/react-start";
 
-import { renderErrorPage } from "@jobrio/utils/error-page";
+import { renderErrorPage } from "@wealthspan/utils/error-page";
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {

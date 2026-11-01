@@ -15,11 +15,11 @@ dependencies flow one direction and no app becomes coupled to another.
 - `apps/web` and `apps/admin` → may import from any `packages/*`, but
   **never from each other**.
 - `apps/api` → may import from `packages/*` that make sense server-side
-  (`@jobrio/types`, `@jobrio/validation`, `@jobrio/constants`); it does not
-  depend on `@jobrio/auth` (that package is client-side auth UI/state — see
+  (`@wealthspan/types`, `@wealthspan/validation`, `@wealthspan/constants`); it does not
+  depend on `@wealthspan/auth` (that package is client-side auth UI/state — see
   its own `AGENTS.md`), talking to Supabase Auth directly instead.
 - Internal cross-package dependencies always use
-  `"@jobrio/x": "workspace:*"` — never a version number or relative path
+  `"@wealthspan/x": "workspace:*"` — never a version number or relative path
   reaching across package boundaries.
 
 ## Known exception

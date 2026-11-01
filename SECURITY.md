@@ -2,11 +2,11 @@
 
 ## Supported Versions
 
-Only the latest release of Jobrio receives security updates.
+Only the latest release of Wealthspan receives security updates.
 
 ## Reporting a Vulnerability
 
-Report suspected vulnerabilities privately to **security@jobrio.com**.
+Report suspected vulnerabilities privately to **security@wealthspan.com**.
 Please include reproduction steps, affected area (platform / admin / api),
 and any logs. Do not open a public GitHub issue for security reports.
 

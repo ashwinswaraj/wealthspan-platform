@@ -1,4 +1,4 @@
-# @jobrio/api
+# @wealthspan/api
 
 Backend edge service. Thin layer in front of Supabase — identity itself is
 handled by Supabase Auth, this app verifies tokens and will host

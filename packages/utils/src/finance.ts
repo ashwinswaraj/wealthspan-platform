@@ -14,7 +14,7 @@ import type {
   FinanceLoan,
   FinanceSummary,
   FinanceTransaction,
-} from "@jobrio/types";
+} from "@wealthspan/types";
 
 /* ------------------------------------------------------------------ *
  * Money helpers

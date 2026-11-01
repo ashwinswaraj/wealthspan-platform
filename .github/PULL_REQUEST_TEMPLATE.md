@@ -11,6 +11,6 @@ Closes #
 
 ## Checklist
 - [ ] Build passes (`pnpm run build`)
-- [ ] UI uses `@jobrio/ui/design-system`
+- [ ] UI uses `@wealthspan/ui/design-system`
 - [ ] Docs updated under `docs/`
 - [ ] Screenshots attached (UI changes)

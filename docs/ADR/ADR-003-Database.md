@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **ADR-003 Database** for the Jobrio platform.
+Describe the scope and intent of **ADR-003 Database** for the Wealthspan platform.
 
 ## Scope
 

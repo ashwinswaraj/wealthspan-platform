@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Push Notifications** for the Jobrio platform.
+Describe the scope and intent of **Push Notifications** for the Wealthspan platform.
 
 ## Scope
 

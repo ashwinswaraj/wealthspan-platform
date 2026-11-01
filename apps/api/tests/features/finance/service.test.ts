@@ -6,7 +6,7 @@ import type {
   FinanceLoan,
   FinanceProject,
   FinanceTransaction,
-} from "@jobrio/types";
+} from "@wealthspan/types";
 import { createFinanceService, FinanceError } from "../../../src/features/finance";
 import type { FinanceStore, NewTransaction } from "../../../src/features/finance";
 

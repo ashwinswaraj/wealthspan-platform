@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { FinanceAuditEntry, FinanceTransaction } from "@jobrio/types";
+import type { FinanceAuditEntry, FinanceTransaction } from "@wealthspan/types";
 import {
   CatalogError,
   createCatalogService,

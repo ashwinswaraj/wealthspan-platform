@@ -17,7 +17,7 @@ import type {
   FinanceLoan,
   FinanceProject,
   FinanceTransaction,
-} from "@jobrio/types";
+} from "@wealthspan/types";
 import type { FinanceStore, NewTransaction } from "./types";
 
 export interface CatalystLike {

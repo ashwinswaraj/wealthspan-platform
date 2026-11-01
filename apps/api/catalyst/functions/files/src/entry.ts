@@ -1,6 +1,6 @@
 /**
  * files — Catalyst Advanced I/O function (Express). Built into ../index.js by
- * `pnpm --filter @jobrio/api build:catalyst`; don't edit index.js by hand.
+ * `pnpm --filter @wealthspan/api build:catalyst`; don't edit index.js by hand.
  *
  *   GET /export?format=csv|xlsx|docx|pdf&from=YYYY-MM-DD&to=YYYY-MM-DD&projectId=
  *
@@ -12,8 +12,8 @@ import express from "express";
 const catalyst = require("zcatalyst-sdk-node");
 import { createCatalystFinanceStore, createFinanceService } from "../../../../src/features/finance";
 import { createCatalystCatalogStore } from "../../../../src/features/catalog";
-import { SHEETS, SHEET_KEYS, type SheetKey, type SheetRef } from "@jobrio/constants/sheets";
-import { monthRange, recordDate, type SheetRecord } from "@jobrio/utils/sheet";
+import { SHEETS, SHEET_KEYS, type SheetKey, type SheetRef } from "@wealthspan/constants/sheets";
+import { monthRange, recordDate, type SheetRecord } from "@wealthspan/utils/sheet";
 import {
   buildReport,
   FILE_FORMATS,

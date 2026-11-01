@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Admin Dashboard** for the Jobrio platform.
+Describe the scope and intent of **Admin Dashboard** for the Wealthspan platform.
 
 ## Scope
 

@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Order Desk** for the Jobrio platform.
+Describe the scope and intent of **Order Desk** for the Wealthspan platform.
 
 ## Scope
 

@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **QA Lifecycle** for the Jobrio platform.
+Describe the scope and intent of **QA Lifecycle** for the Wealthspan platform.
 
 ## Scope
 

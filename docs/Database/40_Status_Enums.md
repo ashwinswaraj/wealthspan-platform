@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Status Enums** for the Jobrio platform.
+Describe the scope and intent of **Status Enums** for the Wealthspan platform.
 
 ## Scope
 

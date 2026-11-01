@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Dispute Lifecycle** for the Jobrio platform.
+Describe the scope and intent of **Dispute Lifecycle** for the Wealthspan platform.
 
 ## Scope
 

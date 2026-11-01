@@ -1,6 +1,6 @@
 /**
  * finance — Catalyst Advanced I/O function (Express). Built into ../index.js by
- * `pnpm --filter @jobrio/api build:catalyst`; don't edit index.js by hand.
+ * `pnpm --filter @wealthspan/api build:catalyst`; don't edit index.js by hand.
  *
  *   GET    /transactions?from&to&projectId&accountId&type&limit&offset
  *   POST   /transactions

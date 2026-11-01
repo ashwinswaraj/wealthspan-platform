@@ -1,12 +1,12 @@
 /**
- * Jobrio Design Tokens — SINGLE SOURCE OF TRUTH.
+ * Wealthspan Design Tokens — SINGLE SOURCE OF TRUTH.
  *
  * Every token here mirrors a value already present in `src/styles.css` or
  * already in production use. Nothing new is introduced.
  *
  * Rules:
  *  - Do NOT add a new value here unless the design lead has approved it.
- *  - Consumers must not hardcode raw values elsewhere — import from `@jobrio/ui/design-system`.
+ *  - Consumers must not hardcode raw values elsewhere — import from `@wealthspan/ui/design-system`.
  */
 
 export const colors = {

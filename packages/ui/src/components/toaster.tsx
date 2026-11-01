@@ -1,4 +1,4 @@
-import { useToast } from "@jobrio/hooks/use-toast";
+import { useToast } from "@wealthspan/hooks/use-toast";
 import {
   Toast,
   ToastClose,
@@ -6,7 +6,7 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from "@jobrio/ui/components/toast";
+} from "@wealthspan/ui/components/toast";
 
 export function Toaster() {
   const { toasts } = useToast();

@@ -1,5 +1,5 @@
 {
-  "name": "jobrio",
+  "name": "wealthspan",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.0.0",
@@ -8,15 +8,15 @@
   },
   "scripts": {
     "predev": "pnpm check:structure",
-    "dev": "turbo run dev --filter=@jobrio/web --",
+    "dev": "turbo run dev --filter=@wealthspan/web --",
     "build": "pnpm check:structure && turbo run build && node tools/collect-dist.mjs",
-    "build:dev": "pnpm check:structure && turbo run build:dev --filter=@jobrio/web && node tools/collect-dist.mjs",
+    "build:dev": "pnpm check:structure && turbo run build:dev --filter=@wealthspan/web && node tools/collect-dist.mjs",
     "check:structure": "node tools/collect-dist.mjs --check-structure",
     "lint": "pnpm check:structure && eslint .",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "format": "prettier --write .",
-    "build:client": "pnpm --filter @jobrio/web build:static && pnpm --filter @jobrio/admin build:static"
+    "build:client": "pnpm --filter @wealthspan/web build:static && pnpm --filter @wealthspan/admin build:static"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",

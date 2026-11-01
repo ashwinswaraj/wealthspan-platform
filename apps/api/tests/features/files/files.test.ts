@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import ExcelJS from "exceljs";
-import type { FinanceSummary, FinanceTransaction } from "@jobrio/types";
+import type { FinanceSummary, FinanceTransaction } from "@wealthspan/types";
 import { buildReport, FILE_FORMATS, renderFile } from "../../../src/features/files";
 
 const tx = (o: Partial<FinanceTransaction>): FinanceTransaction =>

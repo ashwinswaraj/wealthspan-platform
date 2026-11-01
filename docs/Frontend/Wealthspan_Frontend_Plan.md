@@ -1,11 +1,11 @@
-**The owner wants an exact visual copy** of the original app. Screens are ported from the original's rendered markup/classes (Tailwind), re-split into Jobrio-style feature components; behaviour is rebuilt against the Catalyst backend.
+**The owner wants an exact visual copy** of the original app. Screens are ported from the original's rendered markup/classes (Tailwind), re-split into Wealthspan-style feature components; behaviour is rebuilt against the Catalyst backend.
 
-# Wealthspan frontend — conversion plan (Jobrio shape, Wealthspan content)
+# Wealthspan frontend — conversion plan (Wealthspan shape, Wealthspan content)
 
 Source of screens: the owner's compiled `wealthspan.html` (reference only — Firebase/Gemini,
 no source). We rebuild each screen inside `apps/web` following root `AGENTS.md` §3:
 one feature folder per domain, barrel `index.ts`, thin `pages/`, thin `routes/`.
-UI comes from `@jobrio/ui/design-system`. Money maths only through `@jobrio/utils/finance`.
+UI comes from `@wealthspan/ui/design-system`. Money maths only through `@wealthspan/utils/finance`.
 
 Do NOT copy from the HTML: fake admin numbers (users, ₹ Cr vault, "audited by CertiK",
 "RBI custody"), leftover "OpenAI"/"Gemini" strings, client-side money maths.
@@ -22,7 +22,7 @@ Do NOT copy from the HTML: fake admin numbers (users, ₹ Cr vault, "audited by 
 | 6 | `budgets`, `notifications` | Monthly caps per category | todo |
 | 7 | `subscription` | Trial, plans, UTR submit; admin approval in `apps/admin` | todo |
 | 8 | `account-settings` | Profile, theme, data controls, delete account | todo |
-| 9 | `marketing` | Replace Jobrio copy/branding with Wealthspan | todo |
+| 9 | `marketing` | Replace Wealthspan copy/branding with Wealthspan | todo |
 
 ## Known open decisions
 - **Hosting**: TanStack Start is SSR; Catalyst Web Client hosting is static. Session cookies only

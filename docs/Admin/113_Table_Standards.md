@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Describe the scope and intent of **Table Standards** for the Jobrio platform.
+Describe the scope and intent of **Table Standards** for the Wealthspan platform.
 
 ## Scope
 
