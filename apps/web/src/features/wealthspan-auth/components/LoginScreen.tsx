@@ -80,32 +80,16 @@ export function LoginScreen(_props: { onLoggedIn?: () => void }) {
             >
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                 <defs>
-                  <clipPath id="zq-tl">
-                    <rect x="0" y="0" width="12" height="12" />
-                  </clipPath>
-                  <clipPath id="zq-tr">
-                    <rect x="12" y="0" width="12" height="12" />
-                  </clipPath>
-                  <clipPath id="zq-bl">
-                    <rect x="0" y="12" width="12" height="12" />
-                  </clipPath>
-                  <clipPath id="zq-br">
-                    <rect x="12" y="12" width="12" height="12" />
-                  </clipPath>
+                  <mask id="zoho-ring">
+                    <rect x="2" y="2" width="20" height="20" rx="7" fill="#fff" />
+                    <rect x="6.8" y="6.8" width="10.4" height="10.4" rx="2.2" fill="#000" />
+                  </mask>
                 </defs>
-                <g transform="rotate(-14 12 12)" fill="none" strokeWidth="4.2">
-                  <g clipPath="url(#zq-tl)">
-                    <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5" stroke="#E42527" />
-                  </g>
-                  <g clipPath="url(#zq-tr)">
-                    <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5" stroke="#089949" />
-                  </g>
-                  <g clipPath="url(#zq-bl)">
-                    <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5" stroke="#226DB4" />
-                  </g>
-                  <g clipPath="url(#zq-br)">
-                    <rect x="3.6" y="3.6" width="16.8" height="16.8" rx="5" stroke="#F9B21D" />
-                  </g>
+                <g transform="rotate(-8 12 12)" mask="url(#zoho-ring)">
+                  <rect x="0" y="0" width="12" height="11.5" fill="#E42527" />
+                  <rect x="12" y="0" width="12" height="13" fill="#089949" />
+                  <rect x="12" y="13" width="12" height="11" fill="#226DB4" />
+                  <rect x="0" y="11.5" width="12" height="12.5" fill="#F9B21D" />
                 </g>
               </svg>
               <span>Zoho</span>
