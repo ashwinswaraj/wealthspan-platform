@@ -12,12 +12,18 @@ declare global {
 
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) return resolve();
-    const s = document.createElement("script");
-    s.src = src;
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error(src));
-    document.body.appendChild(s);
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
+    if (existing?.dataset.loaded === "1") return resolve();
+    const s = existing ?? document.createElement("script");
+    s.addEventListener("load", () => {
+      s.dataset.loaded = "1";
+      resolve();
+    });
+    s.addEventListener("error", () => reject(new Error(src)));
+    if (!existing) {
+      s.src = src;
+      document.body.appendChild(s);
+    }
   });
 }
 
@@ -39,6 +45,10 @@ export function CatalystLoginSheet({ onClose }: { onClose: () => void }) {
         await loadScript(INIT);
         if (!window.catalyst) throw new Error("sdk");
         window.catalyst.auth.signIn(BOX_ID, { service_url: `${import.meta.env.BASE_URL}index.html` });
+        window.setTimeout(() => {
+          if (!document.querySelector(`#${BOX_ID} iframe`))
+            setError("Login form did not load. Reload the page from the Wealthspan app address and try again.");
+        }, 8000);
       } catch {
         setError("Login is available only on the Wealthspan app address (Catalyst hosting).");
       }
@@ -54,7 +64,7 @@ export function CatalystLoginSheet({ onClose }: { onClose: () => void }) {
           </button>
         </div>
         {error ? <p className="text-sm text-red-500 px-2 pb-3">{error}</p> : null}
-        <div id={BOX_ID} className="min-h-[300px]" />
+        <div id={BOX_ID} style={{ height: 460 }} className="w-full overflow-hidden rounded-2xl [&_iframe]:h-full [&_iframe]:w-full [&_iframe]:border-0" />
       </div>
     </div>
   );

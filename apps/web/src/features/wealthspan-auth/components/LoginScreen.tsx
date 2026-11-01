@@ -15,6 +15,8 @@ const wrapperStyle = {
 export function LoginScreen(_props: { onLoggedIn?: () => void }) {
   const [email, setEmail] = useState("");
   const [sheet, setSheet] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const hasText = email.length > 0;
 
   return (
     <div className={wrapper} style={wrapperStyle}>
@@ -104,20 +106,36 @@ export function LoginScreen(_props: { onLoggedIn?: () => void }) {
               <input
                 id="email-input"
                 type="email"
+                data-auth-input="true"
                 autoComplete="email"
                 autoCorrect="off"
                 autoCapitalize="off"
                 spellCheck={false}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-13 sm:h-14 min-h-[48px] bg-transparent rounded-[20px] sm:rounded-[24px] text-gray-950 dark:text-white text-[16px] sm:text-base font-normal text-center focus:outline-none transition-all duration-200 px-5 xs:px-6 border-2 border-black dark:border-white"
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                className={`w-full h-13 sm:h-14 min-h-[48px] bg-transparent rounded-[20px] sm:rounded-[24px] text-gray-950 dark:text-white text-[16px] sm:text-base font-normal text-center focus:outline-none transition-all duration-200 ${hasText ? "px-14" : "px-5 xs:px-6"} ${focused ? "border-2 border-black dark:border-white" : hasText ? "border border-gray-400 dark:border-gray-500" : "border border-gray-300 dark:border-gray-700"}`}
               />
               <label
                 htmlFor="email-input"
-                className="absolute pointer-events-none transition-all duration-200 ease-out select-none top-0 -translate-y-1/2 left-4 xs:left-5 text-xs px-1.5 font-medium bg-[#fafafa] dark:bg-[#0c0d12] z-10 text-black dark:text-white font-semibold"
+                className={`absolute pointer-events-none transition-all duration-200 ease-out select-none ${focused || hasText ? "top-0 -translate-y-1/2 left-4 xs:left-5 text-xs px-1.5 font-medium bg-[#fafafa] dark:bg-[#0c0d12] z-10 " + (focused ? "text-black dark:text-white font-semibold" : "text-gray-500 dark:text-gray-400") : "top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-sm sm:text-base text-gray-400 dark:text-gray-500 whitespace-nowrap"}`}
               >
                 Enter your email
               </label>
+              {hasText ? (
+                <button
+                  type="button"
+                  id="email-submit-btn"
+                  onClick={() => setSheet(true)}
+                  aria-label="Submit email"
+                  className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 min-w-[36px] min-h-[36px] bg-black dark:bg-white text-white dark:text-black rounded-full shadow-md active:scale-95 hover:bg-neutral-900 dark:hover:bg-neutral-100 transition-all duration-150 cursor-pointer flex items-center justify-center shrink-0 z-10"
+                >
+                  <svg className="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              ) : null}
             </div>
           </form>
           <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 leading-relaxed text-center mt-1 px-1 select-none">
