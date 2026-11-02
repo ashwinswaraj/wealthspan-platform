@@ -15,6 +15,7 @@ const wrapperStyle = {
 export function LoginScreen(_props: { onLoggedIn?: () => void }) {
   const [email, setEmail] = useState("");
   const [sheet, setSheet] = useState(false);
+  const [provider, setProvider] = useState<"google" | "zoho" | null>(null);
   const [focused, setFocused] = useState(false);
   const hasText = email.length > 0;
   const inputRef = useRef<HTMLInputElement>(null);
@@ -24,7 +25,15 @@ export function LoginScreen(_props: { onLoggedIn?: () => void }) {
 
   return (
     <div className={wrapper} style={wrapperStyle}>
-      {sheet ? <CatalystLoginSheet onClose={() => setSheet(false)} /> : null}
+      {sheet ? (
+        <CatalystLoginSheet
+          provider={provider ?? undefined}
+          onClose={() => {
+            setSheet(false);
+            setProvider(null);
+          }}
+        />
+      ) : null}
       <div className="auth-initial-content w-full max-w-[420px] mx-auto flex flex-col justify-between items-center py-3 xs:py-4 sm:py-6 px-4 xs:px-6 box-border">
         <WealthspanWordmark className="shrink-0 pt-1" />
         <div className="w-full flex flex-col items-center my-auto py-2 sm:py-3 text-center select-none">
@@ -54,7 +63,10 @@ export function LoginScreen(_props: { onLoggedIn?: () => void }) {
           <div className="w-full grid grid-cols-2 gap-3">
             <button
               type="button"
-              onClick={() => setSheet(true)}
+              onClick={() => {
+                setProvider("google");
+                setSheet(true);
+              }}
               className="h-13 sm:h-14 min-h-[48px] px-2 whitespace-nowrap rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-[13px] sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
             >
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
@@ -76,13 +88,22 @@ export function LoginScreen(_props: { onLoggedIn?: () => void }) {
                 />
               </svg>
               <span>Continue with Google</span>
+              {provider === "google" ? (
+                <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin shrink-0" />
+              ) : null}
             </button>
             <button
               type="button"
-              onClick={() => setSheet(true)}
+              onClick={() => {
+                setProvider("zoho");
+                setSheet(true);
+              }}
               className="h-13 sm:h-14 min-h-[48px] px-2 whitespace-nowrap rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-[13px] sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
             >
               <span>Continue with Zoho</span>
+              {provider === "zoho" ? (
+                <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin shrink-0" />
+              ) : null}
             </button>
           </div>
           <div className="w-full flex items-center my-0.5 select-none">
