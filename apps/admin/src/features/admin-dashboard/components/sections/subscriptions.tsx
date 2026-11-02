@@ -1,15 +1,31 @@
 import { useMemo, useState } from "react";
 import { formatINR, paiseToRupees, rupeesToPaise } from "@wealthspan/utils/finance";
-import { useAdminOverview, useAdminPayments, useReviewPayment } from "../../lib/adminApi";
+import {
+  useAdminOverview,
+  useAdminPayments,
+  useAdminPlans,
+  useReviewPayment,
+  useSavePlan,
+} from "../../lib/adminApi";
 import type { AdminPaymentRow, PaymentStatusLabel } from "../../lib/types";
 
-/** Mirrors PLANS in apps/api/src/features/subscription/types.ts (prices in paise). Change there first. */
-const PLANS = {
+/** Shown until the live prices load. Mirrors PLANS in apps/api/src/features/subscription/types.ts (paise). */
+const DEFAULT_PLANS = {
   pro_monthly: { label: "Pro — monthly", pricePaise: 19900, days: 30 },
   pro_annual: { label: "Pro — annual", pricePaise: 199900, days: 365 },
-} as const;
-type PlanKey = keyof typeof PLANS;
-const PLAN_KEYS = Object.keys(PLANS) as PlanKey[];
+};
+type PlanKey = keyof typeof DEFAULT_PLANS;
+type PlansMap = Record<PlanKey, { label: string; pricePaise: number; days: number }>;
+const PLAN_KEYS = Object.keys(DEFAULT_PLANS) as PlanKey[];
+
+/** The live plans (what users are charged), falling back to the defaults while loading. */
+function usePlans(): PlansMap {
+  const q = useAdminPlans();
+  return {
+    pro_monthly: q.data?.pro_monthly ?? DEFAULT_PLANS.pro_monthly,
+    pro_annual: q.data?.pro_annual ?? DEFAULT_PLANS.pro_annual,
+  };
+}
 
 const PLAN_META: Record<
   PlanKey,
@@ -33,7 +49,8 @@ const PLAN_META: Record<
   },
 };
 
-const SAVE_NOTICE = "Plan prices are set in the API for now";
+const CREATE_NOTICE =
+  "New plans and deleting plans are not supported: edit Monthly or Annual instead";
 const FILTERS = ["all", "pending", "approved", "rejected"] as const;
 type Filter = (typeof FILTERS)[number];
 
@@ -117,7 +134,7 @@ function SearchBox({
 
 function PlanSummaryCard({ planKey }: { planKey: PlanKey }) {
   const m = PLAN_META[planKey];
-  const p = PLANS[planKey];
+  const p = usePlans()[planKey];
   return (
     <div className="p-4 rounded-2xl bg-white dark:bg-[#212121] border border-[#ebebeb] dark:border-[#383838] shadow-xs flex items-center justify-between">
       <div className="min-w-0 pr-2">
@@ -151,7 +168,7 @@ function PlanCard({
   onDelete: () => void;
 }) {
   const m = PLAN_META[planKey];
-  const p = PLANS[planKey];
+  const p = usePlans()[planKey];
   return (
     <div className="bg-white dark:bg-[#1a1a1a] rounded-[32px] border border-[#e5e7eb] dark:border-[#2f2f2f] p-6 sm:p-7 shadow-xs flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all">
       <div
@@ -232,20 +249,41 @@ function PlanCard({
 function EditPlanModal({ initial, onClose }: { initial: PlanKey | null; onClose: () => void }) {
   const creating = initial === null;
   const [tab, setTab] = useState<1 | 2>(1);
+  const plans = usePlans();
+  const save = useSavePlan();
   const [planKey, setPlanKey] = useState<PlanKey>(initial ?? "pro_monthly");
   const seed = (k: PlanKey | null) => ({
-    name: k ? PLANS[k].label : "",
-    price: k ? String(paiseToRupees(PLANS[k].pricePaise)) : "",
-    days: k ? String(PLANS[k].days) : "",
+    name: k ? plans[k].label : "",
+    price: k ? String(paiseToRupees(plans[k].pricePaise)) : "",
+    days: k ? String(plans[k].days) : "",
   });
   const [draft, setDraft] = useState(seed(initial));
-  const [notice, setNotice] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const m = PLAN_META[planKey];
 
   const pick = (k: PlanKey) => {
     setPlanKey(k);
     setDraft(seed(k));
-    setNotice(false);
+    setNotice(null);
+    setSaved(false);
+  };
+  const onSave = () => {
+    setSaved(false);
+    if (creating) return setNotice(CREATE_NOTICE);
+    setNotice(null);
+    save.mutate(
+      {
+        id: planKey,
+        label: draft.name,
+        priceRupees: Number(draft.price),
+        days: Number(draft.days),
+      },
+      {
+        onSuccess: () => setSaved(true),
+        onError: (e) => setNotice(e instanceof Error ? e.message : "Could not save."),
+      },
+    );
   };
   const set = (k: keyof typeof draft) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setDraft((d) => ({ ...d, [k]: e.target.value }));
@@ -329,7 +367,7 @@ function EditPlanModal({ initial, onClose }: { initial: PlanKey | null; onClose:
                         className={`px-4 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-all ${k === planKey ? "text-white shadow-xs" : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"}`}
                         style={k === planKey ? { backgroundColor: PLAN_META[k].color } : undefined}
                       >
-                        Wealthspan {PLANS[k].label}
+                        Wealthspan {plans[k].label}
                       </button>
                     ))}
                   </div>
@@ -419,7 +457,12 @@ function EditPlanModal({ initial, onClose }: { initial: PlanKey | null; onClose:
           )}
           {notice && (
             <p role="status" className="text-xs font-medium text-amber-600 dark:text-amber-400">
-              {SAVE_NOTICE}.
+              {notice}
+            </p>
+          )}
+          {saved && (
+            <p role="status" className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              Saved. New payments use this price.
             </p>
           )}
         </div>
@@ -433,7 +476,8 @@ function EditPlanModal({ initial, onClose }: { initial: PlanKey | null; onClose:
           </button>
           <button
             type="button"
-            onClick={() => setNotice(true)}
+            onClick={onSave}
+            disabled={save.isPending}
             className="px-7 py-3 sm:px-8 sm:py-3.5 bg-black dark:bg-white text-white dark:text-black text-[14px] sm:text-[15.5px] font-semibold rounded-full shadow-lg active:scale-95 hover:bg-neutral-900 dark:hover:bg-neutral-100 flex items-center gap-2.5 transition-all duration-150 cursor-pointer disabled:opacity-50"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -444,7 +488,7 @@ function EditPlanModal({ initial, onClose }: { initial: PlanKey | null; onClose:
                 d="M5 13l4 4L19 7"
               />
             </svg>
-            <span>Save & Push to App</span>
+            <span>{save.isPending ? "Saving…" : "Save & Push to App"}</span>
           </button>
         </div>
       </div>
@@ -817,7 +861,7 @@ export function SubscriptionsSection() {
         <div className="px-6 sm:px-8 py-8 flex flex-col gap-8">
           {notice && (
             <p role="status" className="text-xs font-medium text-amber-600 dark:text-amber-400">
-              {SAVE_NOTICE}.
+              {CREATE_NOTICE}.
             </p>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

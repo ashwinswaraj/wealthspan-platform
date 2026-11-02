@@ -149,3 +149,30 @@ describe("payments", () => {
     expect((await s.review("admin", p.id, "approve")).subscription!.endsOn).toBe("2027-10-26");
   });
 });
+
+describe("admin-edited plan prices", () => {
+  it("uses the saved price and days instead of the built-in ones", async () => {
+    const s = createSubscriptionService({
+      store: memStore(),
+      now: () => clock,
+      adminIds: ["admin"],
+      plans: async () => ({
+        trial: { label: "Trial", pricePaise: 0, days: 14 },
+        pro_monthly: { label: "Pro monthly", pricePaise: 24900, days: 30 },
+        pro_annual: { label: "Pro annual", pricePaise: 199900, days: 365 },
+      }),
+    });
+    expect((await s.startTrial("u")).endsOn).toBe("2026-11-09");
+    expect(
+      await code(
+        s.submitPayment("u", { plan: "pro_monthly", utr: "123456789012", amountRupees: 199 }),
+      ),
+    ).toBe("validation");
+    const p = await s.submitPayment("u", {
+      plan: "pro_monthly",
+      utr: "123456789012",
+      amountRupees: 249,
+    });
+    expect(p.amountPaise).toBe(24900);
+  });
+});

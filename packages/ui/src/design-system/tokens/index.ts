@@ -52,7 +52,7 @@ export const colors = {
 
 export const typography = {
   family: {
-    headline: "Manrope, sans-serif",
+    headline: "Inter, sans-serif",
     body: "Inter, sans-serif",
     label: "Inter, sans-serif",
   },

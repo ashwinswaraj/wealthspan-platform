@@ -20,7 +20,6 @@ Rule: **Bina reason koi file/folder exist nahi karta.** Har entry ke saamne uska
 | `eslint.config.js`                   | `[RULE]` Import boundaries (packages/ui → apps import na kare) yahin enforce hota hai                                             |
 | `.nvmrc`                             | `[CLR]` Node version pin — "works on my machine" bugs rokta hai                                                                   |
 | `pnpm-lock.yaml`                     | `[SCALE]` Lockfile = reproducible installs across machines/CI (pnpm-only, no other package manager)                               |
-| `vercel.json`                        | `[SCALE]` Deploy target config — monorepo me kaunsa app kaise deploy ho                                                           |
 | `.vscode/settings.json`              | `[CLR]` Team-wide editor defaults (format-on-save) — consistency bina manual setup ke                                             |
 | `.vscode/extensions.json`            | `[CLR]` Recommended extensions — naye dev ko sahi tools turant milte hain                                                         |
 | `.husky/pre-commit`                  | `[SEC]`+`[RULE]`+`[AUTO]` Commit se pehle lint/type-check auto-run hota hai — broken/insecure code repo me jaane se rokta hai     |

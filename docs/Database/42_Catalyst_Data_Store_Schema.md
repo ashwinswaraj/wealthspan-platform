@@ -32,6 +32,8 @@ Secrets (Sarvam key etc.) live only in function environment variables, never in 
 | subscriptions       | user_id, plan, starts_on, ends_on, payment_id, sub_key (UNIQUE: `trial:<userId>` / `pay:<paymentId>`) |
 | payment_submissions | user_id, plan, amount_paise, utr (UNIQUE), status, note, reviewed_at, reviewed_by                     |
 | chat_usage          | usage_key (UNIQUE: `<userId>:<IST day>`), user_id, uses                                               |
+| plan_settings       | plan_id (UNIQUE: trial / pro_monthly / pro_annual), label, price_paise (bigint), days, updated_by     |
+| broadcasts          | title, body (text), audience (ALL/FREE/GO/PRO), severity (INFO/WARNING/CRITICAL), created_by          |
 
 ## Login
 

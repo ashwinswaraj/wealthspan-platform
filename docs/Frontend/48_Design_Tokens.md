@@ -20,7 +20,7 @@ Document the actual token set in `packages/ui/src/design-system/tokens/index.ts`
 | Category    | Export                    | Examples                                                                                                                                                                                              |
 | ----------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Color       | `colors`                  | Material-Design-3-style role naming: `primary`, `primaryContainer`, `onPrimary`, `secondary`, `tertiary`, a full surface stack (`surface`, `surfaceLow`...`surfaceHighest`), `outline`, `destructive` |
-| Typography  | `typography`              | `family.headline` = Manrope, `family.body`/`family.label` = Inter; a `scale` from `display` down to `caption` (Tailwind utility strings, not raw sizes)                                               |
+| Typography  | `typography`              | `family.headline`, `family.body` and `family.label` are all Inter; a `scale` from `display` down to `caption` (Tailwind utility strings, not raw sizes)                                               |
 | Spacing     | `spacing`                 | `section`, `sectionCompact`, `page` — Tailwind's default spacing scale is the only sanctioned spacing beyond these                                                                                    |
 | Radius      | `radius`                  | `xs` (2px) through `3xl` (24px), plus `pill`                                                                                                                                                          |
 | Elevation   | `elevation`               | Standard shadows (`sm`/`md`/`lg`) plus named glow effects (for example `ctaBlue`, `ctaWhite`; some names are leftovers from the previous product)                                                     |
@@ -40,4 +40,4 @@ HSL numbers live, not this package.
 - `apps/web/src/styles.css`
 - `docs/Assets/77_Colors.md`, `docs/Assets/78_Fonts.md`
 
-Note: the landing page loads Inter and Newsreader from Google Fonts; the tokens above still list Manrope for headlines. Align them when the brand fonts are final.
+Note: Inter is the one UI font in both apps. The login headline alone uses Newsreader (serif), as in the original design.

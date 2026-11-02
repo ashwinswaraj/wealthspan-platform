@@ -6,4 +6,4 @@
 
 - Health checks (`GET /admin/health`, polled every 30 s): services such as the API, Data Store and AI.
 - AI card: model `sarvam-105b`, answer detail (Concise, Balanced, Detailed); not persisted.
-- Broadcast form: not connected.
+- Broadcast form: connected (saves to `broadcasts`, listed as Recent broadcasts).

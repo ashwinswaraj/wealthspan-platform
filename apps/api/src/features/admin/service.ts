@@ -3,13 +3,23 @@
  * Admin rights are decided by e-mail (ADMIN_EMAILS) at the edge; this service trusts that check.
  */
 import {
-  PLANS,
+  SubscriptionError,
+  isPlanId,
+  loadPlans,
   paymentReference,
+  validatePlanInput,
   type PaymentStatus,
   type PlanId,
+  type PlanSettingsStore,
   type Subscription,
 } from "../subscription";
-import type { AdminStore } from "./types";
+import {
+  BROADCAST_AUDIENCES,
+  BROADCAST_SEVERITIES,
+  type AdminStore,
+  type Broadcast,
+  type BroadcastAudience,
+} from "./types";
 
 export type PlanTier = "Free" | "Go" | "Pro";
 const DAY = 86_400_000;
@@ -26,6 +36,8 @@ const tierOf = (plan: PlanId): PlanTier => (plan === "trial" ? "Go" : "Pro");
 
 export const createAdminService = (deps: {
   store: AdminStore;
+  /** Where admin-edited plan prices live; without it plans stay at the built-in prices. */
+  plans?: PlanSettingsStore;
   adminEmails: string[];
   adminUserIds?: string[];
   now?: () => Date;
@@ -46,6 +58,17 @@ export const createAdminService = (deps: {
     isAdminEmail(who.email) &&
     (pinned.size === 0 || (!!who.userId && pinned.has(String(who.userId))));
   const isPinned = () => pinned.size > 0;
+  /** The audit trail must never block the change itself. */
+  const audit = async (row: Parameters<AdminStore["insertAudit"]>[0]) => {
+    try {
+      await store.insertAudit(row);
+    } catch (e) {
+      console.error(
+        "audit write failed:",
+        String((e as { message?: string })?.message ?? "").slice(0, 200),
+      );
+    }
+  };
 
   const liveSub = (subs: Subscription[]) => {
     const t = today();
@@ -67,12 +90,13 @@ export const createAdminService = (deps: {
     isPinned,
 
     async overview() {
-      const [users, subs, payments, projects, transactions] = await Promise.all([
+      const [users, subs, payments, projects, transactions, plansNow] = await Promise.all([
         store.listUsers(),
         store.listAllSubscriptions(),
         store.listAllPayments("pending"),
         store.countRows("projects"),
         store.countRows("transactions"),
+        loadPlans(deps.plans),
       ]);
       const per = byUser(subs);
       const usersByPlan = { free: 0, go: 0, pro: 0 };
@@ -83,7 +107,7 @@ export const createAdminService = (deps: {
         else if (live.plan === "trial") usersByPlan.go += 1;
         else {
           usersByPlan.pro += 1;
-          const p = PLANS[live.plan];
+          const p = plansNow[live.plan];
           mrrPaise += Math.round((p.pricePaise * 30) / p.days);
         }
       }
@@ -125,7 +149,11 @@ export const createAdminService = (deps: {
     },
 
     async payments(status?: PaymentStatus) {
-      const [rows, users] = await Promise.all([store.listAllPayments(status), store.listUsers()]);
+      const [rows, users, plansNow] = await Promise.all([
+        store.listAllPayments(status),
+        store.listUsers(),
+        loadPlans(deps.plans),
+      ]);
       const email = new Map(users.map((u) => [u.id, u.email]));
       return rows
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -135,7 +163,7 @@ export const createAdminService = (deps: {
           userEmail: email.get(p.userId) ?? p.userId,
           /** Matches the reference the user writes in the UPI remark. */
           reference: paymentReference(p.userId),
-          plan: PLANS[p.plan]?.label ?? p.plan,
+          plan: plansNow[p.plan]?.label ?? p.plan,
           amountPaise: p.amountPaise,
           orderId: `ORD-${p.id.slice(-6)}`,
           createdAt: p.createdAt,
@@ -168,6 +196,71 @@ export const createAdminService = (deps: {
         actor: a.actor,
         at: a.createdAt,
       }));
+    },
+
+    /* ---- plans the admin can edit ---- */
+    async plans() {
+      return loadPlans(deps.plans);
+    },
+
+    async savePlan(
+      adminId: string,
+      planId: string,
+      input: { label?: unknown; priceRupees?: unknown; days?: unknown },
+    ) {
+      if (!deps.plans) throw new SubscriptionError("validation", "Plan editing is not available.");
+      if (!isPlanId(planId)) throw new SubscriptionError("not_found", "Unknown plan.", 404);
+      const config = validatePlanInput(planId, input);
+      await deps.plans.savePlanSetting(planId, config, adminId);
+      await audit({
+        action: "plan_updated",
+        entity: "plan",
+        entityId: null,
+        actor: adminId,
+        detail: JSON.stringify({ planId, ...config }),
+      });
+      return { planId, ...config };
+    },
+
+    /* ---- broadcasts: admin sends, users read the ones for their tier ---- */
+    async broadcasts(limit = 20) {
+      return store.listBroadcasts(limit);
+    },
+
+    async sendBroadcast(
+      adminId: string,
+      input: { title?: unknown; body?: unknown; audience?: unknown; severity?: unknown },
+    ): Promise<Broadcast> {
+      const title = String(input.title ?? "").trim();
+      const body = String(input.body ?? "").trim();
+      if (title.length < 2 || title.length > 80)
+        throw new SubscriptionError("validation", "Title must be 2 to 80 characters.");
+      if (body.length < 2 || body.length > 600)
+        throw new SubscriptionError("validation", "Message must be 2 to 600 characters.");
+      const audience = BROADCAST_AUDIENCES.find((a) => a === input.audience);
+      const severity = BROADCAST_SEVERITIES.find((s) => s === input.severity);
+      if (!audience || !severity)
+        throw new SubscriptionError("validation", "Choose an audience and a severity.");
+      const saved = await store.insertBroadcast({
+        title,
+        body,
+        audience,
+        severity,
+        createdBy: adminId,
+      });
+      await audit({
+        action: "broadcast_sent",
+        entity: "broadcast",
+        entityId: saved.id,
+        actor: adminId,
+      });
+      return saved;
+    },
+
+    /** What a signed-in user sees: broadcasts for everyone plus the ones for their own tier. */
+    async broadcastsFor(tier: Exclude<BroadcastAudience, "ALL">, limit = 5) {
+      const rows = await store.listBroadcasts(50);
+      return rows.filter((b) => b.audience === "ALL" || b.audience === tier).slice(0, limit);
     },
   };
 };

@@ -12,6 +12,8 @@ interface HomeScreenProps {
   onNotifications: () => void;
   onAsk: (text: string) => void;
   onVoice: () => void;
+  /** Red dot on the bell: an announcement the user has not opened yet. */
+  hasUnread?: boolean;
 }
 
 /** Chat-first home: greeting, spinning prompt wheel, and the "Talk about your wealth" bar. */
@@ -22,6 +24,7 @@ export function HomeScreen({
   onNotifications,
   onAsk,
   onVoice,
+  hasUnread = false,
 }: HomeScreenProps) {
   const [text, setText] = useState("");
   const line = useMemo(() => {
@@ -43,6 +46,7 @@ export function HomeScreen({
           onOpenMenu={onOpenMenu}
           onUpgrade={onUpgrade}
           onNotifications={onNotifications}
+          hasUnread={hasUnread}
         />
         <main className="relative z-0 isolate flex-1 min-h-0 flex flex-col justify-end w-full max-w-full px-4 sm:px-5 pb-2 -mt-[56px] sm:-mt-[60px] -mb-[68px] sm:-mb-[74px] overflow-hidden">
           <div className="w-full flex flex-col justify-end items-start pt-6 sm:pt-8 pb-[74px] sm:pb-[80px] transition-all duration-300 relative select-none z-0 isolate">

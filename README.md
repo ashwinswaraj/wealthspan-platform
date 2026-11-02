@@ -161,7 +161,6 @@ WEALTHSPAN/
 │           └── __tests__/
 ├── tests/               root-level cross-app E2E/integration tests
 └── tools/
-└── (root-level files: .editorconfig, .env, .env.example, .gitignore, .nvmrc, .prettierignore, .prettierrc, AGENTS.md, ARCHITECTURE_RATIONALE.md, CHANGELOG.md, CODE_OF_CONDUCT.md, CONTRIBUTING.md, LICENSE, README.md, SECURITY.md, UX_INTEGRITY_AUDIT.md, eslint.config.js, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, tsconfig.json, turbo.json, vercel.json, vite.config.ts)
 ```
 
 **Key notes:**
