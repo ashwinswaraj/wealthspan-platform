@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CatalystLoginSheet } from "./CatalystLoginSheet";
 import { ArcMark, WealthspanWordmark } from "./Logo";
 
@@ -17,6 +17,10 @@ export function LoginScreen(_props: { onLoggedIn?: () => void }) {
   const [sheet, setSheet] = useState(false);
   const [focused, setFocused] = useState(false);
   const hasText = email.length > 0;
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   return (
     <div className={wrapper} style={wrapperStyle}>
@@ -51,7 +55,7 @@ export function LoginScreen(_props: { onLoggedIn?: () => void }) {
             <button
               type="button"
               onClick={() => setSheet(true)}
-              className="h-13 sm:h-14 min-h-[48px] rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
+              className="h-13 sm:h-14 min-h-[48px] px-2 whitespace-nowrap rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-[13px] sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
             >
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                 <path
@@ -76,7 +80,7 @@ export function LoginScreen(_props: { onLoggedIn?: () => void }) {
             <button
               type="button"
               onClick={() => setSheet(true)}
-              className="h-13 sm:h-14 min-h-[48px] rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
+              className="h-13 sm:h-14 min-h-[48px] px-2 whitespace-nowrap rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-[13px] sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
             >
               <span>Continue with Zoho</span>
             </button>
@@ -99,6 +103,7 @@ export function LoginScreen(_props: { onLoggedIn?: () => void }) {
             <div id="email-input-container" className="w-full relative">
               <input
                 id="email-input"
+                ref={inputRef}
                 type="email"
                 data-auth-input="true"
                 autoComplete="email"

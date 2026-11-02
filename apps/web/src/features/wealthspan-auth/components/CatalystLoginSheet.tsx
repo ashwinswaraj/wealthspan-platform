@@ -67,7 +67,14 @@ export function CatalystLoginSheet({ onClose }: { onClose: () => void }) {
             Close
           </button>
         </div>
-        {error ? <p className="text-sm text-red-500 px-2 pb-3">{error}</p> : null}
+        {error ? (
+          <p className="text-sm text-red-500 px-2 pb-3">
+            {error}{" "}
+            <a className="underline" href="/__catalyst/auth/login">
+              Open hosted sign-in
+            </a>
+          </p>
+        ) : null}
         <div
           id={BOX_ID}
           style={{ height: 460 }}
