@@ -60,7 +60,7 @@ export function LoginScreen(_props: { onLoggedIn?: () => void }) {
               trial!
             </span>
           </div>
-          <div className="w-full grid grid-cols-2 gap-3">
+          <div className="w-full flex flex-col gap-3">
             <button
               type="button"
               onClick={() => {

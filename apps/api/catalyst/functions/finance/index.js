@@ -1860,9 +1860,14 @@ var ADMIN_USER_IDS = () => list(process.env.ADMIN_USER_IDS);
 app.use(async (req, res, next) => {
   try {
     const c = catalyst.initialize(req);
-    const user = await c.userManagement().getCurrentUser();
+    let user;
+    try {
+      user = await c.userManagement().getCurrentUser();
+    } catch (e) {
+      console.error("auth: getCurrentUser failed", e instanceof Error ? e.message : e);
+    }
     const userId = user?.user_id ?? user?.userId;
-    if (!userId) throw new Error("no user");
+    if (!userId) return res.status(401).json({ error: "unauthorized", message: "Please log in." });
     req.userId = String(userId);
     req.email = String(user?.email_id ?? user?.emailId ?? "");
     req.name = [user?.first_name, user?.last_name].filter(Boolean).join(" ");
@@ -1883,8 +1888,9 @@ app.use(async (req, res, next) => {
     req.svc = createFinanceService({ store: fin });
     req.cat = createCatalogService({ store: createCatalystCatalogStore(c), finance: fin });
     next();
-  } catch {
-    res.status(401).json({ error: "unauthorized", message: "Please log in." });
+  } catch (e) {
+    console.error("auth: setup failed", e instanceof Error ? e.stack : e);
+    res.status(500).json({ error: "server_error", message: "Server setup problem. Please try again." });
   }
 });
 app.use(rateLimit({ windowMs: 6e4, max: 90, methods: ["POST", "PATCH", "PUT", "DELETE"] }));
