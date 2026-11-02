@@ -1,24 +1,5 @@
 # Design Tokens
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-01
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **Design Tokens** for the Wealthspan platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Tokens are CSS variables in `apps/admin/src/styles.css`, mapped by Tailwind `@theme inline`: background, foreground, primary (and container, fixed), secondary, muted, accent, destructive, border, input, ring, plus radius scale (`--radius-sm/md/lg`) and fonts `--font-headline`, `--font-body`, `--font-label`. Dark mode redefines the variables under `.dark`. Some screens still use literal hex classes (`#0d0d0d`, `#ececec`); migrating them to tokens is wanted.

@@ -1,24 +1,11 @@
-# Data Model
+# Data Model (overview)
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
+Full model: [41_Wealthspan_Data_Model.md](41_Wealthspan_Data_Model.md). Physical tables: [42_Catalyst_Data_Store_Schema.md](42_Catalyst_Data_Store_Schema.md).
 
-Describe the scope and intent of **Data Model** for the Wealthspan platform.
+In one paragraph: a user owns Accounts and Projects. Projects hold Transactions (income / expense / transfer), Loans, Investments and Events. All users share one table set, separated by `user_id` which the server takes from the Catalyst session. Money is integer paise, dates are `YYYY-MM-DD`, deletes are soft for 30 days, and every change is written to `audit_log`.
 
-## Scope
+Platform tables (not part of the finance model): `subscriptions`, `payment_submissions`, `chat_usage`.
 
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Code that must stay in sync: `packages/constants/src/finance.ts`, `packages/types/src/finance.ts`, `packages/validation/src/finance.ts`, `packages/utils/src/finance.ts`.

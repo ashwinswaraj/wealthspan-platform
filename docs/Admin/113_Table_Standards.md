@@ -1,24 +1,10 @@
 # Table Standards
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **Table Standards** for the Wealthspan platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+- Search box above the table; CSV export where the screen has it.
+- Footer line "Showing 1 to N of M".
+- Empty state row instead of a blank table.
+- Money right-aligned in rupees from paise (`formatINR`), dates in `dd Mon yyyy` (en-IN).
+- Status as a coloured pill with text, not colour alone.
+- Example: `usersDirectory.tsx`.

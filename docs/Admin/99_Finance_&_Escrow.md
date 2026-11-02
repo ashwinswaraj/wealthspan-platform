@@ -1,24 +1,16 @@
-# Finance & Escrow
+# Subscription Billing
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active (manual UPI); gateway TBD · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
-Describe the scope and intent of **Finance & Escrow** for the Wealthspan platform.
+Approve Pro payments and see revenue.
 
-## Scope
+## Screen: Subscriptions & Billing
 
-- What this document covers
-- What it explicitly does not cover
+- Pending, approved, rejected payments (`GET /admin/payments?status=`): UTR, user email, reference code `WSP-xxxxx`, plan, amount, date.
+- Approve or reject with a note: `POST /admin/payments/:id/approve|reject`. Approval creates the subscription.
+- Check the UTR and reference against the bank statement before approving.
+- MRR comes from the overview.
 
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+No payment gateway exists; choosing one is TBD.

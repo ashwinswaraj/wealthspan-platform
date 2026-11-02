@@ -1,24 +1,10 @@
 # Phase 3
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Planned · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+Theme: depth for businesses and families. Nothing below is built.
 
-Describe the scope and intent of **Phase 3** for the Wealthspan platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+- GST and tax-ready reports (no filing in scope until decided).
+- Multi-user access and roles (family member, accountant).
+- Forecasts and cash-flow projections.
+- Interest vs principal split for loans (Phase 1 does not split).

@@ -25,7 +25,7 @@ in [§9](#9-known-deviations--do-not-silently-fix-these) as intentional.
 
 ```
 apps/
-  web/      @wealthspan/web    — public client + professional web app (Vite + TanStack Start)
+  web/      @wealthspan/web    — Wealthspan user web app (Vite + TanStack Start)
   admin/    @wealthspan/admin  — super-admin panel (Vite + TanStack Start)
   api/      @wealthspan/api    — backend edge service (currently a thin scaffold — see apps/api/AGENTS.md)
 packages/
@@ -56,10 +56,9 @@ fix the README itself if you're touching it anyway.
 ## 2. Stack (fixed — don't suggest or introduce alternatives)
 
 - Frontend: React 19 + TanStack Start/Router + Vite + Tailwind v4
-- Backend: no framework chosen yet — `apps/api` is intentionally a minimal
-  scaffold (Supabase Auth does identity; the app is a thin edge layer). Don't
-  add Express/Hono/Fastify/etc. without being asked.
-- Database: Supabase (Postgres)
+- Backend: Zoho Catalyst Advanced I/O functions (`apps/api/catalyst/functions`: finance, chat, files). Don't
+  add Hono/Fastify/etc. without being asked.
+- Database + login: Zoho Catalyst Data Store and Cloud Scale Authentication (Embedded Auth)
 - Package manager: **pnpm only**. Never generate or commit a `package-lock.json`,
   `yarn.lock`, or `bun.lock` — `pnpm-lock.yaml` is the single lockfile. Internal
   cross-package dependencies use `"@wealthspan/x": "workspace:*"`, never a version
@@ -101,8 +100,7 @@ domain: `components/`, `hooks/`, `types/`, `lib/` as needed, plus an
   helpers) belongs in the app's top-level `src/components/`, `src/hooks/`,
   or `src/utils/`, not duplicated into each feature and not left in one
   feature for another to reach into. (Reference case:
-  `apps/web/src/components/dashboard/shared.tsx` holds atoms used by both
-  `dashboard-client` and `dashboard-professional`.)
+  `apps/web/src/components/ConnectionPill.tsx`, used by several features.)
 - **`pages/` stays thin.** A page composes one or more features and renders
   them; it does not contain business logic, content dictionaries, or state
   machines. If you find yourself writing real logic in a `pages/*.tsx` file,
@@ -215,7 +213,7 @@ left as-is or flagged rather than resolved unilaterally. Full reasoning in
    scripts expect a `vite.config.ts` at repo root. Don't delete it as
    "redundant."
 2. **`apps/admin/src/features/admin-dashboard/`** is one large feature
-   rather than split into per-domain features (finance, security, workforce,
+   rather than split into per-domain features (users, subscriptions, security,
    etc.), because its ~20 files share state and UI atoms with no
    independent public API per section. If you're asked to split it further,
    that's a product/ownership decision — confirm the boundaries with a human
@@ -267,9 +265,8 @@ conflicts with §2 (Stack), **this section wins**. Full reasoning in
 - AI provider: **Sarvam**, behind an adapter (don't call the provider
   directly from feature code).
 - Database + login: **Zoho Catalyst too** (Data Store + Authentication) — the
-  owner chose "everything on Catalyst"; Supabase is dropped for Wealthspan.
-  Existing `@wealthspan/database` / `@wealthspan/auth` Supabase code stays until the
-  owner approves replacing it; new finance code must not depend on Supabase.
+  owner chose "everything on Catalyst"; Supabase is gone. `@wealthspan/database` holds the Data Store
+  table names and query helpers, and `@wealthspan/auth` the session hook.
   Catalyst constraints to design around: ZCQL has no documented row cap
   (always paginate with `LIMIT offset,count`), max 4 JOINs, Var Char ≤ 255,
   Text ≤ 10,000 chars, Int ≤ 10 digits (use BigInt for paise), Advanced I/O
@@ -283,8 +280,5 @@ conflicts with §2 (Stack), **this section wins**. Full reasoning in
   `docs/Database/41_Wealthspan_Data_Model.md`. All money is integer paise.
   Never do money arithmetic in a component or in the chatbot prompt — call
   `@wealthspan/utils`.
-- Wealthspan-specific code (orders, professionals, QA, escrow) is being removed:
-  the owner approved the clean-up on 2026-10-30. The architecture (folders,
-  feature-driven layout, `@wealthspan/*` package scope) stays; Wealthspan code
-  goes where the Wealthspan code was. `apps/web` is already clean (route `/` is
-  the Wealthspan home); `apps/admin` and the shared packages are next.
+- The old marketplace code (orders, professionals, QA, escrow) has been replaced. The architecture (folders,
+  feature-driven layout, `@wealthspan/*` package scope) stays; Wealthspan code lives where that code was.

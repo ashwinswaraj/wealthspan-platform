@@ -1,24 +1,5 @@
 # Push Notifications
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **Push Notifications** for the Wealthspan platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+**Not in Phase 1.** The app is a web SPA; push would need a service worker or a mobile app, plus opt-in design. Reminders (EMI due, budget cap) are planned for inside the app. Revisit with the mobile plan (see ADR-005).

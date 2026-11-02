@@ -1,24 +1,5 @@
 # Design System
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-01
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **Design System** for the Wealthspan platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+The admin app uses Tailwind v4, lucide icons and shared components from `@wealthspan/ui`. Fonts: Manrope (headlines) and Inter (body, labels). Light and dark themes via the `dark` class. The wider system is in `docs/Frontend/`.

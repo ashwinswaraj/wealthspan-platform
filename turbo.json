@@ -9,9 +9,7 @@
     "LOVABLE_NITRO_PRESET",
     "LOVABLE_SANDBOX",
     "NODE_ENV",
-    "SANDBOX",
-    "VITE_SUPABASE_PUBLISHABLE_KEY",
-    "VITE_SUPABASE_URL"
+    "SANDBOX"
   ],
   "tasks": {
     "build": {

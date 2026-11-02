@@ -1,51 +1,33 @@
 # API Architecture
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
+## Shape
 
-Describe how `apps/api` is structured and what role it plays relative to
-Supabase.
-
-## Scope
-
-- Covers: `apps/api`'s internal structure, its relationship to Supabase Auth
-- Does not cover: the database schema (see `docs/Database/`) or specific
-  endpoint contracts beyond what's built so far (see `42_API_Specification.md`)
-
-## Details
-
-`apps/api` is a **thin edge layer, not the system of record**. Identity is
-handled by Supabase Auth directly — this app verifies bearer tokens and
-exposes the resolved session; it does not own user data itself.
-
-Structure follows the monorepo-wide `features/<domain>/` pattern (see root
-`AGENTS.md` §3):
+`apps/api` is three Zoho Catalyst Advanced I/O functions (Node 22, Express, 30 s limit) under `apps/api/catalyst/functions/{finance,chat,files}`. Their `entry.ts` files only wire routes; logic lives in `apps/api/src/features/<domain>/`:
 
 ```
-src/
-  features/<domain>/
-    controller.ts   HTTP request handling
-    service.ts      external calls / business logic
-    types.ts         shared shapes for this domain
-    routes.ts        route map for this domain
-    index.ts         barrel — public API
-  config/  middleware/  utils/
-  index.ts            app entry point
+features/
+  finance/       transactions + summary (service.ts, catalyst-store.ts, types.ts)
+  catalog/       projects, accounts, events, loans, investments
+  subscription/  trial, plans, UTR payment submissions and review
+  admin/         overview, users, payments, ledger, audit
+  chat/          sarvam.ts (provider adapter), quota.ts (daily limit)
+  files/         report + writers (PDF, Excel, CSV, Word), sheet .xlsx
+middleware/security.ts   CSRF guard, rate limit, JSON errors
 ```
 
-Only `features/auth/` exists so far. No HTTP framework is mounted yet
-(`src/index.ts` is currently `export {}`) — see `.lovable/plan.md` for that
-decision.
+Each service takes a `store` interface; `catalyst-store.ts` is the ZCQL implementation, tests use in-memory stores.
 
-## Open Questions
+`build.mjs` bundles each entry into `functions/<name>/index.js` (generated, committed; run `pnpm --filter @wealthspan/api build:catalyst`).
 
-- [ ] Which HTTP framework (Hono is the natural fit for a
-      TanStack-Start-adjacent, edge-deployable stack, but not yet confirmed)
-- [ ] Whether `apps/api` will eventually own any data directly, or remain
-      purely a pass-through/orchestration layer in front of Supabase
+## Request pipeline
 
-## References
+`hardenApp` -> `requestGuard` (CSRF, nosniff, no-store) -> JSON body (32 kb) -> Catalyst session lookup (401 if none) -> `rateLimit` -> route -> `notFound` -> `jsonErrors`.
 
-- [Master Context](../00_Master_Context.md)
-- `apps/api/AGENTS.md`, `apps/api/README.md`
+## Rules
+
+- The user id comes only from `userManagement().getCurrentUser()`.
+- Every store query filters by `user_id`; admin routes are the only cross-user reads.
+- Money is integer paise in and out; the UI converts to rupees.
+- `features/auth` and `config/` in `apps/api/src` are leftovers from the previous product, pending removal; no function uses them.

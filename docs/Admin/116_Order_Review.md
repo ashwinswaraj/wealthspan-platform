@@ -1,24 +1,12 @@
-# Order Review
+# Entry Review
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Partly built · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## Process
 
-Describe the scope and intent of **Order Review** for the Wealthspan platform.
+1. Open Financial Ledger & Projects.
+2. Scan recent entries (type, project, mode, amount, date).
+3. For suspicious volume or patterns, look at the audit log.
+4. Content stays hidden; to resolve a user issue, ask the user or use the support flow (Planned).
 
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Flagging an entry or user from this screen is Planned. Data: `GET /admin/ledger`.

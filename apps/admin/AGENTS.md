@@ -6,8 +6,8 @@ covered here.
 ## Current state
 
 Almost all business logic lives in one consolidated feature,
-`src/features/admin-dashboard/` (~20 files: finance, disputes, security,
-workforce, roles, audit, order-desk, QA, and more), not split per-domain —
+`src/features/admin-dashboard/` (users, subscriptions, payments, plans,
+roles, security, audit, system, and more), not split per-domain —
 see root `AGENTS.md` §9.2 for why, and don't split it further without
 confirming ownership boundaries with a human first. `src/components/` is
 intentionally near-empty (just `.gitkeep`) — it's reserved for UI genuinely

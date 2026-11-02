@@ -1,24 +1,21 @@
 # System Flows
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## 1. Sign-in
+User opens `/app/` → Catalyst Embedded Authentication (Google / Zoho / email) → session cookie → functions read the user from the session.
 
-Describe the scope and intent of **System Flows** for the Wealthspan platform.
+## 2. Add an entry
+Sheet row (or chat) → `POST /transactions` → validation (`packages/validation`) → payment mode must suit the account → store (Data Store, keyed by `user_id`) → audit entry. Card-bill-looking expenses trigger a "record as transfer instead?" warning.
 
-## Scope
+## 3. Conclude a festival
+Confirm → event status `concluded` → its expenses now count in Expense on their own dates.
 
-- What this document covers
-- What it explicitly does not cover
+## 4. Ask the accountant
+Message → `chat` function → daily quota check (40/day) → Sarvam with the user's context → answer. Numbers come from `packages/utils/src/finance.ts`. Tool calls that write data: Planned.
 
-## Details
+## 5. Export
+Choose format and range → `GET /server/files/export?format=csv|xlsx|docx|pdf&from&to&projectId` → file download.
 
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+## 6. Subscribe
+Start trial once → or pay by UPI and submit the 12-digit UTR (`POST /subscription/payments`) → admin approves in `apps/admin` → subscription starts. Automated gateway: TBD.

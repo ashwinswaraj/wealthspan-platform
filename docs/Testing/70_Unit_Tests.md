@@ -1,24 +1,11 @@
 # Unit Tests
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
+Vitest, run with `pnpm test` (CI: `test` and `ci-api`). Existing suites:
 
-Describe the scope and intent of **Unit Tests** for the Wealthspan platform.
+- `packages/utils/src/__tests__`: money maths (`finance.test.ts`), sheet helpers.
+- `packages/validation/src/__tests__`: input rules.
+- `apps/api/tests`: security middleware, finance, catalog, subscription, admin, chat (Sarvam client, quota), files.
 
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Services are tested with in-memory stores; `catalyst-store.test.ts` checks ZCQL building. Every new service rule needs a test, especially user isolation and money.

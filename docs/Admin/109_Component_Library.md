@@ -1,24 +1,5 @@
 # Component Library
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-01
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **Component Library** for the Wealthspan platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Shared primitives come from `packages/ui` (`@wealthspan/ui`). Admin-specific pieces sit in `apps/admin/src/features/admin-dashboard/components`: `AdminDashboardLayout` (sidebar and header), section screens under `sections/`, `usersDirectory`, `AdminNotificationsModal`, `AdminProfileModal`. Local patterns: stat card, search box, floating-label field and health card. Prefer promoting repeats into `packages/ui`.

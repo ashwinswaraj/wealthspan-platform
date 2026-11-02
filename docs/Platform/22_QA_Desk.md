@@ -1,24 +1,21 @@
-# QA Desk
+# Data Quality
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Partly built (guards shipped; review Planned) · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
-Describe the scope and intent of **QA Desk** for the Wealthspan platform.
+Keep the numbers trustworthy.
 
-## Scope
+## Shipped (in `packages/utils/src/finance.ts`)
 
-- What this document covers
-- What it explicitly does not cover
+- `looksLikeCardBillPayment`: warns that a card-bill expense is really a transfer.
+- `findSameAmountCardExpenses`: flags an expense with the same amount as a credit-card expense in the last 45 days.
+- Validation of required fields and payment mode vs account (`packages/validation`).
 
-## Details
+## Planned
 
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
+A review list of suspected duplicates and anomalies for the user. Lifecycle: `33_QA_Lifecycle.md`.
 
 ## References
 
-- [Master Context](../../00_Master_Context.md)
+- [Data model](../Database/41_Wealthspan_Data_Model.md)

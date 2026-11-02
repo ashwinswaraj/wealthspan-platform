@@ -12,7 +12,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), versioning per 
 - Consolidated `apps/admin`'s flat `components/dashboard/` into one
   `features/admin-dashboard/` domain
 - Split `apps/web`'s flat `components/`/`pages/`/`lib/` into
-  `features/{marketing,auth,signup,dashboard-client,dashboard-professional,legal}/`
+  `features/{projects,sheets,wealthspan-auth,wealthspan-shell}/`
 - Root `dev` script scoped to `apps/web` only
   (`turbo run dev --filter=@wealthspan/web --`) — `web` and `admin` currently
   share a default dev port; see `.lovable/plan.md`
@@ -28,8 +28,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), versioning per 
 - `apps/web/package.json` now declares the `@wealthspan/*` workspace packages
   it imports (previously only resolved via a Vite alias)
 - Two instances of business logic misplaced in generic `lib/` folders
-  moved into their owning feature (`apps/web`'s order-related files,
-  `apps/admin`'s finance registries)
+  moved into their owning feature (`apps/web`'s finance files,
+  `apps/admin`'s registries)
 - Removed a duplicate legacy copy of `apps/web` that existed at repo root,
   merging back 3 bug-fixed files it had that the current copy didn't
 

@@ -1,6 +1,6 @@
 # Design System
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-31
+> Status: Draft · Last updated: 2026-11-01
 
 ## Purpose
 

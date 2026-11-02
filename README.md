@@ -1,6 +1,6 @@
 # WEALTHSPAN
 
-Workforce-as-a-Service platform. Monorepo containing the client/professional web app, the super-admin panel, the API service, shared packages, and full product documentation.
+Wealthspan: an AI personal accountant ("the full arc of your money"). Monorepo containing the user web app, the admin panel, the Zoho Catalyst API functions, shared packages, and full product documentation.
 
 Built and maintained with [Lovable](https://lovable.dev/projects/1b3730be-b1ba-45be-9a42-47616d773861).
 
@@ -73,7 +73,7 @@ WEALTHSPAN/
 │   │       │   ├── finance/
 │   │       │   └── subscription/
 │   │       └── middleware/
-│   └── web/                 @wealthspan/web — client & professional web app
+│   └── web/                 @wealthspan/web — Wealthspan user app
 │       ├── public/
 │       ├── scripts/
 │       └── src/

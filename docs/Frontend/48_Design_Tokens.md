@@ -1,6 +1,6 @@
 # Design Tokens
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-31
+> Status: Draft · Last updated: 2026-11-01
 
 ## Purpose
 
@@ -23,7 +23,7 @@ Document the actual token set in `packages/ui/src/design-system/tokens/index.ts`
 | Typography | `typography` | `family.headline` = Manrope, `family.body`/`family.label` = Inter; a `scale` from `display` down to `caption` (Tailwind utility strings, not raw sizes) |
 | Spacing | `spacing` | `section`, `sectionCompact`, `page` — Tailwind's default spacing scale is the only sanctioned spacing beyond these |
 | Radius | `radius` | `xs` (2px) through `3xl` (24px), plus `pill` |
-| Elevation | `elevation` | Standard shadows (`sm`/`md`/`lg`) plus named glow effects (`ctaBlue`, `ctaWhite`, `premiumId`, `elite`, `verified`) |
+| Elevation | `elevation` | Standard shadows (`sm`/`md`/`lg`) plus named glow effects (for example `ctaBlue`, `ctaWhite`; some names are leftovers from the previous product) |
 | Opacity | `opacity` | `disabled`, `muted`, `ghost` |
 | Z-index | `zIndex` | `base` through `tooltip` (0–70) |
 | Motion | `motion` | Durations (`fast`/`base`/`slow`), easings, and named interaction patterns (`press`, `hover`, `hoverLift`, `fadeIn`, `scaleIn`) |
@@ -39,3 +39,5 @@ HSL numbers live, not this package.
 - `packages/ui/src/design-system/tokens/index.ts`
 - `apps/web/src/styles.css`
 - `docs/Assets/77_Colors.md`, `docs/Assets/78_Fonts.md`
+
+Note: the landing page loads Inter and Newsreader from Google Fonts; the tokens above still list Manrope for headlines. Align them when the brand fonts are final.

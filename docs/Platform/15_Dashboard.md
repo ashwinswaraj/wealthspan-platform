@@ -1,24 +1,22 @@
-# Admin Dashboard
+# Dashboard
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active (core shipped) · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
-Describe the scope and intent of **Admin Dashboard** for the Wealthspan platform.
+The signed-in landing screen: one place to see the full arc of the user's money.
 
-## Scope
+## What exists
 
-- What this document covers
-- What it explicitly does not cover
+- **Projects** (`apps/web/src/features/projects`): one per business or income source, plus Personal. Each project has five sections: Income, Expense, Debt & Loan/EMI, Savings & Investing, Festivals & functions.
+- **Sheets** (`apps/web/src/features/sheets`): an Excel-style grid per section, defined once in `packages/constants/src/sheets.ts` (`SHEETS`) and shared with the chatbot.
+- **Summary**: `GET /finance/summary` computes income, expense, profit and balances with `packages/utils/src/finance.ts`. Numbers never come from the AI.
+- Money is shown in rupees and stored as integer paise.
 
-## Details
+## Not in scope
 
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
+Forecasts, GST and tax views are Phase 3 (see the data model, section 9).
 
 ## References
 
-- [Master Context](../../00_Master_Context.md)
+- [Data model](../Database/41_Wealthspan_Data_Model.md)

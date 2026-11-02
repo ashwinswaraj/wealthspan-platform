@@ -1,24 +1,21 @@
-# Services Desk
+# Plans & Catalog
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active (plans fixed in code; catalog shipped) · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
-Describe the scope and intent of **Services Desk** for the Wealthspan platform.
+What a user can subscribe to, and the lists they pick from.
 
-## Scope
+## Plans (`apps/api/src/features/subscription/types.ts`, `PLANS`)
 
-- What this document covers
-- What it explicitly does not cover
+| Plan id | Label | Price | Access |
+| --- | --- | --- | --- |
+| `trial` | 1 month free trial (shown as "Go") | free | 30 days, once per user |
+| `pro_monthly` | Pro, monthly | Rs 199 (19900 paise) | 30 days |
+| `pro_annual` | Pro, annual | Rs 1,999 (199900 paise) | 365 days |
 
-## Details
+## Catalog (`apps/api/src/features/catalog`)
 
-_TODO: fill in._
+Per-user records the sheets work on: `projects`, `accounts`, `events`, `loans`, `investments`. Soft delete only (recoverable for 30 days). Fixed lists (income and expense categories, payment modes, account kinds) live in `packages/constants/src/finance.ts`.
 
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Prices are edited in code today; an admin editor is not wired (see `docs/Admin/95_Services_Desk.md`).

@@ -20,7 +20,7 @@
 
 ## Locked references
 
-- **Primary Button** = the Super Admin → Professional Applications "Review"
+- **Primary Button** = the Super Admin → Payments "Review"
   action. **Secondary Button** = Approve / Reject / Request Info.
 - **Auth inputs** (Sign In / Sign Up / Forgot Password) = the treatment in
   `src/components/signup/FormField.tsx`. Use `AuthInput`, `AuthSelect`,

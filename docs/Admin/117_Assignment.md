@@ -1,24 +1,11 @@
-# Assignment
+# Chatbot Action Review
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Planned · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## Process (once the chatbot tools exist)
 
-Describe the scope and intent of **Assignment** for the Wealthspan platform.
+1. Review the audit trail of chatbot changes (tool, before, after, undone).
+2. Watch for high decline or undo rates, which signal wrong tool use.
+3. Check the daily quota (40 messages per user) is not blocking real use.
 
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Today only `POST /chat` exists. User-side lifecycle: `docs/Platform/32_Assignment_Lifecycle.md`.

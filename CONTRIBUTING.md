@@ -6,7 +6,7 @@
 - `feat/*`, `fix/*`, `docs/*`, `chore/*`
 
 ## Commits
-Conventional Commits: `feat(orders): add escrow release`
+Conventional Commits: `feat(sheets): add loan EMI column`
 
 ## Workflow
 1. Fork/branch from `develop`

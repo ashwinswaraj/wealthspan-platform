@@ -1,24 +1,11 @@
-# ADR-007 Admin Navigation
+# ADR-007: Admin screens only show what the API serves
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Accepted · Last updated: 2026-11-01
 
-## Purpose
+## Decision
 
-Describe the scope and intent of **ADR-002 Assignment** for the Wealthspan platform.
+The admin panel's sections (`dashboard`, `finance`, `subscriptions`, `security`, `system` in `features/admin-dashboard/components/sections/`) read from `/admin/*`: overview, users, payments (approve/reject), ledger, audit, health. No section is added for a feature the API does not serve. Planned screens (support and refunds, data-quality review) stay out of the navigation until their API exists.
 
-## Scope
+## Consequences
 
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Navigation cannot show dead screens. A new admin area needs its API route first.

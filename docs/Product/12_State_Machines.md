@@ -1,58 +1,33 @@
 # State Machines
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+States as coded in `packages/constants/src/finance.ts` and `apps/api/src/features/subscription`.
 
-Document the order lifecycle state machine as it's actually defined in
-code — `packages/constants/src/orders.ts`'s `OrderStatus` type, which both
-`apps/web` (client order creation) and `apps/admin` (Order Desk) read from
-the same live registry (`orderRegistry.ts`).
+## Event (festival / function)
 
-## Scope
+`open` → `concluded` → (reopen) `open`. While open, expenses move account balances but are shown on a separate "open events" line, not in the Expense total. Conclude and reopen both need confirmation; no row is duplicated.
 
-- Covers: the `OrderStatus` enum as coded today
-- Does not cover: whether every state transition shown below is actually
-  enforced/validated anywhere — the type only defines the possible states,
-  it doesn't itself prove which transitions are guarded
+## Loan
 
-## Details
+`active` ⇄ `closed` (`/loans/:id/close|reopen`). Outstanding = loan amount − linked EMI expenses.
 
-Numbered stages, straight from the source comments in `orders.ts`:
+## Project / account
 
-| # | Status | Meaning |
-| --- | --- | --- |
-| 1 | `pending` | Pending Review (new order) |
-| 1b | `info_requested` | Awaiting Client Info (admin asked for more details) |
-| 1c | `rejected` | Rejected — archived, admin declined with a reason |
-| 2 | `awaiting_payment` | Bill sent, awaiting payment |
-| 3 | `payment_received` | Payment received, ready to assign |
-| 4 | `assigned` | Assigned — requirement clarity stage |
-| 5 | `progress` | In progress |
-| 5b | `abandoned` | No professional response / dropped |
-| 6 | `qa` | In QA |
-| 7 | `delivered` | Delivered |
-| 8 | `awaiting_approval` | Awaiting client approval |
-| 9 | `rework` | In rework |
-| 10 | `disputed` | Disputed |
-| 11 | `released` | Escrow released — archived |
-| 12 | `cancelled` | Cancelled & refunded — archived |
-| 13 | `resolved` | Resolved disputes — archived |
+Active ⇄ archived (`archivedAt`). Deleting something still used by transactions returns 409.
 
-This is a single linear-ish lifecycle with branch points (info request /
-rejection early, abandonment mid-flow, dispute/rework late) rather than a
-strict linear pipeline — states 1b, 1c, 5b, and 10 are all off-ramps from
-the main 1→13 path, not sequential steps within it.
+## Any record
 
-## Open Questions
+Live → soft-deleted (`deletedAt`) → recoverable for 30 days (`SOFT_DELETE_RETENTION_DAYS`).
 
-- [ ] No formal state-transition table exists yet (which statuses can
-      legally follow which) — only the enum of possible states
-- [ ] Whether transition validity is enforced anywhere in code today, or
-      only conventionally
+## Payment submission
 
-## References
+`pending` → `approved` | `rejected` (`PaymentStatus`). Approval creates a subscription keyed `pay:<paymentId>`, so it can happen only once.
 
-- `packages/constants/src/orders.ts`
-- `packages/constants/src/orderRegistry.ts`
-- `docs/Platform/31_Order_Lifecycle.md`, `docs/Admin/96_Order_Desk.md` (product-level specs, still drafts)
+## Subscription
+
+No live row = **Free**. `trial` (30 days, once) = **Go**. `pro_monthly` / `pro_annual` = **Pro**. Access ends after `endsOn`.
+
+## Chatbot tool call
+
+`proposed` → (`none`: run) | (`undo`: run, offer Undo) | (`confirm`: show change, wait). More than 3 affected rows always needs confirmation. Status: policy defined, tools Planned.

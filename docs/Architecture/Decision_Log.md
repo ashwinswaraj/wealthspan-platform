@@ -1,36 +1,22 @@
 # Decision Log
 
-Newest first. One entry per decision: what, why, who, what it replaces.
+Newest first. One entry per decision: what, why, who.
 
-## 2026-10-24 — Wealthspan direction (owner: Ashwin Swaraj)
+## 2026-11-01 — Hardening and access (owner: Ashwin Swaraj)
 
-1. **Product:** this repo is being converted from Wealthspan to **Wealthspan**
-   (AI personal accountant). Wealthspan-specific code (orders, professionals,
-   QA, escrow registries) stays untouched until the owner approves removing it.
-2. **Frontend:** the owner's existing Wealthspan frontend exists only as a
-   compiled single HTML file (no source). It is used as the visual and
-   behavioural reference; the app is rebuilt inside `apps/web` using the
-   existing structure (features/, packages/ui design system, TanStack).
-3. **Backend:** server functions run on **Zoho Catalyst** (owner's choice).
-   Functions are written in Node.js (Catalyst supports Java, Node.js, Python).
-   To verify before building: function execution-time limit and outbound HTTP
-   from functions (needed for the AI API) — not stated in the docs read so far.
-4. **AI provider:** **Sarvam** (owner's choice). Keep the provider behind a
-   small adapter so it can be swapped (Claude was evaluated as the alternative).
-   To verify before relying on it: tool/function-calling quality for
-   create/edit/delete actions.
-5. **Database and login:** **everything on Zoho Catalyst** (owner: "Sab
-   catalyst pr") — Data Store (ZCQL) + Catalyst Authentication. Supabase is
-   dropped for Wealthspan; old Wealthspan Supabase code stays until removal is
-   approved. Verified from Catalyst docs: Advanced I/O timeout 30 s; Express
-   supported; ZCQL has SUM/COUNT/MIN/MAX/AVG, GROUP BY, HAVING, LIMIT
-   offset,count, max 4 JOINs, no documented row cap; column types Text, Var
-   Char(255), Date, DateTime, Int(10 digits), BigInt(19), Double, Boolean,
-   Foreign Key, Encrypted text; every table has ROWID/CREATORID/CREATEDTIME/
-   MODIFIEDTIME; Google social login needs own Client ID/Secret + Public
-   Signup. STILL UNVERIFIED: email-code (OTP) login, outbound HTTP from
-   functions to Sarvam, free-tier insert/row limits at real usage, function
-   memory. Money columns must be BigInt (paise); Int (10 digits) overflows at ~₹10 crore, below our ₹100 crore input cap.
-5b. **Login method (2026-10-25):** email code (OTP) or magic link, one per attempt, built as a custom `auth` function + Catalyst third-party auth; Google login can be added later. Catalyst Mail free tier (~100 emails) is a launch blocker to resolve.
-6. **Data model:** see `docs/Database/41_Wealthspan_Data_Model.md`.
-7. **Money** is integer paise everywhere (the old frontend used floats).
+- Security layer in `apps/api/src/middleware/security.ts`: CSRF header, in-memory rate limits, JSON error handler.
+- Admin rights pinned by `ADMIN_EMAILS` + `ADMIN_USER_IDS`; trials made unique per user with `sub_key`.
+- Chat requires an active plan or trial and a daily quota (40 messages per IST day).
+- Payments in Phase 1: manual UPI with a UTR reference, approved by an admin. Payment gateway: TBD.
+
+## 2026-10-25 — Login is Catalyst Embedded Authentication
+
+Replaced the planned custom email-OTP `auth` function with Catalyst Cloud Scale Embedded Authentication (Google, Zoho, email). No custom login function and no `login_codes` table; the user is read from the session in every function. Web Client Hosting serves the apps under `/app/` and `/app/admin/`, same domain as `/server/<function>`.
+
+## 2026-10-24 — Wealthspan direction
+
+1. **Product:** AI personal accountant ("The full arc of your money"), built on a repo converted from an earlier product.
+2. **Frontend:** rebuilt in `apps/web` using the existing feature structure and design system; the owner's old single-file app is only a visual reference.
+3. **Backend:** everything on Zoho Catalyst: Advanced I/O functions (Express, 30 s limit), Data Store (ZCQL), Authentication. The previous product's database and login code is leftover and pending removal.
+4. **AI provider:** Sarvam (`sarvam-105b`) behind one adapter file so it can be swapped.
+5. **Data model:** `docs/Database/41_Wealthspan_Data_Model.md`. Money is integer paise.

@@ -1,6 +1,6 @@
 # Component Library
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-31
+> Status: Draft · Last updated: 2026-11-01
 
 ## Purpose
 
@@ -32,10 +32,10 @@ Beyond the design system, `@wealthspan/ui` has two more layers:
   `calendar`, `chart`, etc.) that `design-system/primitives/` and
   `layout/` are themselves built on top of.
 - `packages/ui/src/shared/` — higher-level shared components that don't
-  fit the core design-system surface: `ClientIdCard`/`ProfessionalIdCard`,
-  `AuditListPage`, `SidebarToggleIcon`, `LogoBriefcase`,
-  `NotificationBellIcon`, `MessagesInbox`, `ChatConversation`,
-  `QrScannerModal`, `AnimatedPlaceholder`.
+  fit the core design-system surface (`AuditListPage`, `SidebarToggleIcon`,
+  `NotificationBellIcon`, `ChatConversation`, `AnimatedPlaceholder`, and
+  some leftovers from the previous product that are candidates for removal).
+  Check the folder for the current list.
 
 ## Open Questions
 

@@ -16,20 +16,10 @@ const shortRouteRedirects: Record<string, string> = {
   "/sub": "/dashboard/super/sub",
   "/dashboard/sub": "/dashboard/super/sub",
   "/dashboard/admin/sub": "/dashboard/super/sub",
-  "/client": "/dashboard/client",
-  "/professional": "/dashboard/professional",
-  "/active": "/dashboard/professional",
-  "/professional/active": "/dashboard/professional",
-  "/dashboard/active": "/dashboard/professional",
-  "/dashboard/professional/active": "/dashboard/professional",
-  "/trial": "/dashboard/trial",
-  "/dashboard/trial": "/dashboard/trial",
 };
 
 function canonicalizePath(pathname: string) {
   const normalized = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
-  if (/^\/professional\/step-[1-5]$/.test(normalized)) return `/signup${normalized}`;
-  if (/^\/client\/step-[1-4]$/.test(normalized)) return `/signup${normalized}`;
   return shortRouteRedirects[normalized] ?? pathname;
 }
 

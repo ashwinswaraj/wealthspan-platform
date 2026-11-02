@@ -1,24 +1,27 @@
-# Assignment Engine
+# Chatbot Tool-Actions
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Partly built (chat shipped; tools Planned) · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
-Describe the scope and intent of **Assignment Engine** for the Wealthspan platform.
+The AI accountant reads and writes the same sheets as the user.
 
-## Scope
+## Shipped
 
-- What this document covers
-- What it explicitly does not cover
+`POST /chat` (`apps/api/src/features/chat`) calls Sarvam `sarvam-105b`, with a per-user daily quota of 40 messages (`DAILY_CHAT_LIMIT`, table `chat_usage`).
 
-## Details
+## Planned (tools not built yet)
 
-_TODO: fill in._
+The chatbot never touches the database; it calls fixed tools, and the server decides confirmation from `CHATBOT_TOOL_POLICY` (`packages/constants/src/finance.ts`):
 
-## Open Questions
+| Level | Tools | Behaviour |
+| --- | --- | --- |
+| none | search, summary, list_*, generate_file | runs at once |
+| undo | create_* | runs, shows Undo |
+| confirm | update_*, delete_*, conclude/reopen event | shows the change, waits for the user |
 
-- [ ] TBD
+More than 3 rows in one call always needs confirmation. Lifecycle: `32_Assignment_Lifecycle.md`.
 
 ## References
 
-- [Master Context](../../00_Master_Context.md)
+- [Data model](../Database/41_Wealthspan_Data_Model.md)

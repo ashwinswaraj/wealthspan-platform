@@ -1,44 +1,22 @@
 # User Roles
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## Roles today
 
-Document the user-role distinctions that actually exist in code today.
-
-## Scope
-
-- Covers: role distinctions evidenced by the app/feature structure
-- Does not cover: a formal permissions matrix (see `11_Permissions_Matrix.md`
-  and `docs/Security/RBAC.md` — that level of detail isn't decided yet)
-
-## Details
-
-Three top-level roles are evidenced in the codebase:
-
-| Role | Where it lives | Evidence |
+| Role | App | How it is decided |
 | --- | --- | --- |
-| **Client** | `apps/web`, `features/dashboard-client/` | Separate dashboard feature, own layout (`ClientDashboardLayout`), own section set (orders, invoices, wallet, messages) |
-| **Professional** | `apps/web`, `features/dashboard-professional/` | Separate dashboard feature, own layout (`ProfessionalDashboardLayout` / `ProfessionalActiveDashboardLayout`), own section set (available jobs, my tasks, earnings) |
-| **Admin** | `apps/admin`, `features/admin-dashboard/` | Further split into `"super"` and `"sub"` sub-roles — see `docs/Security/RBAC.md` |
+| **User** (subscriber) | `apps/web` | Any signed-in Catalyst user (Google / Zoho / email). Sees only their own rows. |
+| **Admin** | `apps/admin` | E-mail is in `ADMIN_EMAILS`; if `ADMIN_USER_IDS` is also set, the Catalyst user id must be listed too (`apps/api/src/features/admin/service.ts`). |
 
-Client and professional are modeled as **separate features**, not a single
-"dashboard" with a role flag — see `apps/web/AGENTS.md`: "don't merge them
-to reduce duplication; the two roles have different permissions and data
-shapes."
+There is a single user role: no separate account types. A user's subscription state is **Free** (no live plan), **Go** (trial) or **Pro** (paid).
 
-Admin has two sub-roles (`"super"` / `"sub"`) read from Supabase
-`app_metadata.role`, currently only gating nav visibility (see
-`docs/Security/RBAC.md` for why that's UI-only, not enforcement).
+## Not built
 
-## Open Questions
-
-- [ ] Whether a user can hold more than one role (e.g. be both a client and
-      a professional) isn't evidenced either way in the current structure
-- [ ] No formal permissions matrix exists yet (see `11_Permissions_Matrix.md`)
+- Finer admin roles (support, finance, read-only): Planned, see `Admin/122_Admin_Roles.md`.
+- Multi-user access to one set of books (family member, accountant): Phase 3.
 
 ## References
 
-- `apps/web/src/features/dashboard-client/`, `dashboard-professional/`
-- `apps/admin/src/features/admin-dashboard/`
-- `docs/Security/RBAC.md`
+- `apps/api/src/features/admin`
+- [Permissions Matrix](11_Permissions_Matrix.md)

@@ -1,24 +1,9 @@
 # Admin UI Patterns
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-01
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **Admin UI Patterns** for the Wealthspan platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../90_Admin_Context.md)
+- **Stat card**: label, value, note, footer (Overview, Security).
+- **Review action**: approve or reject with note (Subscriptions & Billing).
+- **Derived alerts**: header bell built from pending payments and failing services.
+- **Polling**: health refetches every 30 s; other data loads on demand through TanStack Query hooks in `adminApi.ts`.
+- **Honest states**: dash for missing, "Not available yet", "Local only".

@@ -1,46 +1,27 @@
 # Payment Gateway
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
+**Gateway: TBD. No payment provider is integrated.**
 
-Document the actual state of payment integration — which is currently
-**scaffolding and UI mockup, not a live integration**.
+## What exists today
 
-## Details
+Manual UPI flow (`apps/api/src/features/subscription`):
+1. User picks `pro_monthly` (Rs. 199) or `pro_annual` (Rs. 1,999) and pays by UPI outside the app.
+2. User submits plan, amount and the 12-digit UTR (`POST /subscription/payments`). The amount must match the plan; a UTR can only be used once.
+3. An admin approves or rejects it in the admin panel (`/admin/payments/:id/approve|reject`). Approval creates the subscription exactly once (unique `sub_key`).
 
-- `apps/api/.env.example` declares `STRIPE_SECRET_KEY` — the name is
-  reserved, but no code in the repo actually calls the Stripe API.
-- `apps/admin`'s settings screen (`features/admin-dashboard/components/sections/system.tsx`)
-  displays `"Stripe"` as a configured provider, and its audit log
-  (`sections/audit.tsx`) shows simulated events like
-  `stripe.payment_intent.succeeded` — **this is static display/demo data**,
-  not a real webhook feed.
-- `apps/admin`'s finance section explicitly marks unwired actions, e.g. a
-  button labeled `"Resend Invoice · Backend Required"` — the team has
-  already flagged these as not functional (see `UX_INTEGRITY_AUDIT.md`,
-  which found the same pattern across "payment-provider transactions and
-  QR/UPI collection").
-- `packages/constants/src/services.ts` mentions "Stripe, PayPal, Razorpay"
-  as an example of a *service Wealthspan professionals might offer clients*
-  (payment-integration consulting) — unrelated to Wealthspan's own payment
-  processing.
+The free 1-month trial needs no payment (`POST /subscription/trial`, once per user).
 
-## What this means
+## Why this is temporary
 
-Nothing here should be read as "Stripe is integrated." The env var and UI
-exist as placeholders for when a real integration is built.
+Manual review does not scale, has no automatic renewals and no automatic refunds. Prices are in `PLANS` and are placeholders until pricing is decided.
 
-## Open Questions
+## Open decisions
 
-- [ ] Which payment provider is actually chosen (Stripe is the only one
-      with a reserved env var, but that's not the same as a decision)
-- [ ] Escrow/release mechanics (referenced throughout `OrderStatus` as
-      `released`/`disputed`) currently have no backing payment
-      infrastructure at all
+- [ ] Gateway (Razorpay, Cashfree, PhonePe, other) and UPI AutoPay for renewals
+- [ ] Webhook design: see [API/43_Webhooks.md](../API/43_Webhooks.md)
+- [ ] GST invoicing and who issues it (needs an accountant)
+- [ ] Refund automation: see [Legal/83_Refund_Policy.md](../Legal/83_Refund_Policy.md)
 
-## References
-
-- `apps/api/.env.example`
-- `UX_INTEGRITY_AUDIT.md`
-- `docs/Platform/23_Finance_&_Escrow.md`, `docs/Admin/99_Finance_&_Escrow.md` (product specs, still drafts)
+Never store card or bank credentials; a gateway would keep them.

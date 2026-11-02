@@ -1,24 +1,12 @@
 # Logging
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
+Functions log with `console.error` to Catalyst's function logs. Rules in code:
 
-Describe the scope and intent of **Logging** for the Wealthspan platform.
+- Log only a truncated error message (`.slice(0, 200..300)`), never request bodies, chat text, tokens or `SARVAM_API_KEY`.
+- The browser never receives stack traces; `jsonErrors` returns a short JSON message.
+- Business-level history is the `audit_log` table, not the function logs.
+- A refused admin attempt (listed e-mail, wrong user id) is logged as a warning without the id.
 
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Retention follows Catalyst's log settings; TBD whether to export logs.

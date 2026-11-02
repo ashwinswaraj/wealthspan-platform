@@ -1,24 +1,17 @@
-# Finance & Escrow
+# Subscription Billing
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active (manual UPI); gateway TBD · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
-Describe the scope and intent of **Finance & Escrow** for the Wealthspan platform.
+How a user pays for Pro.
 
-## Scope
+## Today
 
-- What this document covers
-- What it explicitly does not cover
+There is no payment gateway. The user pays by UPI, then submits the 12-digit UTR and a reference code (`WSP-` plus the last 5 characters of their id) in the remark. An admin matches it on the bank statement and approves or rejects (`apps/api/src/features/subscription`). Each UTR can be used once.
 
-## Details
+## TBD
 
-_TODO: fill in._
+A payment gateway with automatic confirmation, invoices and renewals is not chosen. Do not describe it as built.
 
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Lifecycle: `34_Payment_Lifecycle.md`. Admin side: `docs/Admin/99_*` (Subscription Billing).

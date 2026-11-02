@@ -1,24 +1,17 @@
-# ADR-008 Admin Permissions
+# ADR-008: Admin permissions are pinned by environment variables
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Accepted · Last updated: 2026-11-01
 
-## Purpose
+## Context
 
-Describe the scope and intent of **ADR-003 QA** for the Wealthspan platform.
+A database "role" column can be edited by a bug or a bad write. Admin power should not depend on user-editable data.
 
-## Scope
+## Decision
 
-- What this document covers
-- What it explicitly does not cover
+A user is an admin only if their e-mail is in `ADMIN_EMAILS`. When `ADMIN_USER_IDS` is also set, the Catalyst user id must be listed too ("pinned"), so a re-registered or look-alike e-mail cannot gain access. `GET /admin/me` tells a listed but unpinned admin their own user id to copy into the variable. Non-admins get `403` on everything under `/admin`.
 
-## Details
+There is a single admin level today (no super/sub split).
 
-_TODO: fill in._
+## Consequences
 
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Changing admins means editing `catalyst-config.json` and deploying. Per-module permissions are Planned, not built.

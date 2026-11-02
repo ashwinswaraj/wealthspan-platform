@@ -1,32 +1,18 @@
 import type { AuthContext, SessionPayload } from "./types";
 
-/** Resolves a Supabase user from a bearer token. Returns null if invalid. */
-export async function fetchSupabaseUser(
-  token: string,
-  ctx: AuthContext,
-): Promise<SessionPayload | null> {
-  const response = await fetch(`${ctx.supabaseUrl}/auth/v1/user`, {
-    headers: { apikey: ctx.supabasePublishableKey, Authorization: `Bearer ${token}` },
-  });
-  if (!response.ok) return null;
-
-  const user = (await response.json()) as {
-    id: string;
-    email?: string | null;
-    app_metadata?: { role?: string };
-  };
-
+/** Resolves the caller's session from Catalyst. Returns null when nobody is signed in. */
+export async function resolveSession(ctx: AuthContext): Promise<SessionPayload | null> {
+  let user;
+  try {
+    user = await ctx.getCurrentUser();
+  } catch {
+    return null;
+  }
+  if (!user?.user_id) return null;
+  const email = user.email_id ?? null;
   return {
-    userId: user.id,
-    email: user.email ?? null,
-    role: user.app_metadata?.role ?? "user",
+    userId: user.user_id,
+    email,
+    role: ctx.isAdmin({ email, userId: user.user_id }) ? "admin" : "user",
   };
-}
-
-/** Revokes a Supabase user's refresh tokens for the given bearer token. */
-export async function revokeSupabaseSession(token: string, ctx: AuthContext): Promise<void> {
-  await fetch(`${ctx.supabaseUrl}/auth/v1/logout`, {
-    method: "POST",
-    headers: { apikey: ctx.supabasePublishableKey, Authorization: `Bearer ${token}` },
-  });
 }

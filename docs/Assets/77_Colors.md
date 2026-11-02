@@ -1,6 +1,6 @@
 # Colors
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
@@ -11,8 +11,7 @@ references these via CSS variables, it doesn't duplicate the numbers).
 
 ## Details
 
-All values are `hsl(H S% L%)`. No dark-mode variant is defined yet — only
-one `:root` color set exists.
+All values are `hsl(H S% L%)`. Only one `:root` color set exists; a `.dark` class exists but only swaps the logo tile and mark colors.
 
 | Token | HSL | Role |
 | --- | --- | --- |
@@ -33,8 +32,7 @@ for the derived `radius` scale).
 
 ## Open Questions
 
-- [ ] No dark-mode color set exists yet — confirm whether one is planned
-      before assuming this is intentional vs. simply not built
+- [ ] A full dark-mode palette is not built; confirm whether it is planned
 
 ## References
 

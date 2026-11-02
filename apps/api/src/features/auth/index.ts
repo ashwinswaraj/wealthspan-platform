@@ -1,3 +1,3 @@
-export { getSession, signOut } from "./controller";
+export { getSession } from "./controller";
 export { authRoutes, default } from "./routes";
-export type { AuthContext, SessionPayload } from "./types";
+export type { AuthContext, CatalystUser, SessionPayload } from "./types";

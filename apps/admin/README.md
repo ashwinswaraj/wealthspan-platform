@@ -7,8 +7,8 @@ Wealthspan Super Admin control panel.
 ```
 src/
   features/
-    admin-dashboard/  the bulk of this app's logic (finance, disputes,
-                       security, workforce, roles, audit, order-desk, QA,
+    admin-dashboard/  the bulk of this app's logic (users, subscriptions,
+                       payments, plans, roles, security, audit, system,
                        and more) — consolidated into one feature rather
                        than split per-domain; see root AGENTS.md §9.2 for why
   routes/              file-based TanStack routes (auto-generates

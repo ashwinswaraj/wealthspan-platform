@@ -1,24 +1,8 @@
 # Integration Tests
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **Integration Tests** for the Wealthspan platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+None automated yet. Priority list:
+- finance + catalog + subscription against the Catalyst Development Data Store (user isolation, 409 on in-use deletes, unique `sub_key`, unique UTR).
+- Sarvam adapter against the live API with a test key (timeout under 30 s).
+- Real `getCurrentUser()` field names and how bigint ids and NULLs come back (still unverified).

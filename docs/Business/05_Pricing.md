@@ -1,24 +1,26 @@
 # Pricing
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## Source of truth
 
-Describe the scope and intent of **Pricing** for the Wealthspan platform.
+Plans and prices are defined only in `PLANS` in `apps/api/src/features/subscription/types.ts`. Prices are in paise.
 
-## Scope
+| Plan id | Name | Price | Access |
+| --- | --- | --- | --- |
+| `trial` | 1 month free trial ("Go") | Rs. 0 | 30 days |
+| `pro_monthly` | Pro, monthly | Rs. 199 | 30 days |
+| `pro_annual` | Pro, annual | Rs. 1,999 | 365 days |
 
-- What this document covers
-- What it explicitly does not cover
+Tiers shown in admin: **Free / Go / Pro** (`trial` is Go; paid plans are Pro).
 
-## Details
+## Rules
 
-_TODO: fill in._
+- One trial per user.
+- A payment can be approved only once (`pay:<paymentId>` key); a UTR already submitted is rejected as a duplicate.
+- Access runs from `startsOn` to `endsOn` (last day with access).
 
-## Open Questions
+## Open questions
 
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+- Final launch prices and any discount codes: TBD.
+- Whether prices include GST: TBD.

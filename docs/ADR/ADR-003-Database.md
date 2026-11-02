@@ -1,24 +1,17 @@
-# ADR-003 Database
+# ADR-003: Catalyst Data Store, one shared table set keyed by user_id
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Accepted · Last updated: 2026-11-01
 
-## Purpose
+## Context
 
-Describe the scope and intent of **ADR-003 Database** for the Wealthspan platform.
+Wealthspan needs relational money records, soft delete and an audit trail, without running a separate database product.
 
-## Scope
+## Decision
 
-- What this document covers
-- What it explicitly does not cover
+Use Zoho Catalyst Data Store (queried with ZCQL). One set of tables for all users; every row has `user_id` and the server filters by it on every query. All money movements live in one `transactions` table; a project is a label on a transaction. Money is `bigint` paise, dates are `YYYY-MM-DD`, deletes are soft (`deleted_at`). No database foreign keys: the server controls referential behaviour (deleting something still used answers 409).
 
-## Details
+## Consequences
 
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+- Isolation is enforced in server code, not by a database policy, so every store method must take `userId` (covered by tests).
+- ZCQL limits (no documented row cap, max 4 joins) shape reporting queries; calculations happen in `packages/utils`.
+- Details: [Data Model](../Database/41_Wealthspan_Data_Model.md), [Schema](../Database/42_Catalyst_Data_Store_Schema.md).
