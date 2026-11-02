@@ -6,7 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-headline: Manrope, sans-serif;
+  --font-headline: Inter, sans-serif;
   --font-body: Inter, sans-serif;
   --font-label: Inter, sans-serif;
 
@@ -185,7 +185,7 @@
   h4,
   h5,
   h6 {
-    font-family: "Manrope", sans-serif;
+    font-family: "Inter", sans-serif;
   }
 }
 
@@ -208,7 +208,7 @@
     scrollbar-width: none;
   }
   .font-headline {
-    font-family: "Manrope", sans-serif;
+    font-family: "Inter", sans-serif;
   }
   .font-body {
     font-family: "Inter", sans-serif;

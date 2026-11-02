@@ -4,3 +4,4 @@ dist
 .vinxi
 pnpm-lock.yaml
 routeTree.gen.ts
+apps/api/catalyst/functions/*/index.js

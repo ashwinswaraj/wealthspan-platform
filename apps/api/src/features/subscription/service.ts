@@ -5,8 +5,8 @@
  * So a submission only ever becomes `pending`; access starts when the owner
  * approves it after checking the bank statement. Each UTR can be used once.
  */
+import { loadPlans, type PlanMap } from "./plans";
 import {
-  PLANS,
   SubscriptionError,
   type PaymentSubmission,
   type PlanId,
@@ -35,6 +35,8 @@ export interface Entitlement {
 
 export const createSubscriptionService = (deps: {
   store: SubscriptionStore;
+  /** Current plan prices (admin-editable). Defaults to the built-in prices. */
+  plans?: () => Promise<PlanMap>;
   now?: () => Date;
   adminIds?: string[];
 }) => {
@@ -42,6 +44,7 @@ export const createSubscriptionService = (deps: {
   const now = () => deps.now?.() ?? new Date();
   const today = () => DATE(now());
   const isAdmin = (id: string) => (deps.adminIds ?? []).includes(id);
+  const plans = deps.plans ?? (() => loadPlans());
 
   const entitlementOf = (subs: Subscription[]): Entitlement => {
     const t = today();
@@ -67,6 +70,9 @@ export const createSubscriptionService = (deps: {
   };
 
   return {
+    /** Current prices, for the app's upgrade screen and the admin editor. */
+    getPlans: () => plans(),
+
     async getEntitlement(userId: string) {
       return entitlementOf(await store.listSubscriptions(userId));
     },
@@ -81,7 +87,7 @@ export const createSubscriptionService = (deps: {
           userId,
           plan: "trial",
           startsOn,
-          endsOn: addDays(startsOn, PLANS.trial.days - 1),
+          endsOn: addDays(startsOn, (await plans()).trial.days - 1),
           paymentId: null,
           subKey: `trial:${userId}`,
           createdAt: now().toISOString(),
@@ -104,7 +110,7 @@ export const createSubscriptionService = (deps: {
       const utr = String(input.utr ?? "").replace(/\s+/g, "");
       if (!UTR.test(utr))
         throw new SubscriptionError("validation", "UTR must be exactly 12 digits.");
-      const expected = PLANS[plan].pricePaise;
+      const expected = (await plans())[plan].pricePaise;
       if (Math.round(Number(input.amountRupees) * 100) !== expected) {
         throw new SubscriptionError(
           "validation",
@@ -172,7 +178,7 @@ export const createSubscriptionService = (deps: {
           userId: p.userId,
           plan: p.plan,
           startsOn,
-          endsOn: addDays(startsOn, PLANS[p.plan].days - 1),
+          endsOn: addDays(startsOn, (await plans())[p.plan].days - 1),
           paymentId: p.id,
           subKey: `pay:${p.id}`,
           createdAt: now().toISOString(),

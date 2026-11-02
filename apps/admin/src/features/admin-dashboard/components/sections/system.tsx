@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useAdminHealth } from "../../lib/adminApi";
+import { useAdminBroadcasts, useAdminHealth, useSendBroadcast } from "../../lib/adminApi";
 import type { AdminHealthRow } from "../../lib/types";
 
 const NOT_CONNECTED = "Saved settings are not connected yet";
@@ -185,7 +185,26 @@ function BroadcastCard() {
   const [audience, setAudience] = useState("ALL");
   const [severity, setSeverity] = useState("INFO");
   const [body, setBody] = useState("");
-  const onSubmit = (e: FormEvent) => e.preventDefault();
+  const send = useSendBroadcast();
+  const history = useAdminBroadcasts();
+  const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    setStatus(null);
+    send.mutate(
+      { title, body, audience, severity },
+      {
+        onSuccess: () => {
+          setTitle("");
+          setBody("");
+          setStatus({ ok: true, text: "Broadcast sent. Users see it on their home screen." });
+        },
+        onError: (err) =>
+          setStatus({ ok: false, text: err instanceof Error ? err.message : "Could not send." }),
+      },
+    );
+  };
+  const latest = history.data?.slice(0, 3) ?? [];
   return (
     <div className="p-6 rounded-2xl bg-white dark:bg-[#2f2f2f] border border-[#ebebeb] dark:border-[#383838] shadow-xs flex flex-col justify-between space-y-5">
       <div>
@@ -215,7 +234,7 @@ function BroadcastCard() {
             </h2>
           </div>
           <span className="px-3 py-1 rounded-full bg-[#f9f9f9] dark:bg-[#212121] border border-[#ebebeb] dark:border-[#383838] text-[#0d0d0d] dark:text-[#ececec] font-semibold text-xs">
-            Not connected yet
+            Live
           </span>
         </div>
         <p className="font-body-sm text-xs text-[#737373] dark:text-[#b4b4b4] mt-3">
@@ -282,10 +301,21 @@ function BroadcastCard() {
             />
           </div>
           <div className="pt-2 flex items-center justify-between gap-3">
-            <span className={NOTE}>Sending broadcasts is not connected yet</span>
+            <span
+              role="status"
+              className={
+                status?.ok === false
+                  ? "text-xs font-medium text-rose-600 dark:text-rose-400"
+                  : status
+                    ? "text-xs font-medium text-emerald-600 dark:text-emerald-400"
+                    : NOTE
+              }
+            >
+              {status?.text ?? "Shown to the chosen users on their home screen"}
+            </span>
             <button
               type="submit"
-              disabled
+              disabled={send.isPending}
               className="px-6 py-2.5 rounded-full bg-[#0d0d0d] dark:bg-white text-white dark:text-[#0d0d0d] font-medium text-xs hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-all cursor-pointer shadow-xs flex items-center gap-2 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100"
             >
               <svg
@@ -304,10 +334,26 @@ function BroadcastCard() {
                 <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" />
                 <path d="m21.854 2.147-10.94 10.939" />
               </svg>
-              <span>Dispatch Broadcast</span>
+              <span>{send.isPending ? "Sending…" : "Dispatch Broadcast"}</span>
             </button>
           </div>
         </form>
+        {latest.length > 0 && (
+          <div className="mt-5 pt-4 border-t border-[#ebebeb] dark:border-[#383838]">
+            <div className={`${NOTE} font-semibold mb-2`}>Recent broadcasts</div>
+            <ul className="space-y-1.5">
+              {latest.map((b) => (
+                <li key={b.id} className="text-xs text-[#0d0d0d] dark:text-[#ececec] truncate">
+                  <span className="font-semibold">{b.title}</span>
+                  <span className="text-[#737373] dark:text-[#b4b4b4]">
+                    {" "}
+                    · {b.audience} · {b.severity}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

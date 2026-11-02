@@ -7,29 +7,21 @@ var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __copyProps = (to, from, except, desc) => {
-  if ((from && typeof from === "object") || typeof from === "function") {
+  if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
       if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, {
-          get: () => from[key],
-          enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable,
-        });
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (
-  (target = mod != null ? __create(__getProtoOf(mod)) : {}),
-  __copyProps(
-    // If the importer is in node compatibility mode or this is not an ESM
-    // file that has been converted to a CommonJS file using a Babel-
-    // compatible transform (i.e. "__esModule" has not been set), then set
-    // "default" to the CommonJS "module.exports" for node compatibility.
-    isNodeMode || !mod || !mod.__esModule
-      ? __defProp(target, "default", { value: mod, enumerable: true })
-      : target,
-    mod,
-  )
-);
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 
 // catalyst/functions/chat/src/entry.ts
 var import_express = __toESM(require("express"));
@@ -57,24 +49,22 @@ function createSarvamClient(opts) {
           headers: {
             "content-type": "application/json",
             "api-subscription-key": opts.apiKey,
-            authorization: `Bearer ${opts.apiKey}`,
+            authorization: `Bearer ${opts.apiKey}`
           },
           body: JSON.stringify({
             model: opts.model ?? "sarvam-105b",
             messages: input.messages,
             max_tokens: input.maxTokens ?? 1024,
-            ...(input.reasoning ? { reasoning_effort: input.reasoning } : {}),
-            ...(input.tools?.length ? { tools: input.tools, tool_choice: "auto" } : {}),
-          }),
+            ...input.reasoning ? { reasoning_effort: input.reasoning } : {},
+            ...input.tools?.length ? { tools: input.tools, tool_choice: "auto" } : {}
+          })
         });
         if (!res.ok) {
-          const detail = (await res.text().catch(() => ""))
-            .replace(/sk_[A-Za-z0-9_]+/g, "[key]")
-            .slice(0, 200);
+          const detail = (await res.text().catch(() => "")).replace(/sk_[A-Za-z0-9_]+/g, "[key]").slice(0, 200);
           throw new AiError(
             "provider",
             `AI provider returned ${res.status}. ${detail}`.trim(),
-            res.status === 429 ? 429 : 502,
+            res.status === 429 ? 429 : 502
           );
         }
         const data = await res.json();
@@ -85,7 +75,7 @@ function createSarvamClient(opts) {
           content: choice.message.content ?? null,
           toolCalls: choice.message.tool_calls ?? [],
           finishReason: choice.finish_reason ?? "stop",
-          usage: data.usage,
+          usage: data.usage
         };
       } catch (e) {
         if (e instanceof AiError) throw e;
@@ -95,7 +85,7 @@ function createSarvamClient(opts) {
       } finally {
         clearTimeout(timer);
       }
-    },
+    }
   };
 }
 
@@ -104,10 +94,7 @@ var DAILY_CHAT_LIMIT = 40;
 var IST_OFFSET_MS = 5.5 * 36e5;
 var createChatQuota = (deps) => {
   const limit = deps.limit ?? DAILY_CHAT_LIMIT;
-  const day = () =>
-    new Date((deps.now?.() ?? /* @__PURE__ */ new Date()).getTime() + IST_OFFSET_MS)
-      .toISOString()
-      .slice(0, 10);
+  const day = () => new Date((deps.now?.() ?? /* @__PURE__ */ new Date()).getTime() + IST_OFFSET_MS).toISOString().slice(0, 10);
   return {
     limit,
     /** Counts one message. `ok: false` means today's limit is used up. */
@@ -127,43 +114,53 @@ var createChatQuota = (deps) => {
       const next = row.uses + 1;
       await deps.store.setUses(row.rowId, next);
       return { ok: true, used: next, limit };
-    },
+    }
   };
 };
 var esc = (s) => String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 var createCatalystChatUsageStore = (app2) => ({
   async get(key) {
-    const rows = await app2
-      .zcql()
-      .executeZCQLQuery(
-        `SELECT ROWID, uses FROM chat_usage WHERE usage_key = '${esc(key)}' LIMIT 0,1`,
-      );
+    const rows = await app2.zcql().executeZCQLQuery(
+      `SELECT ROWID, uses FROM chat_usage WHERE usage_key = '${esc(key)}' LIMIT 0,1`
+    );
     const r = rows[0]?.chat_usage ?? Object.values(rows[0] ?? {})[0];
     return r ? { rowId: String(r.ROWID), uses: Number(r.uses ?? 0) } : null;
   },
   async insert(key, userId) {
-    await app2
-      .datastore()
-      .table("chat_usage")
-      .insertRow({ usage_key: key, user_id: userId, uses: 1 });
+    await app2.datastore().table("chat_usage").insertRow({ usage_key: key, user_id: userId, uses: 1 });
   },
   async setUses(rowId, uses) {
     if (!/^\d{1,20}$/.test(rowId)) throw new Error("bad id");
     await app2.datastore().table("chat_usage").updateRow({ ROWID: rowId, uses });
-  },
+  }
 });
 
 // src/features/subscription/types.ts
 var PLANS = {
   trial: { label: "1 month free trial", pricePaise: 0, days: 30 },
   pro_monthly: { label: "Pro \u2014 monthly", pricePaise: 19900, days: 30 },
-  pro_annual: { label: "Pro \u2014 annual", pricePaise: 199900, days: 365 },
+  pro_annual: { label: "Pro \u2014 annual", pricePaise: 199900, days: 365 }
 };
 var SubscriptionError = class extends Error {
   constructor(code, message, status = 400) {
     super(message);
     this.code = code;
     this.status = status;
+  }
+};
+
+// src/features/subscription/plans.ts
+var mergePlans = (saved) => ({
+  trial: { ...PLANS.trial, ...saved.trial ?? {} },
+  pro_monthly: { ...PLANS.pro_monthly, ...saved.pro_monthly ?? {} },
+  pro_annual: { ...PLANS.pro_annual, ...saved.pro_annual ?? {} }
+});
+var loadPlans = async (store) => {
+  if (!store) return mergePlans({});
+  try {
+    return mergePlans(await store.listPlanSettings());
+  } catch {
+    return mergePlans({});
   }
 };
 
@@ -180,26 +177,24 @@ var createSubscriptionService = (deps) => {
   const now = () => deps.now?.() ?? /* @__PURE__ */ new Date();
   const today = () => DATE(now());
   const isAdmin = (id) => (deps.adminIds ?? []).includes(id);
+  const plans = deps.plans ?? (() => loadPlans());
   const entitlementOf = (subs) => {
     const t = today();
-    const live = subs
-      .filter((s) => s.startsOn <= t && s.endsOn >= t)
-      .sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0];
+    const live = subs.filter((s) => s.startsOn <= t && s.endsOn >= t).sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0];
     const trialUsed = subs.some((s) => s.plan === "trial");
     if (!live) return { plan: "free", active: false, endsOn: null, daysLeft: 0, trialUsed };
-    const daysLeft =
-      Math.round((Date.parse(`${live.endsOn}T00:00:00Z`) - Date.parse(`${t}T00:00:00Z`)) / 864e5) +
-      1;
+    const daysLeft = Math.round(
+      (Date.parse(`${live.endsOn}T00:00:00Z`) - Date.parse(`${t}T00:00:00Z`)) / 864e5
+    ) + 1;
     return { plan: live.plan, active: true, endsOn: live.endsOn, daysLeft, trialUsed };
   };
   const startFor = (subs) => {
-    const latest = subs
-      .map((s) => s.endsOn)
-      .sort()
-      .pop();
+    const latest = subs.map((s) => s.endsOn).sort().pop();
     return latest && latest >= today() ? addDays(latest, 1) : today();
   };
   return {
+    /** Current prices, for the app's upgrade screen and the admin editor. */
+    getPlans: () => plans(),
     async getEntitlement(userId) {
       return entitlementOf(await store.listSubscriptions(userId));
     },
@@ -213,10 +208,10 @@ var createSubscriptionService = (deps) => {
           userId,
           plan: "trial",
           startsOn,
-          endsOn: addDays(startsOn, PLANS.trial.days - 1),
+          endsOn: addDays(startsOn, (await plans()).trial.days - 1),
           paymentId: null,
           subKey: `trial:${userId}`,
-          createdAt: now().toISOString(),
+          createdAt: now().toISOString()
         });
       } catch (e) {
         if ((await store.listSubscriptions(userId)).some((x) => x.plan === "trial"))
@@ -231,11 +226,11 @@ var createSubscriptionService = (deps) => {
       const utr = String(input.utr ?? "").replace(/\s+/g, "");
       if (!UTR.test(utr))
         throw new SubscriptionError("validation", "UTR must be exactly 12 digits.");
-      const expected = PLANS[plan].pricePaise;
+      const expected = (await plans())[plan].pricePaise;
       if (Math.round(Number(input.amountRupees) * 100) !== expected) {
         throw new SubscriptionError(
           "validation",
-          `Amount must be \u20B9${expected / 100} for this plan.`,
+          `Amount must be \u20B9${expected / 100} for this plan.`
         );
       }
       if (await store.findPaymentByUtr(utr))
@@ -245,7 +240,7 @@ var createSubscriptionService = (deps) => {
         throw new SubscriptionError(
           "conflict",
           "You already have payments waiting for review.",
-          429,
+          429
         );
       return store.insertPayment({
         userId,
@@ -256,12 +251,12 @@ var createSubscriptionService = (deps) => {
         note: null,
         createdAt: now().toISOString(),
         reviewedAt: null,
-        reviewedBy: null,
+        reviewedBy: null
       });
     },
     async listMyPayments(userId) {
-      return (await store.listPayments(userId)).sort((a, b) =>
-        b.createdAt.localeCompare(a.createdAt),
+      return (await store.listPayments(userId)).sort(
+        (a, b) => b.createdAt.localeCompare(a.createdAt)
       );
     },
     async listPending(adminId) {
@@ -276,12 +271,12 @@ var createSubscriptionService = (deps) => {
       const reviewed = {
         reviewedAt: now().toISOString(),
         reviewedBy: adminId,
-        note: note?.slice(0, 200) ?? null,
+        note: note?.slice(0, 200) ?? null
       };
       if (decision === "reject")
         return {
           payment: await store.updatePayment(p.id, { status: "rejected", ...reviewed }),
-          subscription: null,
+          subscription: null
         };
       const subs = await store.listSubscriptions(p.userId);
       const startsOn = startFor(subs);
@@ -291,10 +286,10 @@ var createSubscriptionService = (deps) => {
           userId: p.userId,
           plan: p.plan,
           startsOn,
-          endsOn: addDays(startsOn, PLANS[p.plan].days - 1),
+          endsOn: addDays(startsOn, (await plans())[p.plan].days - 1),
           paymentId: p.id,
           subKey: `pay:${p.id}`,
-          createdAt: now().toISOString(),
+          createdAt: now().toISOString()
         });
       } catch (e) {
         if ((await store.getPayment(paymentId))?.status !== "pending")
@@ -305,9 +300,9 @@ var createSubscriptionService = (deps) => {
       }
       return {
         payment: await store.updatePayment(p.id, { status: "approved", ...reviewed }),
-        subscription,
+        subscription
       };
-    },
+    }
   };
 };
 
@@ -318,8 +313,8 @@ var rid = (v) => {
   if (!/^\d{1,20}$/.test(String(v))) throw new Error("bad id");
   return String(v);
 };
-var nul = (v) => (v === void 0 || v === null || v === "" || v === "null" ? null : v);
-var str = (v) => (nul(v) === null ? null : String(v));
+var nul = (v) => v === void 0 || v === null || v === "" || v === "null" ? null : v;
+var str = (v) => nul(v) === null ? null : String(v);
 var ts = (v) => String(nul(v) ?? "").replace(" ", "T");
 var rowToSubscription = (r) => ({
   id: String(r.ROWID),
@@ -328,7 +323,7 @@ var rowToSubscription = (r) => ({
   startsOn: String(r.starts_on),
   endsOn: String(r.ends_on),
   paymentId: str(r.payment_id),
-  createdAt: ts(r.CREATEDTIME),
+  createdAt: ts(r.CREATEDTIME)
 });
 var rowToPayment = (r) => ({
   id: String(r.ROWID),
@@ -340,58 +335,78 @@ var rowToPayment = (r) => ({
   note: str(r.note),
   createdAt: ts(r.CREATEDTIME),
   reviewedAt: str(r.reviewed_at),
-  reviewedBy: str(r.reviewed_by),
+  reviewedBy: str(r.reviewed_by)
 });
 var createCatalystSubscriptionStore = (app2) => {
-  const query = async (q, table) =>
-    (await app2.zcql().executeZCQLQuery(q)).map((r) => r[table] ?? Object.values(r)[0]);
+  const query = async (q, table) => (await app2.zcql().executeZCQLQuery(q)).map((r) => r[table] ?? Object.values(r)[0]);
   const queryAll = async (table, where) => {
     const out = [];
     for (let offset = 0; ; offset += PAGE) {
       const rows = await query(
         `SELECT * FROM ${table} WHERE ${where} ORDER BY ROWID DESC LIMIT ${offset},${PAGE}`,
-        table,
+        table
       );
       out.push(...rows);
       if (rows.length < PAGE) return out;
     }
   };
   return {
-    async listSubscriptions(userId) {
-      return (await queryAll("subscriptions", `user_id = '${esc2(userId)}'`)).map(
-        rowToSubscription,
+    async listPlanSettings() {
+      const rows = await queryAll("plan_settings", "ROWID > 0");
+      const out = {};
+      for (const r of rows)
+        out[String(r.plan_id)] = {
+          label: String(r.label),
+          pricePaise: Number(r.price_paise),
+          days: Number(r.days)
+        };
+      return out;
+    },
+    async savePlanSetting(planId, config, updatedBy) {
+      const existing = await query(
+        `SELECT ROWID FROM plan_settings WHERE plan_id = '${esc2(planId)}' LIMIT 0,1`,
+        "plan_settings"
       );
+      const cols = {
+        label: config.label,
+        price_paise: config.pricePaise,
+        days: config.days,
+        updated_by: updatedBy
+      };
+      const table = app2.datastore().table("plan_settings");
+      if (existing[0]) await table.updateRow({ ROWID: rid(String(existing[0].ROWID)), ...cols });
+      else await table.insertRow({ plan_id: planId, ...cols });
+    },
+    async listSubscriptions(userId) {
+      return (await queryAll("subscriptions", `user_id = '${esc2(userId)}'`)).map(rowToSubscription);
     },
     async insertSubscription(s) {
-      const saved = await app2
-        .datastore()
-        .table("subscriptions")
-        .insertRow({
-          user_id: s.userId,
-          plan: s.plan,
-          starts_on: s.startsOn,
-          ends_on: s.endsOn,
-          payment_id: s.paymentId,
-          ...(s.subKey ? { sub_key: s.subKey } : {}),
-        });
+      const saved = await app2.datastore().table("subscriptions").insertRow({
+        user_id: s.userId,
+        plan: s.plan,
+        starts_on: s.startsOn,
+        ends_on: s.endsOn,
+        payment_id: s.paymentId,
+        ...s.subKey ? { sub_key: s.subKey } : {}
+      });
       return rowToSubscription(saved);
     },
     async listPayments(userId) {
       return (await queryAll("payment_submissions", `user_id = '${esc2(userId)}'`)).map(
-        rowToPayment,
+        rowToPayment
       );
     },
     async getPayment(paymentId) {
       const rows = await query(
         `SELECT * FROM payment_submissions WHERE ROWID = ${rid(paymentId)} LIMIT 0,1`,
-        "payment_submissions",
+        "payment_submissions"
       );
       return rows[0] ? rowToPayment(rows[0]) : null;
     },
     async findPaymentByUtr(utr) {
       const rows = await query(
         `SELECT * FROM payment_submissions WHERE utr = '${esc2(utr)}' LIMIT 0,1`,
-        "payment_submissions",
+        "payment_submissions"
       );
       return rows[0] ? rowToPayment(rows[0]) : null;
     },
@@ -404,7 +419,7 @@ var createCatalystSubscriptionStore = (app2) => {
         status: p.status,
         note: p.note,
         reviewed_at: p.reviewedAt,
-        reviewed_by: p.reviewedBy,
+        reviewed_by: p.reviewedBy
       });
       return rowToPayment(saved);
     },
@@ -423,13 +438,11 @@ var createCatalystSubscriptionStore = (app2) => {
       return (await queryAll("payment_submissions", "status = 'pending'")).map(rowToPayment);
     },
     async listAllPayments(status) {
-      return (
-        await queryAll("payment_submissions", status ? `status = '${esc2(status)}'` : "ROWID > 0")
-      ).map(rowToPayment);
+      return (await queryAll("payment_submissions", status ? `status = '${esc2(status)}'` : "ROWID > 0")).map(rowToPayment);
     },
     async listAllSubscriptions() {
       return (await queryAll("subscriptions", "ROWID > 0")).map(rowToSubscription);
-    },
+    }
   };
 };
 
@@ -455,14 +468,17 @@ var deny = (res) => {
   res.status(403).json({ error: "forbidden", message: "Request blocked." });
 };
 var jsonErrors = () => (err, _req, res, _next) => {
-  const status = Number(err?.status ?? err?.statusCode ?? 500);
+  const status = Number(
+    err?.status ?? err?.statusCode ?? 500
+  );
   if (status === 413)
     return void res.status(413).json({ error: "too_large", message: "That request is too large." });
   if (status >= 400 && status < 500)
-    return void res
-      .status(400)
-      .json({ error: "bad_request", message: "That request could not be read." });
-  console.error("unhandled error:", String(err?.message ?? typeof err).slice(0, 200));
+    return void res.status(400).json({ error: "bad_request", message: "That request could not be read." });
+  console.error(
+    "unhandled error:",
+    String(err?.message ?? typeof err).slice(0, 200)
+  );
   res.status(500).json({ error: "server", message: "Something went wrong. Try again." });
 };
 var notFound = () => (_req, res) => {
@@ -476,11 +492,13 @@ hardenApp(app);
 app.use(requestGuard());
 app.use(import_express.default.json({ limit: "32kb" }));
 var ai = () => createSarvamClient({ apiKey: process.env.SARVAM_API_KEY });
-var SYSTEM =
-  "You are Wealthspan's accountant assistant for an Indian user. Amounts are in rupees. Reply briefly in the user's language (Hindi, Hinglish or English).";
+var SYSTEM = "You are Wealthspan's accountant assistant for an Indian user. Amounts are in rupees. Reply briefly in the user's language (Hindi, Hinglish or English).";
 var fail = (res, e) => {
   if (e instanceof AiError) return res.status(e.status).json({ error: e.code, message: e.message });
-  console.error("chat error:", String(e?.message ?? typeof e).slice(0, 200));
+  console.error(
+    "chat error:",
+    String(e?.message ?? typeof e).slice(0, 200)
+  );
   return res.status(500).json({ error: "server", message: "Something went wrong. Try again." });
 };
 app.post("/chat", async (req, res) => {
@@ -496,30 +514,29 @@ app.post("/chat", async (req, res) => {
   }
   try {
     const entitlement = await createSubscriptionService({
-      store: createCatalystSubscriptionStore(c),
+      store: createCatalystSubscriptionStore(c)
     }).getEntitlement(userId);
     if (!entitlement.active)
       return res.status(402).json({
         error: "subscription_required",
-        message: "Start your free trial or subscribe to chat with your accountant.",
+        message: "Start your free trial or subscribe to chat with your accountant."
       });
     const quota = await createChatQuota({ store: createCatalystChatUsageStore(c) }).consume(userId);
     if (!quota.ok)
       return res.status(429).json({
         error: "daily_limit",
-        message: `Daily chat limit (${quota.limit} messages) reached. Try again tomorrow.`,
+        message: `Daily chat limit (${quota.limit} messages) reached. Try again tomorrow.`
       });
   } catch (e) {
     return fail(res, e);
   }
   const raw = Array.isArray(req.body?.messages) ? req.body.messages : [];
-  const messages = raw
-    .filter((m) => (m?.role === "user" || m?.role === "assistant") && typeof m.content === "string")
-    .slice(-12)
-    .map((m) => ({
-      role: m.role,
-      content: m.content.slice(0, 2e3),
-    }));
+  const messages = raw.filter(
+    (m) => (m?.role === "user" || m?.role === "assistant") && typeof m.content === "string"
+  ).slice(-12).map((m) => ({
+    role: m.role,
+    content: m.content.slice(0, 2e3)
+  }));
   if (!messages.length)
     return res.status(400).json({ error: "validation", message: "Send at least one message." });
   try {

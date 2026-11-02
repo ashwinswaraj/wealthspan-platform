@@ -10,9 +10,10 @@
  *   GET    /summary?from&to&projectId
  *   GET/POST /projects|accounts|events|loans|investments ; PATCH/DELETE /<entity>/:id
  *   POST   /events/:id/conclude|reopen, /loans/:id/close|reopen, /projects|accounts/:id/archive|unarchive
- *   GET    /subscription ; POST /subscription/trial ; GET|POST /subscription/payments
+ *   GET    /subscription ; POST /subscription/trial ; GET|POST /subscription/payments ; GET /plans ; GET /broadcasts
  *   GET    /admin/me                       (any logged-in user: are they an admin?)
  *   GET    /admin/overview|users|payments|ledger|audit|health ; POST /admin/payments/:id/approve|reject   (admins only)
+ *   GET    /admin/plans ; PUT /admin/plans/:id ; GET|POST /admin/broadcasts   (admins only)
  *
  * The user is ALWAYS taken from the Catalyst login session, never from the request.
  */
@@ -33,6 +34,7 @@ import {
 import {
   createSubscriptionService,
   createCatalystSubscriptionStore,
+  loadPlans,
   SubscriptionError,
 } from "../../../../src/features/subscription";
 import { createAdminService, createCatalystAdminStore } from "../../../../src/features/admin";
@@ -81,9 +83,14 @@ app.use(async (req: Req, res, next) => {
     req.c = c;
     const fin = createCatalystFinanceStore(c);
     const subStore = createCatalystSubscriptionStore(c);
-    req.sub = createSubscriptionService({ store: subStore, adminIds: [] });
+    req.sub = createSubscriptionService({
+      store: subStore,
+      plans: () => loadPlans(subStore),
+      adminIds: [],
+    });
     req.admin = createAdminService({
       store: createCatalystAdminStore(c),
+      plans: subStore,
       adminEmails: ADMIN_EMAILS(),
       adminUserIds: ADMIN_USER_IDS(),
     });
@@ -246,6 +253,20 @@ app.post(
   "/subscription/payments",
   wrap((req) => req.sub!.submitPayment(req.userId!, req.body ?? {})),
 );
+/** Current plan prices (admin-editable), for the upgrade screen. */
+app.get(
+  "/plans",
+  wrap((req) => req.sub!.getPlans().then((plans) => ({ plans }))),
+);
+/** Announcements for this user's tier: everyone, plus Free / Go / Pro as it applies. */
+app.get(
+  "/broadcasts",
+  wrap(async (req) => {
+    const e = await req.sub!.getEntitlement(req.userId!);
+    const tier = !e.active ? "FREE" : e.plan === "trial" ? "GO" : "PRO";
+    return { broadcasts: await req.admin!.broadcastsFor(tier) };
+  }),
+);
 
 /* ---- admin console ---- */
 const isAdmin = (req: Req) => req.admin!.isAdmin({ email: req.email, userId: req.userId });
@@ -292,6 +313,22 @@ app.get(
   ),
 );
 app.get(
+  "/admin/plans",
+  wrap((req) => req.admin!.plans().then((plans) => ({ plans }))),
+);
+app.put(
+  "/admin/plans/:id",
+  wrap((req) => req.admin!.savePlan(req.userId!, req.params.id, req.body ?? {})),
+);
+app.get(
+  "/admin/broadcasts",
+  wrap((req) => req.admin!.broadcasts().then((broadcasts) => ({ broadcasts }))),
+);
+app.post(
+  "/admin/broadcasts",
+  wrap((req) => req.admin!.sendBroadcast(req.userId!, req.body ?? {})),
+);
+app.get(
   "/admin/ledger",
   wrap((req) => req.admin!.ledger().then((rows) => ({ rows }))),
 );
@@ -306,6 +343,7 @@ for (const decision of ["approve", "reject"] as const) {
       // The admin check already passed, so this service instance may review.
       const svc = createSubscriptionService({
         store: createCatalystSubscriptionStore(req.c as never),
+        plans: () => loadPlans(createCatalystSubscriptionStore(req.c as never)),
         adminIds: [req.userId!],
       });
       const note = typeof req.body?.note === "string" ? req.body.note : undefined;

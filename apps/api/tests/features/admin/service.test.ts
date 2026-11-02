@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createAdminService, type AdminStore } from "../../../src/features/admin";
+import { createAdminService, type AdminStore, type Broadcast } from "../../../src/features/admin";
+import type { PlanConfig, PlanSettingsStore } from "../../../src/features/subscription";
 import type { PaymentSubmission, Subscription } from "../../../src/features/subscription";
 
 const sub = (
@@ -33,7 +34,7 @@ const pay = (
   reviewedBy: null,
 });
 
-const store = (): AdminStore => ({
+const store = (): Omit<AdminStore, "insertAudit" | "listBroadcasts" | "insertBroadcast"> => ({
   listUsers: async () => [
     {
       id: "10001",
@@ -97,16 +98,40 @@ const store = (): AdminStore => ({
     },
   ],
 });
+const broadcasts: Broadcast[] = [];
+const audits: Array<Parameters<AdminStore["insertAudit"]>[0]> = [];
+const withExtras = (): AdminStore => ({
+  ...store(),
+  insertAudit: async (row) => {
+    audits.push(row);
+  },
+  listBroadcasts: async () => [...broadcasts].reverse(),
+  insertBroadcast: async (b) => {
+    const saved = { ...b, id: String(broadcasts.length + 1), createdAt: "2026-10-31T06:00:00" };
+    broadcasts.push(saved);
+    return saved;
+  },
+});
+const planStore = (): PlanSettingsStore & { saved: Record<string, PlanConfig> } => {
+  const saved: Record<string, PlanConfig> = {};
+  return {
+    saved,
+    listPlanSettings: async () => ({ ...saved }),
+    savePlanSetting: async (id, cfg) => {
+      saved[id] = cfg;
+    },
+  };
+};
 const pinned = (ids: string[]) =>
   createAdminService({
-    store: store(),
+    store: withExtras(),
     adminEmails: ["admin@example.com"],
     adminUserIds: ids,
     now: () => new Date("2026-10-31T06:00:00Z"),
   });
 const svc = () =>
   createAdminService({
-    store: store(),
+    store: withExtras(),
     adminEmails: [" admin@example.com "],
     now: () => new Date("2026-10-31T06:00:00Z"),
   });
@@ -184,5 +209,90 @@ describe("admin pinning (e-mail AND user id)", () => {
   it("the ledger never shows what users typed", async () => {
     const row = (await svc().ledger())[0];
     expect(row.counterparty).toBe("Hidden");
+  });
+});
+
+describe("plan editing", () => {
+  const make = () => {
+    const plans = planStore();
+    return {
+      plans,
+      svc: createAdminService({ store: withExtras(), plans, adminEmails: ["a@b.com"] }),
+    };
+  };
+  it("saves a changed price and returns it with the defaults for the rest", async () => {
+    const { svc, plans } = make();
+    const r = await svc.savePlan("1", "pro_monthly", {
+      label: "Pro monthly",
+      priceRupees: 249,
+      days: 30,
+    });
+    expect(r).toEqual({ planId: "pro_monthly", label: "Pro monthly", pricePaise: 24900, days: 30 });
+    expect(plans.saved.pro_monthly?.pricePaise).toBe(24900);
+    const all = await svc.plans();
+    expect(all.pro_monthly.pricePaise).toBe(24900);
+    expect(all.pro_annual.pricePaise).toBe(199900);
+    expect(audits.at(-1)).toMatchObject({ action: "plan_updated", entity: "plan" });
+    expect(audits.at(-1)?.detail).toContain("pro_monthly");
+  });
+  it("rejects bad input", async () => {
+    const { svc } = make();
+    await expect(
+      svc.savePlan("1", "pro_monthly", { label: "x", priceRupees: 249, days: 30 }),
+    ).rejects.toThrow();
+    await expect(
+      svc.savePlan("1", "pro_monthly", { label: "Pro", priceRupees: 0, days: 30 }),
+    ).rejects.toThrow();
+    await expect(
+      svc.savePlan("1", "pro_monthly", { label: "Pro", priceRupees: 1.234, days: 30 }),
+    ).rejects.toThrow();
+    await expect(
+      svc.savePlan("1", "pro_monthly", { label: "Pro", priceRupees: 199, days: 0 }),
+    ).rejects.toThrow();
+    await expect(
+      svc.savePlan("1", "trial", { label: "Trial", priceRupees: 10, days: 30 }),
+    ).rejects.toThrow();
+    await expect(
+      svc.savePlan("1", "gold", { label: "Gold", priceRupees: 10, days: 30 }),
+    ).rejects.toThrow();
+  });
+});
+
+describe("broadcasts", () => {
+  const svc2 = () => createAdminService({ store: withExtras(), adminEmails: ["a@b.com"] });
+  it("validates and stores a broadcast, and audits it", async () => {
+    const b = await svc2().sendBroadcast("1", {
+      title: "Downtime tonight",
+      body: "We will be down 10 minutes.",
+      audience: "ALL",
+      severity: "WARNING",
+    });
+    expect(b).toMatchObject({ title: "Downtime tonight", audience: "ALL", severity: "WARNING" });
+    expect(audits.at(-1)).toMatchObject({ action: "broadcast_sent" });
+    await expect(
+      svc2().sendBroadcast("1", { title: "", body: "x y", audience: "ALL", severity: "INFO" }),
+    ).rejects.toThrow();
+    await expect(
+      svc2().sendBroadcast("1", { title: "Hi", body: "Hello", audience: "NOPE", severity: "INFO" }),
+    ).rejects.toThrow();
+  });
+  it("users see broadcasts for everyone and for their own tier only", async () => {
+    const s = svc2();
+    await s.sendBroadcast("1", {
+      title: "For pro",
+      body: "Pro news",
+      audience: "PRO",
+      severity: "INFO",
+    });
+    await s.sendBroadcast("1", {
+      title: "For free",
+      body: "Free news",
+      audience: "FREE",
+      severity: "INFO",
+    });
+    const seenByPro = (await s.broadcastsFor("PRO")).map((b) => b.title);
+    expect(seenByPro).toContain("For pro");
+    expect(seenByPro).toContain("Downtime tonight");
+    expect(seenByPro).not.toContain("For free");
   });
 });

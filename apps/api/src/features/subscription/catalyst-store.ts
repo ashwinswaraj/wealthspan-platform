@@ -4,6 +4,7 @@
  * `payment_submissions.utr` is UNIQUE in the table, so a duplicate UTR fails even if two requests race.
  */
 import type { CatalystLike } from "../finance/catalyst-store";
+import type { PlanConfig, PlanSettingsStore } from "./plans";
 import type {
   PaymentStatus,
   PaymentSubmission,
@@ -48,10 +49,11 @@ export const rowToPayment = (r: Row): PaymentSubmission => ({
 
 export const createCatalystSubscriptionStore = (
   app: CatalystLike,
-): SubscriptionStore & {
-  listAllPayments(status?: PaymentStatus): Promise<PaymentSubmission[]>;
-  listAllSubscriptions(): Promise<Subscription[]>;
-} => {
+): SubscriptionStore &
+  PlanSettingsStore & {
+    listAllPayments(status?: PaymentStatus): Promise<PaymentSubmission[]>;
+    listAllSubscriptions(): Promise<Subscription[]>;
+  } => {
   const query = async (q: string, table: string): Promise<Row[]> =>
     (await app.zcql().executeZCQLQuery(q)).map((r) => r[table] ?? Object.values(r)[0]);
   const queryAll = async (table: string, where: string): Promise<Row[]> => {
@@ -67,6 +69,32 @@ export const createCatalystSubscriptionStore = (
   };
 
   return {
+    async listPlanSettings() {
+      const rows = await queryAll("plan_settings", "ROWID > 0");
+      const out: Partial<Record<PlanId, PlanConfig>> = {};
+      for (const r of rows)
+        out[String(r.plan_id) as PlanId] = {
+          label: String(r.label),
+          pricePaise: Number(r.price_paise),
+          days: Number(r.days),
+        };
+      return out;
+    },
+    async savePlanSetting(planId, config, updatedBy) {
+      const existing = await query(
+        `SELECT ROWID FROM plan_settings WHERE plan_id = '${esc(planId)}' LIMIT 0,1`,
+        "plan_settings",
+      );
+      const cols = {
+        label: config.label,
+        price_paise: config.pricePaise,
+        days: config.days,
+        updated_by: updatedBy,
+      };
+      const table = app.datastore().table("plan_settings");
+      if (existing[0]) await table.updateRow({ ROWID: rid(String(existing[0].ROWID)), ...cols });
+      else await table.insertRow({ plan_id: planId, ...cols });
+    },
     async listSubscriptions(userId) {
       return (await queryAll("subscriptions", `user_id = '${esc(userId)}'`)).map(rowToSubscription);
     },

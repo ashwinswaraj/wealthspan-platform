@@ -2,7 +2,12 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "@wealthspan/ui/design-system";
 import { LoginScreen, useSession } from "@/features/wealthspan-auth";
-import { HomeScreen, SideDrawer } from "@/features/wealthspan-shell";
+import {
+  HomeScreen,
+  NotificationsSheet,
+  SideDrawer,
+  useBroadcasts,
+} from "@/features/wealthspan-shell";
 import type { Project } from "@/features/projects";
 import { SheetScreen, type SheetTarget } from "@/features/sheets";
 
@@ -12,6 +17,8 @@ export default function AppHome() {
   const [drawer, setDrawer] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
   const [sheet, setSheet] = useState<SheetTarget | null>(null);
+  const [inbox, setInbox] = useState(false);
+  const news = useBroadcasts();
 
   if (session.status === "loading")
     return (
@@ -40,7 +47,11 @@ export default function AppHome() {
         displayName="there"
         onOpenMenu={() => setDrawer(true)}
         onUpgrade={() => undefined}
-        onNotifications={() => undefined}
+        onNotifications={() => {
+          setInbox(true);
+          news.markSeen();
+        }}
+        hasUnread={news.hasUnread}
         onAsk={() => undefined}
         onVoice={() => undefined}
       />
@@ -60,6 +71,9 @@ export default function AppHome() {
         }}
         onOpenSettings={() => undefined}
       />
+      {inbox ? (
+        <NotificationsSheet broadcasts={news.broadcasts} onClose={() => setInbox(false)} />
+      ) : null}
       {sheet ? (
         <SheetScreen
           target={sheet}

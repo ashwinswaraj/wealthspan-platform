@@ -20,7 +20,7 @@ Calm, plain and precise, like a good accountant talking to a friend.
 ## Visual
 
 - Colors: brand blue primary on a soft off-white surface ([Colors](Assets/77_Colors.md)).
-- Type: Manrope headlines, Inter body ([Fonts](Assets/78_Fonts.md)).
+- Type: Inter everywhere (login headline in Newsreader) ([Fonts](Assets/78_Fonts.md)).
 - Amounts are shown as ₹ with Indian digit grouping; PDF exports use "Rs." because the built-in PDF fonts lack the ₹ glyph.
 - Tokens and components live in `@wealthspan/ui`; see `docs/Frontend/`.
 

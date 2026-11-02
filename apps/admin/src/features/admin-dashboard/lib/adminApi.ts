@@ -34,7 +34,16 @@ async function call<T>(path: string, init: { method?: string; body?: unknown } =
     },
     body: init.body ? JSON.stringify(init.body) : undefined,
   });
-  if (!res.ok) throw new AdminApiError(res.status, `Admin API ${res.status}`);
+  if (!res.ok) {
+    let message = `Admin API ${res.status}`;
+    try {
+      const body = (await res.json()) as { message?: string };
+      if (typeof body.message === "string" && body.message) message = body.message;
+    } catch {
+      /* keep the generic message */
+    }
+    throw new AdminApiError(res.status, message);
+  }
   return (await res.json()) as T;
 }
 
@@ -101,3 +110,62 @@ export const useAdminHealth = () =>
     refetchInterval: 30_000,
     queryFn: () => call<{ checks: AdminHealthRow[] }>("/health").then((r) => r.checks),
   });
+
+export interface AdminPlan {
+  label: string;
+  pricePaise: number;
+  days: number;
+}
+export type AdminPlanId = "trial" | "pro_monthly" | "pro_annual";
+
+export const useAdminPlans = () =>
+  useQuery({
+    queryKey: ["admin", "plans"],
+    retry: false,
+    queryFn: () => call<{ plans: Record<AdminPlanId, AdminPlan> }>("/plans").then((r) => r.plans),
+  });
+
+export const useSavePlan = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { id: AdminPlanId; label: string; priceRupees: number; days: number }) =>
+      call(`/plans/${v.id}`, {
+        method: "PUT",
+        body: { label: v.label, priceRupees: v.priceRupees, days: v.days },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "plans"] });
+      qc.invalidateQueries({ queryKey: ["admin", "payments"] });
+      qc.invalidateQueries({ queryKey: ["admin", "overview"] });
+      qc.invalidateQueries({ queryKey: ["admin", "audit"] });
+    },
+  });
+};
+
+export interface AdminBroadcast {
+  id: string;
+  title: string;
+  body: string;
+  audience: "ALL" | "FREE" | "GO" | "PRO";
+  severity: "INFO" | "WARNING" | "CRITICAL";
+  createdAt: string;
+}
+
+export const useAdminBroadcasts = () =>
+  useQuery({
+    queryKey: ["admin", "broadcasts"],
+    retry: false,
+    queryFn: () => call<{ broadcasts: AdminBroadcast[] }>("/broadcasts").then((r) => r.broadcasts),
+  });
+
+export const useSendBroadcast = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { title: string; body: string; audience: string; severity: string }) =>
+      call<AdminBroadcast>("/broadcasts", { method: "POST", body: v }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "broadcasts"] });
+      qc.invalidateQueries({ queryKey: ["admin", "audit"] });
+    },
+  });
+};
