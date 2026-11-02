@@ -29,6 +29,8 @@ jobs:
         run: pnpm audit --audit-level high
 
   codeql:
+    # Code scanning needs a public repo or GitHub Advanced Security; skipped on private repos without it.
+    if: ${{ !github.event.repository.private }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
