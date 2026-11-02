@@ -1,24 +1,21 @@
-# Order Desk
+# Entries & Transactions
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
-Describe the scope and intent of **Order Desk** for the Jobrio platform.
+How money movements are entered and viewed.
 
-## Scope
+## Model
 
-- What this document covers
-- What it explicitly does not cover
+- **All money movements are ONE transactions table.** A project is a label on a row.
+- Types: `income`, `expense`, `transfer` (own account to own account; never counts toward profit).
+- Required: project, account, payment mode, category, amount (paise), date. Payment mode must suit the account kind.
+- Entries are created by hand in a sheet or by the chatbot (`created_by`: `manual`, `chatbot`, `system`).
+- Debt/EMI, investments and festival spending are linked via `loan_id`, `investment_id`, `event_id`.
 
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
+API: `/finance/transactions` (list, create, update, delete) and `/finance/summary`. Lifecycle: `31_Order_Lifecycle.md`.
 
 ## References
 
-- [Master Context](../../00_Master_Context.md)
+- [Data model](../Database/41_Wealthspan_Data_Model.md)

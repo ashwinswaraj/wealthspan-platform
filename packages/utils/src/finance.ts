@@ -14,7 +14,7 @@ import type {
   FinanceLoan,
   FinanceSummary,
   FinanceTransaction,
-} from "@jobrio/types";
+} from "@wealthspan/types";
 
 /* ------------------------------------------------------------------ *
  * Money helpers
@@ -22,8 +22,7 @@ import type {
 
 /** "1,200.50" / "₹500" / 500 → 120050 paise. Returns null if not a valid amount. */
 export const rupeesToPaise = (value: number | string): number | null => {
-  const n =
-    typeof value === "number" ? value : Number(String(value).replace(/[₹,\s]/g, ""));
+  const n = typeof value === "number" ? value : Number(String(value).replace(/[₹,\s]/g, ""));
   if (!Number.isFinite(n)) return null;
   const paise = Math.round(n * 100);
   // Reject more than 2 decimal places instead of silently rounding.
@@ -165,8 +164,10 @@ export const accountBalances = (
   for (const a of live(accounts)) bal[a.id] = a.openingBalancePaise;
   for (const tx of live(transactions)) {
     if (upTo && tx.date > upTo) continue;
-    if (tx.type === "income" && tx.accountId && tx.accountId in bal) bal[tx.accountId] += tx.amountPaise;
-    else if (tx.type === "expense" && tx.accountId && tx.accountId in bal) bal[tx.accountId] -= tx.amountPaise;
+    if (tx.type === "income" && tx.accountId && tx.accountId in bal)
+      bal[tx.accountId] += tx.amountPaise;
+    else if (tx.type === "expense" && tx.accountId && tx.accountId in bal)
+      bal[tx.accountId] -= tx.amountPaise;
     else if (tx.type === "transfer") {
       if (tx.fromAccountId && tx.fromAccountId in bal) bal[tx.fromAccountId] -= tx.amountPaise;
       if (tx.toAccountId && tx.toAccountId in bal) bal[tx.toAccountId] += tx.amountPaise;
@@ -181,7 +182,10 @@ export const accountBalances = (
  */
 export const loanOutstanding = (
   loan: Pick<FinanceLoan, "id" | "principalPaise">,
-  transactions: readonly Pick<FinanceTransaction, "type" | "loanId" | "amountPaise" | "deletedAt">[],
+  transactions: readonly Pick<
+    FinanceTransaction,
+    "type" | "loanId" | "amountPaise" | "deletedAt"
+  >[],
 ): number => {
   const paid = live(transactions)
     .filter((t) => t.type === "expense" && t.loanId === loan.id)
@@ -197,9 +201,8 @@ const CARD_BILL_WORDS =
   /(credit\s*card|card\s*(bill|payment|due|dues|outstanding)|cc\s*(bill|payment)|\bcard\s*pay)/i;
 
 /** "HDFC credit card bill" typed as an expense is almost certainly a transfer. */
-export const looksLikeCardBillPayment = (
-  ...texts: Array<string | null | undefined>
-): boolean => texts.some((t) => !!t && CARD_BILL_WORDS.test(t));
+export const looksLikeCardBillPayment = (...texts: Array<string | null | undefined>): boolean =>
+  texts.some((t) => !!t && CARD_BILL_WORDS.test(t));
 
 const dayDiff = (a: string, b: string) =>
   Math.abs(Math.round((Date.parse(`${a}T00:00:00Z`) - Date.parse(`${b}T00:00:00Z`)) / 86_400_000));

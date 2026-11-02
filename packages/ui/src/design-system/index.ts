@@ -1,9 +1,9 @@
 /**
- * Jobrio Design System — SINGLE SOURCE OF TRUTH.
+ * Wealthspan Design System — SINGLE SOURCE OF TRUTH.
  *
- * Every UI concern for the Jobrio app is exported from here.
- * Pages and features MUST import UI from `@jobrio/ui/design-system` — never reach into
- * `@jobrio/ui/components/*` directly.
+ * Every UI concern for the Wealthspan app is exported from here.
+ * Pages and features MUST import UI from `@wealthspan/ui/design-system` — never reach into
+ * `@wealthspan/ui/components/*` directly.
  *
  * To add a new component:
  *   1. Add it inside `src/design-system/**`.
@@ -43,11 +43,11 @@ export {
 export { Spinner, type SpinnerProps } from "./primitives/Spinner";
 export { ProgressBar } from "./primitives/ProgressBar";
 export {
-  JobrioToolbar,
-  JobrioFilterButton,
-  JobrioSortButton,
-  type JobrioToolbarProps,
-} from "./primitives/JobrioToolbar";
+  WealthspanToolbar,
+  WealthspanFilterButton,
+  WealthspanSortButton,
+  type WealthspanToolbarProps,
+} from "./primitives/WealthspanToolbar";
 
 // Layout
 export { AuthContainer, DashboardContainer, SectionContainer } from "./layout/Container";

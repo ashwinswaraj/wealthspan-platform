@@ -1,24 +1,11 @@
 # Logo
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+An arc mark inside a square tile, drawn with an animated stroke on the loading and login screens (`wealthspan-arc-draw` in `apps/web/src/styles.css`).
 
-Describe the scope and intent of **Logo** for the Jobrio platform.
+- Light theme: white tile, black mark. Dark: black tile, white mark (`--logo-tile`, `--logo-mark`).
+- Class `.wealthspan-logo-tile`; no border or outline.
+- Do not recolor to the brand blue, stretch, or add effects.
 
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Final vector files (SVG / PNG) are TBD; see [Brand Assets](80_Brand_Assets.md).

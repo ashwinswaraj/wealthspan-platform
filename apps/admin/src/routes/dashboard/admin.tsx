@@ -8,7 +8,8 @@ export const Route = createFileRoute("/dashboard/admin")({
       { title: "Admin | Wealthspan" },
       {
         name: "description",
-        content: "Wealthspan admin console: users, subscription payments, ledger and system health.",
+        content:
+          "Wealthspan admin console: users, subscription payments, ledger and system health.",
       },
       { name: "robots", content: "noindex, nofollow" },
     ],

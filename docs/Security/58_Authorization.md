@@ -1,24 +1,5 @@
 # Authorization
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **Authorization** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+See [RBAC](RBAC.md). Core rules: (1) user id only from the session; (2) every query filters by `user_id`; (3) ids in URLs are checked to belong to the user (a foreign id answers not found); (4) admin routes need pinned admin identity; (5) chat requires an active plan; (6) the chatbot, when it gets tools, acts only as the signed-in user and needs server-stored confirmation for risky actions.

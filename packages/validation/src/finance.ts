@@ -9,7 +9,7 @@
  * chatbot) for a different reason.
  *
  * `amount` inputs are RUPEES typed by a person (number or "1,200.50");
- * conversion to integer paise happens in @jobrio/utils.
+ * conversion to integer paise happens in @wealthspan/utils.
  */
 
 import {
@@ -23,14 +23,15 @@ import {
   TRANSACTION_TYPES,
   type AccountKind,
   type PaymentModeId,
-} from "@jobrio/constants/finance";
+} from "@wealthspan/constants/finance";
 
 export type FieldErrors = Record<string, string>;
 
 /** ₹100 crore — a sanity ceiling that catches typos like an extra zero or two. */
 export const MAX_AMOUNT_RUPEES = 1_000_000_000;
 
-const isBlank = (v: unknown) => v === undefined || v === null || (typeof v === "string" && !v.trim());
+const isBlank = (v: unknown) =>
+  v === undefined || v === null || (typeof v === "string" && !v.trim());
 
 /* ------------------------------------------------------------------ *
  * Field validators
@@ -76,7 +77,8 @@ export const validateDate = (value: unknown, today?: string, label = "Date"): st
 
 export const validatePaymentMode = (value: unknown, label = "Payment mode"): string | null => {
   if (isBlank(value)) return `${label} is required.`;
-  if (!PAYMENT_MODE_IDS.includes(value as PaymentModeId)) return `Please choose a valid ${label.toLowerCase()}.`;
+  if (!PAYMENT_MODE_IDS.includes(value as PaymentModeId))
+    return `Please choose a valid ${label.toLowerCase()}.`;
   return null;
 };
 
@@ -90,7 +92,9 @@ export const validatePaymentModeForAccount = (
     : `A ${accountKind.replace("_", " ")} account can't be used with this payment mode.`;
 
 const maxLen = (v: unknown, max: number, label: string): string | null =>
-  typeof v === "string" && v.trim().length > max ? `${label} must be at most ${max} characters.` : null;
+  typeof v === "string" && v.trim().length > max
+    ? `${label} must be at most ${max} characters.`
+    : null;
 
 /* ------------------------------------------------------------------ *
  * Transactions
@@ -164,7 +168,8 @@ export const validateTransactionInput = (
     if (!isBlank(input.projectId)) set("projectId", "A transfer does not belong to a project.");
     if (!isBlank(input.category)) set("category", "A transfer has no category.");
     if (!isBlank(input.eventId)) set("eventId", "A transfer cannot belong to an event.");
-    if (!isBlank(input.loanId)) set("loanId", "Record loan payments as an expense linked to the loan.");
+    if (!isBlank(input.loanId))
+      set("loanId", "Record loan payments as an expense linked to the loan.");
     if (!isBlank(input.source)) set("source", "Income source is only for income.");
   }
 
@@ -209,7 +214,8 @@ export const validateAccountInput = (input: {
     const v = parseRupees(input.openingBalance);
     if (v === null) e.openingBalance = "Opening balance must be a number.";
     else if (v > MAX_AMOUNT_RUPEES) e.openingBalance = "Opening balance looks too large.";
-    else if (Math.round(v * 100) / 100 !== v) e.openingBalance = "Opening balance can have at most 2 decimal places.";
+    else if (Math.round(v * 100) / 100 !== v)
+      e.openingBalance = "Opening balance can have at most 2 decimal places.";
   }
   if (!isBlank(input.creditLimit)) {
     if (input.kind !== "credit_card") e.creditLimit = "Credit limit is only for credit cards.";
@@ -242,15 +248,18 @@ export const validateLoanInput = (input: {
   }
   if (!isBlank(input.interestRatePct)) {
     const r = Number(input.interestRatePct);
-    if (!Number.isFinite(r) || r < 0 || r > 100) e.interestRatePct = "Interest rate must be between 0 and 100.";
+    if (!Number.isFinite(r) || r < 0 || r > 100)
+      e.interestRatePct = "Interest rate must be between 0 and 100.";
   }
   if (!isBlank(input.emiDayOfMonth)) {
     const d = Number(input.emiDayOfMonth);
-    if (!Number.isInteger(d) || d < 1 || d > 31) e.emiDayOfMonth = "EMI day must be between 1 and 31.";
+    if (!Number.isInteger(d) || d < 1 || d > 31)
+      e.emiDayOfMonth = "EMI day must be between 1 and 31.";
   }
   if (!isBlank(input.tenureMonths)) {
     const t = Number(input.tenureMonths);
-    if (!Number.isInteger(t) || t < 1 || t > 600) e.tenureMonths = "Tenure must be between 1 and 600 months.";
+    if (!Number.isInteger(t) || t < 1 || t > 600)
+      e.tenureMonths = "Tenure must be between 1 and 600 months.";
   }
   return e;
 };
@@ -290,9 +299,17 @@ export const validateEventInput = (input: {
     const err = validateAmountRupees(input.budget, "Budget");
     if (err) e.budget = err;
   }
-  if (!isBlank(input.startDate) && !isValidIsoDate(input.startDate)) e.startDate = "Start date must be a valid date.";
-  if (!isBlank(input.endDate) && !isValidIsoDate(input.endDate)) e.endDate = "End date must be a valid date.";
-  if (!e.startDate && !e.endDate && input.startDate && input.endDate && input.endDate < input.startDate)
+  if (!isBlank(input.startDate) && !isValidIsoDate(input.startDate))
+    e.startDate = "Start date must be a valid date.";
+  if (!isBlank(input.endDate) && !isValidIsoDate(input.endDate))
+    e.endDate = "End date must be a valid date.";
+  if (
+    !e.startDate &&
+    !e.endDate &&
+    input.startDate &&
+    input.endDate &&
+    input.endDate < input.startDate
+  )
     e.endDate = "End date can't be before the start date.";
   return e;
 };

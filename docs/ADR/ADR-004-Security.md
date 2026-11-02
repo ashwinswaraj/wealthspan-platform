@@ -1,24 +1,16 @@
-# ADR-004 Security
+# ADR-004: Security baseline
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Accepted · Last updated: 2026-11-01
 
-## Purpose
+## Decision
 
-Describe the scope and intent of **ADR-004 Security** for the Jobrio platform.
+1. Login is Catalyst Cloud Scale Embedded Authentication (Google, Zoho, email). Session cookie, same domain as the functions.
+2. Every function resolves the user from the session; no user id is accepted from the client.
+3. CSRF: writes need header `X-Requested-With: wealthspan`; `Sec-Fetch-Site: cross-site` is refused; functions never answer CORS preflights.
+4. Admin rights come only from env vars `ADMIN_EMAILS` and `ADMIN_USER_IDS` (when both are set, an admin needs both).
+5. Chat needs an active plan or trial and has a daily quota (40 messages per IST day).
+6. Secrets (`SARVAM_API_KEY`) live only in function env vars, never in the repo.
 
-## Scope
+## Consequences
 
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Rate limits are per instance and in memory. A review of the whole flow is required before launch. See [Security docs](../Security/Auth_Flow.md).

@@ -1,24 +1,24 @@
 # Target Market
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## Primary segments
 
-Describe the scope and intent of **Target Market** for the Jobrio platform.
+| Segment                              | Need                                                    |
+| ------------------------------------ | ------------------------------------------------------- |
+| Salaried with side income            | Track salary, side gigs, EMIs and SIPs together         |
+| Small shop owners (kirana, services) | Separate shop profit from household money               |
+| Freelancers                          | Income by customer/source, expenses, exportable reports |
+| Families                             | Plan and track festival and function spending           |
 
-## Scope
+## Geography and language
 
-- What this document covers
-- What it explicitly does not cover
+India first: rupees, UPI, April–March financial year. Interface is English in Phase 1; the Sarvam model leaves room for Indian-language chat later (Planned, not built).
 
-## Details
+## Not targeted in Phase 1
 
-_TODO: fill in._
+Companies needing GST filing, payroll or multi-user access (Phase 3), and users who expect automatic bank sync (Phase 2).
 
-## Open Questions
+## Open questions
 
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+- Market size and acquisition channels: TBD, to be researched by the owner.

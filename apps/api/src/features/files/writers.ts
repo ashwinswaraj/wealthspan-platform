@@ -1,6 +1,16 @@
 import ExcelJS from "exceljs";
 import PDFDocument from "pdfkit";
-import { AlignmentType, Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType } from "docx";
+import {
+  AlignmentType,
+  Document,
+  Packer,
+  Paragraph,
+  Table,
+  TableCell,
+  TableRow,
+  TextRun,
+  WidthType,
+} from "docx";
 import { inr, safeText, type Report } from "./report";
 
 /* ---------------------------------- CSV ---------------------------------- */
@@ -35,16 +45,28 @@ export async function toXlsx(r: Report): Promise<Buffer> {
   for (const b of r.breakdowns) {
     sum.addRow([]);
     sum.addRow([b.title]).font = { bold: true };
-    for (const l of b.lines) sum.addRow([safeText(l.label), l.amount]).getCell(2).numFmt = "#,##0.00";
+    for (const l of b.lines)
+      sum.addRow([safeText(l.label), l.amount]).getCell(2).numFmt = "#,##0.00";
   }
   sum.getColumn(1).width = 40;
   sum.getColumn(2).width = 18;
 
   const ws = wb.addWorksheet("Transactions", { views: [{ state: "frozen", ySplit: 1 }] });
-  ws.columns = r.columns.map((c) => ({ header: c.header, key: c.key, width: c.key === "note" ? 40 : c.key === "amount" ? 14 : 18 }));
+  ws.columns = r.columns.map((c) => ({
+    header: c.header,
+    key: c.key,
+    width: c.key === "note" ? 40 : c.key === "amount" ? 14 : 18,
+  }));
   ws.getRow(1).font = { bold: true };
   for (const row of r.rows) {
-    ws.addRow(Object.fromEntries(r.columns.map((c) => [c.key, typeof row[c.key] === "string" ? safeText(row[c.key] as string) : row[c.key]])));
+    ws.addRow(
+      Object.fromEntries(
+        r.columns.map((c) => [
+          c.key,
+          typeof row[c.key] === "string" ? safeText(row[c.key] as string) : row[c.key],
+        ]),
+      ),
+    );
   }
   ws.getColumn("amount").numFmt = "#,##0.00";
   ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: r.columns.length } };
@@ -56,27 +78,49 @@ export async function toXlsx(r: Report): Promise<Buffer> {
 
 const cell = (text: string, bold = false, right = false) =>
   new TableCell({
-    children: [new Paragraph({ alignment: right ? AlignmentType.RIGHT : AlignmentType.LEFT, children: [new TextRun({ text, bold, size: 18 })] })],
+    children: [
+      new Paragraph({
+        alignment: right ? AlignmentType.RIGHT : AlignmentType.LEFT,
+        children: [new TextRun({ text, bold, size: 18 })],
+      }),
+    ],
   });
 
 export async function toDocx(r: Report): Promise<Buffer> {
   const para = (text: string, o: { bold?: boolean; size?: number } = {}) =>
-    new Paragraph({ spacing: { after: 80 }, children: [new TextRun({ text, bold: o.bold, size: o.size })] });
+    new Paragraph({
+      spacing: { after: 80 },
+      children: [new TextRun({ text, bold: o.bold, size: o.size })],
+    });
 
   const kv = (rows: { label: string; amount: number }[]) =>
     new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
-      rows: rows.map((x) => new TableRow({ children: [cell(x.label), cell(`₹${inr(x.amount)}`, false, true)] })),
+      rows: rows.map(
+        (x) => new TableRow({ children: [cell(x.label), cell(`₹${inr(x.amount)}`, false, true)] }),
+      ),
     });
 
   const txTable = new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     rows: [
-      new TableRow({ tableHeader: true, children: ["Date", "Type", "Amount (₹)", "Project", "Category", "Party / note"].map((h) => cell(h, true)) }),
+      new TableRow({
+        tableHeader: true,
+        children: ["Date", "Type", "Amount (₹)", "Project", "Category", "Party / note"].map((h) =>
+          cell(h, true),
+        ),
+      }),
       ...r.rows.map(
         (x) =>
           new TableRow({
-            children: [cell(x.date), cell(x.type), cell(inr(x.amount), false, true), cell(x.project), cell(x.category), cell([x.party, x.note].filter(Boolean).join(" — "))],
+            children: [
+              cell(x.date),
+              cell(x.type),
+              cell(inr(x.amount), false, true),
+              cell(x.project),
+              cell(x.category),
+              cell([x.party, x.note].filter(Boolean).join(" — ")),
+            ],
           }),
       ),
     ],
@@ -109,7 +153,11 @@ const rs = (n: number) => `Rs. ${inr(n)}`;
 
 export function toPdf(r: Report): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A4", margin: 40, info: { Title: r.title, Author: "Wealthspan" } });
+    const doc = new PDFDocument({
+      size: "A4",
+      margin: 40,
+      info: { Title: r.title, Author: "Wealthspan" },
+    });
     const chunks: Buffer[] = [];
     doc.on("data", (c: Buffer) => chunks.push(c));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
@@ -123,14 +171,23 @@ export function toPdf(r: Report): Promise<Buffer> {
     const pair = (label: string, value: string) => {
       ensure(16);
       const y = doc.y;
-      doc.font("Helvetica").fontSize(10).text(label, left, y, { width: width * 0.65 });
+      doc
+        .font("Helvetica")
+        .fontSize(10)
+        .text(label, left, y, { width: width * 0.65 });
       doc.text(value, left + width * 0.65, y, { width: width * 0.35, align: "right" });
       doc.x = left;
       doc.y = Math.max(doc.y, y + 14);
     };
 
     doc.font("Helvetica-Bold").fontSize(18).text(r.title);
-    doc.font("Helvetica").fontSize(10).fillColor("#555").text(`Period: ${r.period}   |   Generated on ${r.generatedOn}`).fillColor("#000").moveDown();
+    doc
+      .font("Helvetica")
+      .fontSize(10)
+      .fillColor("#555")
+      .text(`Period: ${r.period}   |   Generated on ${r.generatedOn}`)
+      .fillColor("#000")
+      .moveDown();
 
     doc.font("Helvetica-Bold").fontSize(13).text("Summary").moveDown(0.3);
     r.totals.forEach((t) => pair(t.label, rs(t.amount)));
@@ -158,15 +215,25 @@ export function toPdf(r: Report): Promise<Buffer> {
       let maxY = y;
       doc.font(bold ? "Helvetica-Bold" : "Helvetica").fontSize(9);
       cols.forEach((c, i) => {
-        doc.text(vals[i], x + (i === 3 ? 8 : 0), y, { width: width * c.w - 4 - (i === 3 ? 8 : 0), align: c.a });
+        doc.text(vals[i], x + (i === 3 ? 8 : 0), y, {
+          width: width * c.w - 4 - (i === 3 ? 8 : 0),
+          align: c.a,
+        });
         maxY = Math.max(maxY, doc.y);
         x += width * c.w;
       });
       doc.x = left;
       doc.y = maxY + 3;
     };
-    line(cols.map((c) => c.h), true);
-    for (const x of r.rows) line([x.date, x.type, rs(x.amount), x.category, [x.party, x.note].filter(Boolean).join(" — ")], false);
+    line(
+      cols.map((c) => c.h),
+      true,
+    );
+    for (const x of r.rows)
+      line(
+        [x.date, x.type, rs(x.amount), x.category, [x.party, x.note].filter(Boolean).join(" — ")],
+        false,
+      );
     if (!r.rows.length) doc.font("Helvetica").fontSize(10).text("No transactions in this period.");
 
     doc.end();

@@ -1,24 +1,27 @@
 # Value Proposition
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## One line
 
-Describe the scope and intent of **Value Proposition** for the Jobrio platform.
+A personal accountant in your pocket that keeps all your income sources in one clear set of books and answers in plain language.
 
-## Scope
+## Why users choose it
 
-- What this document covers
-- What it explicitly does not cover
+1. **All income, one place.** Projects for each business plus Personal; combined or per-project reports.
+2. **No double counting.** Transfers, card-bill payments and open festival spending are handled so totals stay honest.
+3. **Talk or type.** The chatbot works on the same sheets you see; it asks before changing or deleting.
+4. **Built for India.** UPI, cash, wallets, cheques, festivals, April–March year, amounts in rupees.
+5. **Take it with you.** Export to PDF, Excel, CSV or Word for family, banks or a CA.
 
-## Details
+## Versus alternatives
 
-_TODO: fill in._
+| Alternative      | Gap Wealthspan fills                                      |
+| ---------------- | --------------------------------------------------------- |
+| Paper / Excel    | No manual formulas; chat entry; balances computed         |
+| Expense apps     | Support several businesses, loans, investments and events |
+| Human accountant | Always available, far cheaper for small volumes           |
 
-## Open Questions
+## Honest limits (Phase 1)
 
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Entry is manual or via chat; no bank or SMS import yet. Wealthspan does not give investment advice or file taxes.

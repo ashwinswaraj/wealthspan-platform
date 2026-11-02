@@ -1,5 +1,5 @@
-import { Spinner } from "@jobrio/ui/design-system/primitives/Spinner";
-import { cn } from "@jobrio/utils/utils";
+import { Spinner } from "@wealthspan/ui/design-system/primitives/Spinner";
+import { cn } from "@wealthspan/utils/utils";
 
 export const LoadingState = ({
   label = "Loading…",

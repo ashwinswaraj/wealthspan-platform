@@ -1,31 +1,25 @@
-# @jobrio/api
+# @wealthspan/api
 
-Backend edge service. Thin layer in front of Supabase — identity itself is
-handled by Supabase Auth, this app verifies tokens and will host
-non-auth business logic as it grows.
+Backend for Wealthspan: Zoho Catalyst Advanced I/O functions (`catalyst/functions/{finance,chat,files}`) built
+from the shared code in `src/`. Identity is Catalyst Authentication; data is the Catalyst Data Store.
 
 ## Layout
 
 ```
 src/
-  features/<domain>/  one folder per business domain — controller.ts (HTTP
-                      handling), service.ts (external calls), types.ts,
-                      routes.ts, index.ts (barrel). See features/auth/ for
-                      the reference shape.
-  config/             environment/runtime configuration
-  middleware/         cross-cutting request middleware (auth checks, etc.)
+  features/<domain>/  one folder per business domain: controller.ts (HTTP
+                      handling), service.ts (business logic / external calls), types.ts,
+                      routes.ts, index.ts (barrel). Domains: auth, finance, chat,
+                      files, subscription, catalog, admin.
+  config/             runtime configuration (Catalyst env vars)
+  middleware/         cross-cutting middleware (CSRF header, rate limits, JSON errors)
   utils/              generic helpers (not business logic)
-  index.ts            app entry point — currently an unwired stub
+catalyst/             Catalyst project: functions, client hosting, catalyst.json
 tests/
 ```
 
 ## Current state
 
-Only `features/auth/` exists so far (bearer-token verification against
-Supabase Auth — see its own file headers for the exact contract).
-`src/index.ts` is not wired to an HTTP framework yet; see
-`.lovable/plan.md` for the next steps and `AGENTS.md` (this folder's own,
-falling back to the root one) for the rules that apply here.
-
-Copy `.env.example` to `.env` before running. Endpoint contracts, once
-routes exist beyond `auth`, are documented in `docs/API/`.
+All three functions are deployed to the Development environment. Deploy steps are in
+`docs/DevOps/64_Deployment.md`; endpoint contracts are in `docs/API/`. Copy `.env.example` to `.env` for local
+runs; on Catalyst the same names are set in `catalyst-config.json` (and `SARVAM_API_KEY` in the console).

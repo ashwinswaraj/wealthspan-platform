@@ -9,9 +9,9 @@ import {
 import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
-import { Toaster as Sonner } from "@jobrio/ui/components/sonner";
-import { Toaster } from "@jobrio/ui/components/toaster";
-import { TooltipProvider } from "@jobrio/ui/components/tooltip";
+import { Toaster as Sonner } from "@wealthspan/ui/components/sonner";
+import { Toaster } from "@wealthspan/ui/components/toaster";
+import { TooltipProvider } from "@wealthspan/ui/components/tooltip";
 import ConnectionPill from "@/components/ConnectionPill";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -20,6 +20,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "author", content: "Wealthspan" },
+      { name: "referrer", content: "strict-origin-when-cross-origin" },
       { property: "og:site_name", content: "Wealthspan" },
     ],
     links: [
@@ -88,7 +89,19 @@ function ScrollToTop() {
   return null;
 }
 
+/** Clickjacking brake: static hosting cannot send X-Frame-Options, so a page inside someone else's frame hides itself. */
+function useFrameGuard() {
+  useEffect(() => {
+    try {
+      if (window.top !== window.self) document.documentElement.style.display = "none";
+    } catch {
+      document.documentElement.style.display = "none";
+    }
+  }, []);
+}
+
 function RootComponent() {
+  useFrameGuard();
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>

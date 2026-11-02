@@ -18,7 +18,6 @@ jobs:
       - apt-get install -y nodejs
       - npm i -g zcatalyst-cli
       - catalyst -v
-      - cd apps/api/catalyst/functions/auth && npm install --omit=dev
       - cd apps/api/catalyst && catalyst deploy --project << env.PROJECT_ID >> --org << env.CATALYST_ORG >> --token << env.CATALYST_TOKEN >>
 stages:
   - name: build

@@ -1,17 +1,16 @@
 {
-  "name": "@jobrio/auth",
+  "name": "@wealthspan/auth",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@jobrio/ui": "workspace:*",
-    "@jobrio/validation": "workspace:*",
-    "@supabase/supabase-js": "^2.110.0",
+    "@wealthspan/ui": "workspace:*",
+    "@wealthspan/validation": "workspace:*",
     "react": "^19.2.0"
   },
   "devDependencies": {

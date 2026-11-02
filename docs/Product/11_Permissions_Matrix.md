@@ -1,24 +1,18 @@
 # Permissions Matrix
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+Enforcement is server-side in the Catalyst functions; the UI only hides what a role cannot use.
 
-Describe the scope and intent of **Permissions Matrix** for the Jobrio platform.
+| Action                                                                        | User     | Admin                                                    |
+| ----------------------------------------------------------------------------- | -------- | -------------------------------------------------------- |
+| Read / write own transactions, projects, accounts, events, loans, investments | Yes      | No (admin reads are aggregate or recent-list views only) |
+| Chat with the accountant (40 messages/day)                                    | Yes      | Yes (as a user)                                          |
+| Export own data (PDF / Excel / CSV / Word)                                    | Yes      | Own only                                                 |
+| Start free trial (once)                                                       | Yes      | n/a                                                      |
+| Submit a UPI payment for a plan                                               | Yes      | n/a                                                      |
+| Approve / reject a payment                                                    | No (403) | Yes                                                      |
+| List users, subscriptions, recent ledger, audit log                           | No       | Yes (`/admin/*`)                                         |
+| Edit plans and catalog                                                        | No       | Planned (plans are currently code constants)             |
 
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Chatbot actions follow `CHATBOT_TOOL_POLICY`: reads run immediately, creates run with Undo, updates / deletes / event conclude-reopen need confirmation (see [State Machines](12_State_Machines.md)).

@@ -1,24 +1,14 @@
-# QA Lifecycle
+# Data Quality Lifecycle
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Planned (guards shipped) · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## Flow
 
-Describe the scope and intent of **QA Lifecycle** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
+1. **Detect** at entry time: card-bill look-alike or same-amount card expense (shipped warnings).
+2. **Prompt**: the user converts it to a transfer, keeps it, or cancels.
+3. **Review** (Planned): later duplicates or outliers are listed for the user to resolve; resolution is recorded.
+4. **Admin view** (Planned): aggregate counts only, never user content.
 
 ## References
 
-- [Master Context](../../00_Master_Context.md)
+- [Data model](../Database/41_Wealthspan_Data_Model.md)

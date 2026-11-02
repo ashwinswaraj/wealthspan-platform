@@ -1,38 +1,16 @@
 # Git Workflow
 
-> Status: Active · Owner: TBD · Last updated: 2026-08-31
+> Status: Active · Last updated: 2026-11-01
 
-## Purpose
+## Enforced locally (`.husky/`)
 
-Document what's actually enforced by tooling in this repo, vs. what's
-policy-only, so contributors know which rules will block them mechanically
-and which rely on review discipline.
+- `commit-msg`: Conventional Commits (`feat|fix|docs|chore|refactor|test|ci|build|perf`, optional scope).
+- `pre-commit`: `pnpm check:structure` then `pnpm lint`.
 
-## Enforced by `.husky/` (mechanical, will block you)
+## Enforced in CI (`.github/workflows/`)
 
-- **`commit-msg`**: every commit message must match Conventional Commits —
-  `(feat|fix|docs|chore|refactor|test|ci|build|perf)(scope)?: message`.
-  A non-conforming message is rejected at commit time.
-- **`pre-commit`**: runs `pnpm lint` before every commit.
+`ci-web`, `ci-admin`, `ci-api` (typecheck + build/tests, structure check), `test` (`pnpm test`), `lint` (ESLint + Prettier), `database` (typecheck of the database package), `security-scan` (weekly `pnpm audit`, CodeQL, secret scan). Deploy workflows (`deploy-*`, `preview-deploy`, `publish-sdk`) are manual-only and still point at Vercel; deploys to Catalyst are done by hand (see DevOps/64_Deployment.md).
 
-## Policy (from `CONTRIBUTING.md`, not mechanically enforced)
+## Policy
 
-- Branch naming: `feat/*`, `fix/*`, `docs/*`, `chore/*`
-- `main` = production, `develop` = integration
-- Run `pnpm build` and lint before opening a PR; fill the PR template
-
-## CI status
-
-`.github/workflows/lint.yml` is currently a placeholder
-(`# TODO: enable when needed`) — lint is enforced locally via the
-pre-commit hook, not yet in CI. The other workflows
-(`ci-web.yml`, `ci-admin.yml`, `ci-api.yml`, `test.yml`, `database.yml`,
-`security-scan.yml`, `deploy-{staging,production}.yml`, `preview-deploy.yml`,
-`publish-sdk.yml`) are similarly scaffolded but not yet wired to real steps —
-confirm current state before assuming any of them run real checks.
-
-## References
-
-- [Master Context](../00_Master_Context.md)
-- [`CONTRIBUTING.md`](../../CONTRIBUTING.md)
-- `.husky/commit-msg`, `.husky/pre-commit`
+Branches `feat/*`, `fix/*`, `docs/*`, `chore/*`; open a PR; run `pnpm lint`, `pnpm typecheck` and `pnpm test` first. Never rewrite pushed history (the repo is synced with Lovable).

@@ -1,24 +1,7 @@
 # Webhooks
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
+There are no inbound or outbound webhooks in Phase 1. Payments are manual UPI submissions reviewed by an admin, so no gateway callback exists.
 
-Describe the scope and intent of **Webhooks** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+If a payment gateway is chosen (TBD), its webhook would need: signature verification, idempotency on the gateway event id (the same idea as the unique `sub_key` on subscriptions), and a Catalyst function route that is the only one exempt from the session check. None of this is built.

@@ -1,7 +1,7 @@
 /**
  * Data contract between the admin screens and the Catalyst `admin` API (`/server/finance/admin/*`).
  * Every field is optional-by-design: when the API has no value (or is not deployed yet) the screen shows "—",
- * never an invented number. Money is integer paise (format with `formatINR` from @jobrio/utils/finance).
+ * never an invented number. Money is integer paise (format with `formatINR` from @wealthspan/utils/finance).
  */
 export type PlanTier = "Free" | "Go" | "Pro";
 
@@ -37,6 +37,8 @@ export interface AdminPaymentRow {
   id: string;
   utr: string;
   userEmail: string;
+  /** Code the user writes in the UPI remark (WSP-xxxxx): match it on the bank statement before approving. */
+  reference?: string;
   plan: string; // "Pro — annual"
   amountPaise: number;
   orderId: string;

@@ -1,8 +1,8 @@
 /**
- * @jobrio/ui — shared UI layer.
+ * @wealthspan/ui — shared UI layer.
  *
  * The design system is the single source of truth for product UI. Raw shadcn
- * primitives live under `@jobrio/ui/components/*` and must only be consumed by
+ * primitives live under `@wealthspan/ui/components/*` and must only be consumed by
  * the design system itself.
  */
 export * from "./design-system";

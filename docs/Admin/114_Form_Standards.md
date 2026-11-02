@@ -1,24 +1,9 @@
 # Form Standards
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **Form Standards** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+- Floating-label inputs with a visible label.
+- Required fields marked and validated before submit; use shared Zod rules from `@wealthspan/validation` where they exist.
+- Disable the submit button while saving; show a status message after.
+- If a form does not save yet (plan editor, broadcast), say so in an inline notice.
+- Destructive actions ask for confirmation.

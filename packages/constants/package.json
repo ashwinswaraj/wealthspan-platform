@@ -1,13 +1,12 @@
 {
-  "name": "@jobrio/constants",
+  "name": "@wealthspan/constants",
   "version": "0.0.0",
   "private": true,
   "main": "src/index.ts",
   "types": "src/index.ts",
-  "scripts": {
-  },
+  "scripts": {},
   "dependencies": {
-    "@jobrio/types": "workspace:*",
+    "@wealthspan/types": "workspace:*",
     "lucide-react": "^0.575.0",
     "react": "^19.2.0"
   },
@@ -18,6 +17,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./finance": "./src/finance.ts"
+    "./finance": "./src/finance.ts",
+    "./sheets": "./src/sheets.ts"
   }
 }

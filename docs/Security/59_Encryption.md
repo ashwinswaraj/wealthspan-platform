@@ -1,24 +1,8 @@
 # Encryption
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **Encryption** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+- **In transit:** HTTPS to Catalyst; the same-domain cookie is sent over HTTPS. Functions call Sarvam over HTTPS.
+- **At rest:** Data is stored in Catalyst Data Store; encryption at rest is a Catalyst platform property that we have not independently verified (TBD: confirm in Catalyst documentation). Catalyst offers an "Encrypted text" column type; no column uses it yet. Candidates: free-text notes (decision TBD).
+- **Secrets:** function env vars only.
+- We never store bank passwords or card numbers.

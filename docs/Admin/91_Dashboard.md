@@ -1,24 +1,11 @@
-# Admin Dashboard
+# Dashboard (Overview)
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
-Describe the scope and intent of **Admin Dashboard** for the Jobrio platform.
+Health of the business at a glance.
 
-## Scope
+## Data (`GET /admin/overview`)
 
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Users, users by plan (Free, Go, Pro), projects, transactions, MRR (monthly-equivalent of live Pro subscriptions, in paise), pending payments, and a 30-day new-users trend. Implemented in `createAdminService().overview()`.

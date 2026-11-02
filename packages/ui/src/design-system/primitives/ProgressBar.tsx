@@ -1,4 +1,4 @@
-import { cn } from "@jobrio/utils/utils";
+import { cn } from "@wealthspan/utils/utils";
 
 export const ProgressBar = ({
   value,

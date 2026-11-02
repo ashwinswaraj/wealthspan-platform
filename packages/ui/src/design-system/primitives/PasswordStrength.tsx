@@ -1,6 +1,6 @@
 import { Check, X } from "lucide-react";
-import { passwordStrength, type PasswordStrengthLevel } from "@jobrio/validation";
-import { cn } from "@jobrio/utils/utils";
+import { passwordStrength, type PasswordStrengthLevel } from "@wealthspan/validation";
+import { cn } from "@wealthspan/utils/utils";
 
 const BAR_COLOR: Record<PasswordStrengthLevel, string> = {
   empty: "#c3c6d7",

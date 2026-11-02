@@ -1,24 +1,13 @@
 # Users Directory
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
-Describe the scope and intent of **Users Directory** for the Jobrio platform.
+Find a user and see their plan.
 
-## Scope
+## Data (`GET /admin/users`)
 
-- What this document covers
-- What it explicitly does not cover
+Name, email, short code `WSP-xxxxx`, role (Super Administrator or Standard User), plan (Free, Go, Pro), plan validity, active-since date, status (Active or Suspended). Search by name, email or code; CSV download (`usersDirectory.tsx`).
 
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Suspend, plan override and user-detail actions are not wired to the API (Planned).

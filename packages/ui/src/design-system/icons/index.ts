@@ -10,4 +10,4 @@
  */
 
 export * from "lucide-react";
-export { iconSizes, iconStroke } from "@jobrio/ui/design-system/tokens";
+export { iconSizes, iconStroke } from "@wealthspan/ui/design-system/tokens";

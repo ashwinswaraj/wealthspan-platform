@@ -1,11 +1,6 @@
 {
   "functions": {
-    "targets": [
-      "auth",
-      "finance",
-      "chat",
-      "files"
-    ],
+    "targets": ["finance", "chat", "files"],
     "ignore": [],
     "source": "functions"
   },

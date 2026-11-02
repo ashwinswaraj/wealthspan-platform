@@ -1,24 +1,10 @@
 # Policies
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## Admin policies
 
-Describe the scope and intent of **Policies** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+- Approve a payment only after matching UTR and reference to the bank statement.
+- Reject with a note the user can understand.
+- Use admin access only for support and operations; do not browse user data for curiosity.
+- User-facing policies (terms, privacy, refunds) are tracked in `docs/Platform/27_Policies.md`.

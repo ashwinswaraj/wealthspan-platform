@@ -1,24 +1,9 @@
 # UI/UX Guidelines
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-01
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **UI/UX Guidelines** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+- Calm and neutral: near-black on white, mirrored in dark mode; one clear primary action per card.
+- Always show loading, error and empty states; unavailable values show a dash.
+- Say when something is not connected instead of faking success.
+- Large touch targets, rounded controls, works on phone width with a slide-in sidebar.
+- Label icon-only buttons with `aria-label`.

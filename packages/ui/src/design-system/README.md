@@ -1,11 +1,11 @@
-# Jobrio Design System
+# Wealthspan Design System
 
-`src/design-system/` is the ONLY sanctioned UI layer for the Jobrio app.
+`src/design-system/` is the ONLY sanctioned UI layer for the Wealthspan app.
 
 ## Rules
 
-1. Pages and features import UI from `@jobrio/ui/design-system` — never from
-   `@jobrio/ui/components/*` directly. The shadcn primitives under `components/ui`
+1. Pages and features import UI from `@wealthspan/ui/design-system` — never from
+   `@wealthspan/ui/components/*` directly. The shadcn primitives under `components/ui`
    are internal building blocks for the design system.
 2. Never introduce a new color, font, radius, shadow, spacing value, or
    component variation inside a feature. Add it here first, get it approved,
@@ -20,7 +20,7 @@
 
 ## Locked references
 
-- **Primary Button** = the Super Admin → Professional Applications "Review"
+- **Primary Button** = the Super Admin → Payments "Review"
   action. **Secondary Button** = Approve / Reject / Request Info.
 - **Auth inputs** (Sign In / Sign Up / Forgot Password) = the treatment in
   `src/components/signup/FormField.tsx`. Use `AuthInput`, `AuthSelect`,
@@ -50,5 +50,11 @@ src/design-system/
 Usage:
 
 ```ts
-import { Button, Input, DashboardContainer, PageHeader, StatCard } from "@jobrio/ui/design-system";
+import {
+  Button,
+  Input,
+  DashboardContainer,
+  PageHeader,
+  StatCard,
+} from "@wealthspan/ui/design-system";
 ```

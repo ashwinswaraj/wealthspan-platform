@@ -1,41 +1,16 @@
 # AI Development Guidelines
 
-> Status: Active · Owner: TBD · Last updated: 2026-08-31
+> Status: Active · Last updated: 2026-11-01
 
-## Purpose
+Root [`AGENTS.md`](../../AGENTS.md) is the authority. Read it, then the app's own `AGENTS.md`, then `docs/Database/41_Wealthspan_Data_Model.md` before touching money logic.
 
-This file used to be a placeholder. Root [`AGENTS.md`](../../AGENTS.md) is
-the actual authoritative source for AI-agent rules in this repo — this
-page just points there and highlights the parts most relevant to *product*
-development (as opposed to the repo-structure rules `AGENTS.md` leads
-with).
+## Rules that matter most for Wealthspan
 
-## What to read first
-
-Before generating code in this repo, an AI agent should read, in order:
-1. Root [`AGENTS.md`](../../AGENTS.md) — stack, folder rules, dependency
-   direction, things to never do unconfirmed
-2. The specific app/package's own `AGENTS.md`, if one exists (it overrides
-   the root file for that app/package)
-3. [`ARCHITECTURE_RATIONALE.md`](../../ARCHITECTURE_RATIONALE.md) — why
-   each top-level folder exists
-4. The relevant `docs/<Domain>/` spec for the feature being touched
-
-## Things worth repeating here
-
-- **Don't fabricate product/business/legal specifics.** Several docs in
-  this repo (`docs/Legal/*`, `docs/Business/*`, parts of `docs/Security/*`)
-  are intentionally left as drafts because they require a real decision —
-  a lawyer, a product owner, a security review — not because no one got
-  around to it. Filling them with invented specifics is worse than leaving
-  them as `TODO`.
-- **Ground technical docs in the actual code**, not assumption. Several
-  docs in this repo were previously stale (describing folders or package
-  names that no longer existed) — when writing documentation, verify
-  against the current file tree and configs rather than trusting an
-  existing doc's claim.
-
-## References
-
-- Root [`AGENTS.md`](../../AGENTS.md)
-- [`ARCHITECTURE_RATIONALE.md`](../../ARCHITECTURE_RATIONALE.md)
+- **Numbers come from code, never from the model.** The chatbot calls tools; totals, balances and loan outstanding come from `packages/utils/src/finance.ts`. The model only explains them.
+- **The chatbot never touches the database.** It calls fixed tools; the server enforces user id, validation and confirmation. Confirmation state lives on the server.
+- **User id only from the Catalyst session.** Never accept it from a request body, query or prompt.
+- **Money is integer paise.** No floats for amounts.
+- **Do not invent shipped features.** Mark anything unbuilt as Planned or TBD (payment gateway, chat tools, SMS reader, Account Aggregator).
+- **Do not invent legal or tax specifics.** Legal docs are drafts for a lawyer.
+- **Verify against code** before documenting; several earlier docs described a product that no longer exists.
+- No secrets in prompts, logs or the repo.

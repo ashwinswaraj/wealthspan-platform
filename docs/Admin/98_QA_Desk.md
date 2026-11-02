@@ -1,24 +1,11 @@
-# QA Desk
+# Data Quality
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Planned · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
-Describe the scope and intent of **QA Desk** for the Jobrio platform.
+See how often users hit duplicate or double-count warnings.
 
-## Scope
+## State
 
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+No admin screen. The guards run in the user app (`packages/utils/src/finance.ts`). Aggregate counts are Planned and must not expose user content. See `118_QA.md`.

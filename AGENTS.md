@@ -1,4 +1,5 @@
 <!-- LOVABLE:BEGIN -->
+
 > [!IMPORTANT]
 > This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
 > published git history — force pushing, or rebasing/amending/squashing commits
@@ -7,6 +8,7 @@
 >
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
+
 <!-- LOVABLE:END -->
 
 # AGENTS.md — Rules for AI-assisted development
@@ -25,28 +27,28 @@ in [§9](#9-known-deviations--do-not-silently-fix-these) as intentional.
 
 ```
 apps/
-  web/      @jobrio/web    — public client + professional web app (Vite + TanStack Start)
-  admin/    @jobrio/admin  — super-admin panel (Vite + TanStack Start)
-  api/      @jobrio/api    — backend edge service (currently a thin scaffold — see apps/api/AGENTS.md)
+  web/      @wealthspan/web    — Wealthspan user web app (Vite + TanStack Start)
+  admin/    @wealthspan/admin  — super-admin panel (Vite + TanStack Start)
+  api/      @wealthspan/api    — backend edge service (currently a thin scaffold — see apps/api/AGENTS.md)
 packages/
-  ui/           @jobrio/ui           — design system + shared components (single source of UI truth)
-  auth/         @jobrio/auth         — auth logic, shared across apps
-  database/     @jobrio/database     — DB client/types
-  types/        @jobrio/types        — shared TS types (frontend/backend contract)
-  hooks/        @jobrio/hooks        — shared React hooks
-  constants/    @jobrio/constants    — cross-app constants + the reactive order/service registries
-  utils/        @jobrio/utils        — shared utility functions
-  validation/   @jobrio/validation   — shared zod schemas (client + server use the same rules)
-  config/       @jobrio/config       — shared tsconfig/testing config
-  sdk/          @jobrio/sdk          — public npm package for external consumers
+  ui/           @wealthspan/ui           — design system + shared components (single source of UI truth)
+  auth/         @wealthspan/auth         — auth logic, shared across apps
+  database/     @wealthspan/database     — DB client/types
+  types/        @wealthspan/types        — shared TS types (frontend/backend contract)
+  hooks/        @wealthspan/hooks        — shared React hooks
+  constants/    @wealthspan/constants    — cross-app constants + the reactive order/service registries
+  utils/        @wealthspan/utils        — shared utility functions
+  validation/   @wealthspan/validation   — shared zod schemas (client + server use the same rules)
+  config/       @wealthspan/config       — shared tsconfig/testing config
+  sdk/          @wealthspan/sdk          — public npm package for external consumers
 infrastructure/  — ops/security only (db config, proxy, secrets docs, seed scripts) — no app code
 docs/            — product & architecture docs, organized by domain
 tests/           — root-level cross-app E2E/integration tests only (unit tests live inside each feature)
 ```
 
 **Known stale doc**: `README.md`'s tree diagram and its `pnpm --filter` example
-still call the web app `apps/platform` / `@jobrio/platform`. That name no
-longer exists — the real app is `apps/web`, package `@jobrio/web` (confirmed
+still call the web app `apps/platform` / `@wealthspan/platform`. That name no
+longer exists — the real app is `apps/web`, package `@wealthspan/web` (confirmed
 in `apps/web/package.json`). Don't "helpfully" rename `apps/web` back to
 `platform` to match the README — the README is what's outdated. Feel free to
 fix the README itself if you're touching it anyway.
@@ -56,22 +58,21 @@ fix the README itself if you're touching it anyway.
 ## 2. Stack (fixed — don't suggest or introduce alternatives)
 
 - Frontend: React 19 + TanStack Start/Router + Vite + Tailwind v4
-- Backend: no framework chosen yet — `apps/api` is intentionally a minimal
-  scaffold (Supabase Auth does identity; the app is a thin edge layer). Don't
-  add Express/Hono/Fastify/etc. without being asked.
-- Database: Supabase (Postgres)
+- Backend: Zoho Catalyst Advanced I/O functions (`apps/api/catalyst/functions`: finance, chat, files). Don't
+  add Hono/Fastify/etc. without being asked.
+- Database + login: Zoho Catalyst Data Store and Cloud Scale Authentication (Embedded Auth)
 - Package manager: **pnpm only**. Never generate or commit a `package-lock.json`,
   `yarn.lock`, or `bun.lock` — `pnpm-lock.yaml` is the single lockfile. Internal
-  cross-package dependencies use `"@jobrio/x": "workspace:*"`, never a version
+  cross-package dependencies use `"@wealthspan/x": "workspace:*"`, never a version
   number or a relative path.
 - Build orchestration: Turborepo. Root `package.json`'s `build`, `typecheck`,
   and `test` scripts delegate to `turbo run <task>`, fanning out to every
   app per `turbo.json`'s pipeline. `dev` is intentionally scoped to
-  `apps/web` only — `turbo run dev --filter=@jobrio/web --` — because `web`
+  `apps/web` only — `turbo run dev --filter=@wealthspan/web --` — because `web`
   and `admin` currently default to the same dev port and running both
   under one unscoped `turbo run dev` collides (and `turbo` doesn't accept a
   `--port` override to route around it). Run `admin`'s dev server
-  separately: `pnpm --filter @jobrio/admin dev`. **Never** widen the root
+  separately: `pnpm --filter @wealthspan/admin dev`. **Never** widen the root
   `dev` script back to unscoped `turbo run dev` without first giving `web`
   and `admin` distinct ports. **Never** add a root script that calls
   `vite`/`tsc`/etc. directly — that only touches one app and silently skips
@@ -101,8 +102,7 @@ domain: `components/`, `hooks/`, `types/`, `lib/` as needed, plus an
   helpers) belongs in the app's top-level `src/components/`, `src/hooks/`,
   or `src/utils/`, not duplicated into each feature and not left in one
   feature for another to reach into. (Reference case:
-  `apps/web/src/components/dashboard/shared.tsx` holds atoms used by both
-  `dashboard-client` and `dashboard-professional`.)
+  `apps/web/src/components/ConnectionPill.tsx`, used by several features.)
 - **`pages/` stays thin.** A page composes one or more features and renders
   them; it does not contain business logic, content dictionaries, or state
   machines. If you find yourself writing real logic in a `pages/*.tsx` file,
@@ -131,7 +131,7 @@ the folder/file structure directly determines URL structure, and
   build/dev tooling after any change under `routes/`.
 - **Don't restructure `routes/` the way you would `features/` or
   `components/`.** Moving/renaming files here changes real URLs. If a route
-  file's *implementation* is doing too much, move the logic into a feature
+  file's _implementation_ is doing too much, move the logic into a feature
   and leave a thin route file behind — don't move the route file itself
   without a specific reason.
 - `pages/` and `routes/` are deliberately separate: `routes/` = URL → thin
@@ -141,9 +141,9 @@ the folder/file structure directly determines URL structure, and
 
 ## 5. Design system — one source of truth
 
-`packages/ui/src/design-system/` (imported as `@jobrio/ui/design-system`) is
+`packages/ui/src/design-system/` (imported as `@wealthspan/ui/design-system`) is
 the **only** source of design-system UI. Every app and feature must import
-from `@jobrio/ui/design-system` — never reach into `@jobrio/ui/src/components/*`
+from `@wealthspan/ui/design-system` — never reach into `@wealthspan/ui/src/components/*`
 directly from feature code, and never recreate a button/input/container
 locally. If a required component doesn't exist yet, add it inside
 `packages/ui/src/design-system/`, re-export it from
@@ -215,7 +215,7 @@ left as-is or flagged rather than resolved unilaterally. Full reasoning in
    scripts expect a `vite.config.ts` at repo root. Don't delete it as
    "redundant."
 2. **`apps/admin/src/features/admin-dashboard/`** is one large feature
-   rather than split into per-domain features (finance, security, workforce,
+   rather than split into per-domain features (users, subscriptions, security,
    etc.), because its ~20 files share state and UI atoms with no
    independent public API per section. If you're asked to split it further,
    that's a product/ownership decision — confirm the boundaries with a human
@@ -258,7 +258,7 @@ left as-is or flagged rather than resolved unilaterally. Full reasoning in
 
 ## 12. Wealthspan direction (owner decisions, 2026-10-24)
 
-This repo is being converted from Jobrio to Wealthspan. Where this section
+This repo is being converted from Wealthspan to Wealthspan. Where this section
 conflicts with §2 (Stack), **this section wins**. Full reasoning in
 `docs/Architecture/Decision_Log.md`.
 
@@ -267,9 +267,8 @@ conflicts with §2 (Stack), **this section wins**. Full reasoning in
 - AI provider: **Sarvam**, behind an adapter (don't call the provider
   directly from feature code).
 - Database + login: **Zoho Catalyst too** (Data Store + Authentication) — the
-  owner chose "everything on Catalyst"; Supabase is dropped for Wealthspan.
-  Existing `@jobrio/database` / `@jobrio/auth` Supabase code stays until the
-  owner approves replacing it; new finance code must not depend on Supabase.
+  owner chose "everything on Catalyst"; Supabase is gone. `@wealthspan/database` holds the Data Store
+  table names and query helpers, and `@wealthspan/auth` the session hook.
   Catalyst constraints to design around: ZCQL has no documented row cap
   (always paginate with `LIMIT offset,count`), max 4 JOINs, Var Char ≤ 255,
   Text ≤ 10,000 chars, Int ≤ 10 digits (use BigInt for paise), Advanced I/O
@@ -282,9 +281,6 @@ conflicts with §2 (Stack), **this section wins**. Full reasoning in
   `packages/utils/src/finance.ts`; the spec is
   `docs/Database/41_Wealthspan_Data_Model.md`. All money is integer paise.
   Never do money arithmetic in a component or in the chatbot prompt — call
-  `@jobrio/utils`.
-- Jobrio-specific code (orders, professionals, QA, escrow) is being removed:
-  the owner approved the clean-up on 2026-10-30. The architecture (folders,
-  feature-driven layout, `@jobrio/*` package scope) stays; Wealthspan code
-  goes where the Jobrio code was. `apps/web` is already clean (route `/` is
-  the Wealthspan home); `apps/admin` and the shared packages are next.
+  `@wealthspan/utils`.
+- The old marketplace code (orders, professionals, QA, escrow) has been replaced. The architecture (folders,
+  feature-driven layout, `@wealthspan/*` package scope) stays; Wealthspan code lives where that code was.

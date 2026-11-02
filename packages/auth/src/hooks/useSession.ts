@@ -1,60 +1,41 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Session, User } from "@supabase/supabase-js";
 
 export interface SessionState {
-  session: Session | null;
-  user: User | null;
-  loading: boolean;
-  signOut: () => Promise<void>;
+  /** "in" = signed in, "out" = needs login, "loading" = still checking. */
+  status: "loading" | "in" | "out" | "error";
+  refetch: () => void;
 }
 
-// The generated Supabase browser client binds `localStorage` at module scope,
-// so it is imported lazily and only in the browser to keep SSR safe.
-const getSupabase = async () => (await import("@jobrio/database")).supabase;
-
 /**
- * Single source of truth for the signed-in session across both apps.
- * Registers the auth listener first, then hydrates the current session.
+ * Session check against the Catalyst function (`/server/finance/me`, same domain, cookie-based).
+ * Network errors report "error", never "out", so a flaky connection does not log anyone out.
  */
-export function useSession(): SessionState {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+export function useSession(base = "/server"): SessionState {
+  const [status, setStatus] = useState<SessionState["status"]>("loading");
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    let unsubscribe: (() => void) | undefined;
     let cancelled = false;
-
     void (async () => {
-      const supabase = await getSupabase();
-      if (cancelled) return;
-
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-        setSession(nextSession);
-        setLoading(false);
-      });
-      unsubscribe = () => subscription.unsubscribe();
-
-      const { data } = await supabase.auth.getSession();
-      if (cancelled) return;
-      setSession(data.session);
-      setLoading(false);
+      try {
+        const res = await fetch(`${base}/finance/me`, {
+          credentials: "include",
+          headers: { "X-Requested-With": "wealthspan" },
+        });
+        if (cancelled) return;
+        setStatus(res.status === 401 || res.status === 403 ? "out" : res.ok ? "in" : "error");
+      } catch {
+        if (!cancelled) setStatus("error");
+      }
     })();
-
     return () => {
       cancelled = true;
-      unsubscribe?.();
     };
-  }, []);
+  }, [base, tick]);
 
-  const signOut = useCallback(async () => {
-    const supabase = await getSupabase();
-    await supabase.auth.signOut();
-  }, []);
-
-  return { session, user: session?.user ?? null, loading, signOut };
+  const refetch = useCallback(() => setTick((t) => t + 1), []);
+  return { status, refetch };
 }
 
 export default useSession;

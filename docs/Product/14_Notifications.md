@@ -1,24 +1,17 @@
 # Notifications
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## Phase 1
 
-Describe the scope and intent of **Notifications** for the Jobrio platform.
+No push, SMS or e-mail notification system is built. Users see in-app state only (trial days left, payment status). The admin panel has a notifications modal (`AdminNotificationsModal.tsx`) for admin-side alerts.
 
-## Scope
+## Planned
 
-- What this document covers
-- What it explicitly does not cover
+| Notification                                   | Channel           | Phase   |
+| ---------------------------------------------- | ----------------- | ------- |
+| Trial ending soon, payment approved / rejected | E-mail            | Phase 2 |
+| Budget cap reached, EMI due                    | In-app, then push | Phase 2 |
+| Bank / SMS-detected transactions to review     | Push              | Phase 2 |
 
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+SMS and push are not in Phase 1 because there is no SMS reader or native app yet. See `docs/Integrations/50_Email.md`.

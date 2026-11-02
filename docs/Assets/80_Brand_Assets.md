@@ -1,24 +1,12 @@
 # Brand Assets
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+| Asset                                            | Where                                         | Status  |
+| ------------------------------------------------ | --------------------------------------------- | ------- |
+| Logo mark (CSS/SVG tile)                         | `apps/web/src/styles.css`, shell components   | In use  |
+| Colors, fonts                                    | [Colors](77_Colors.md), [Fonts](78_Fonts.md)  | Defined |
+| Tagline "The full arc of your money"             | [Brand Guidelines](../02_Brand_Guidelines.md) | Defined |
+| Exportable logo files, favicon set, social image | none yet                                      | TBD     |
 
-Describe the scope and intent of **Brand Assets** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Store final binary assets under the owning app's `public/` folder, not in `docs/`.

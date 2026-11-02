@@ -1,24 +1,12 @@
-# Payments
+# Payment Approval Process
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active (manual) · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## Steps
 
-Describe the scope and intent of **Payments** for the Jobrio platform.
+1. Open Subscriptions & Billing, filter Pending.
+2. Match the user's UTR and `WSP-` reference with the bank statement (amount must equal the plan price).
+3. Approve: a subscription is created from today. Reject: add a note.
+4. Duplicate UTRs are refused by the server; an approved payment cannot be approved twice.
 
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Gateway automation is TBD.

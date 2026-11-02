@@ -1,11 +1,6 @@
-import { useEffect, useState } from "react";
-import { api, ApiError } from "@/services/api";
-import { establishSession } from "@/services/session";
+import { useState } from "react";
 import { CatalystLoginSheet } from "./CatalystLoginSheet";
 import { ArcMark, WealthspanWordmark } from "./Logo";
-
-type Step = "email" | "code";
-const RESEND_SECONDS = 30;
 
 const wrapper =
   "auth-viewport fixed inset-0 z-50 flex flex-col bg-[#fafafa] dark:bg-[#0c0d12] text-[#0f172a] dark:text-[#f3f4f6] w-full max-w-full overflow-x-hidden overflow-y-auto overscroll-contain selection:bg-black selection:text-white font-sans";
@@ -16,167 +11,12 @@ const wrapperStyle = {
   paddingRight: "env(safe-area-inset-right, 0px)",
 };
 
-/** Login in the original Wealthspan look: Google (hosted by Catalyst) or email code (needs the mail domain). */
-export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
-  const [step, setStep] = useState<Step>("email");
+/** Login in the original Wealthspan look: Google, Zoho or email: all three open the Catalyst sign-in sheet (the sign-in itself runs on Catalyst, never in our code). */
+export function LoginScreen(_props: { onLoggedIn?: () => void }) {
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [wait, setWait] = useState(0);
   const [sheet, setSheet] = useState(false);
-
-  useEffect(() => {
-    if (wait <= 0) return;
-    const t = setTimeout(() => setWait((w) => w - 1), 1000);
-    return () => clearTimeout(t);
-  }, [wait]);
-
-  const run = async (fn: () => Promise<void>) => {
-    setBusy(true);
-    setError(null);
-    try {
-      await fn();
-    } catch (e) {
-      setError(e instanceof ApiError || e instanceof Error ? e.message : "Something went wrong.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const send = () =>
-    run(async () => {
-      await api("auth", "/send", { method: "POST", body: { email: email.trim(), method: "otp" } });
-      setStep("code");
-      setWait(RESEND_SECONDS);
-    });
-
-  const verify = (value: string) =>
-    run(async () => {
-      const { token } = await api<{ token: string }>("auth", "/verify", {
-        method: "POST",
-        body: { email: email.trim(), method: "otp", secret: value },
-      });
-      await establishSession(token);
-      onLoggedIn();
-    });
-
-  if (step === "code") {
-    return (
-      <div className={wrapper} style={wrapperStyle}>
-        <div className="shrink-0 w-full max-w-[440px] mx-auto flex flex-col justify-start items-center py-3 xs:py-4 px-5 xs:px-6 box-border">
-          <header className="w-full flex items-center justify-between pt-1 pb-4 shrink-0 select-none">
-            <button
-              type="button"
-              aria-label="Go back to email input"
-              onClick={() => {
-                setStep("email");
-                setCode("");
-                setError(null);
-              }}
-              className="w-11 h-11 rounded-full border border-[#ebebeb] dark:border-[#262a33] shadow-sm flex items-center justify-center text-gray-700 dark:text-gray-200 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#1a1d24] active:bg-gray-200 dark:active:bg-[#262a33] focus:outline-none active:scale-95 transition-all cursor-pointer bg-white dark:bg-[#0c0d12]"
-            >
-              <svg
-                className="w-5 h-5 stroke-[2.25]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M15.75 19.5L8.25 12l7.5-7.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-            <WealthspanWordmark />
-            <div className="w-10 shrink-0" aria-hidden="true" />
-          </header>
-          <h1 className="text-[21px] xs:text-[23px] sm:text-[24px] font-medium tracking-tight text-neutral-900 dark:text-white text-center mt-6 xs:mt-8 mb-6 sm:mb-8 select-none">
-            Enter the code we sent to your email
-          </h1>
-          <form
-            className="w-full max-w-sm mb-5"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (code.length === 6) void verify(code);
-            }}
-          >
-            <div className="w-full relative">
-              <input
-                id="verification-code-input"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                maxLength={6}
-                autoFocus
-                value={code}
-                onChange={(e) => {
-                  const v = e.target.value.replace(/\D/g, "");
-                  setCode(v);
-                  if (v.length === 6) void verify(v);
-                }}
-                className="w-full h-14 sm:h-16 rounded-[22px] sm:rounded-[24px] bg-transparent text-neutral-950 dark:text-white text-center text-xl sm:text-2xl font-mono tracking-widest placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none transition-all duration-200 border-2 border-black dark:border-white"
-              />
-              <label
-                htmlFor="verification-code-input"
-                className="absolute top-0 -translate-y-1/2 left-6 text-xs px-1.5 font-semibold bg-[#fafafa] dark:bg-[#0c0d12] pointer-events-none select-none z-10 transition-colors text-black dark:text-white"
-              >
-                Code
-              </label>
-            </div>
-            {error ? (
-              <p role="alert" className="mt-3 text-center text-sm text-red-600 dark:text-red-400">
-                {error}
-              </p>
-            ) : null}
-          </form>
-          <div className="w-full max-w-sm bg-[#f6f6f6] dark:bg-[#161820] border border-neutral-200/90 dark:border-neutral-800 rounded-[28px] p-6 sm:p-7 text-center flex flex-col items-center justify-center select-none shadow-xs">
-            <span className="text-sm sm:text-[14.5px] text-neutral-600 dark:text-neutral-400 font-normal">
-              We sent an email to
-            </span>
-            <span className="text-base sm:text-[16.5px] font-bold text-neutral-950 dark:text-white mt-1 break-all">
-              {email}
-            </span>
-            <div className="mt-5 w-14 h-14 rounded-2xl bg-black dark:bg-white text-white dark:text-black flex items-center justify-center shadow-md shadow-black/5 select-none">
-              <svg
-                className="w-7 h-7"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                viewBox="0 0 24 24"
-              >
-                <rect width="20" height="16" x="2" y="4" rx="2" />
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-              </svg>
-            </div>
-          </div>
-          <div className="mt-6 flex flex-col items-center gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setStep("email");
-                setCode("");
-                setError(null);
-              }}
-              className="text-[15px] font-medium text-[#1d6de5] dark:text-[#3b82f6] hover:underline cursor-pointer transition-colors"
-            >
-              Change email address
-            </button>
-            <button
-              type="button"
-              disabled={wait > 0 || busy}
-              onClick={() => void send()}
-              className="text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
-            >
-              {wait > 0 ? `Resend code in ${wait}s` : "Resend code"}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const [focused, setFocused] = useState(false);
+  const hasText = email.length > 0;
 
   return (
     <div className={wrapper} style={wrapperStyle}>
@@ -208,35 +48,37 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
             </span>
           </div>
           <div className="w-full grid grid-cols-2 gap-3">
-            <button type="button" onClick={() => setSheet(true)} className="h-13 sm:h-14 min-h-[48px] rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm transition-all active:scale-[0.99] cursor-pointer">
+            <button
+              type="button"
+              onClick={() => setSheet(true)}
+              className="h-13 sm:h-14 min-h-[48px] rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
+            >
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-              <path
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                fill="#4285F4"
-              />
-              <path
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                fill="#34A853"
-              />
-              <path
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                fill="#EA4335"
-              />
-            </svg>
-              <span>Google</span>
-            </button>
-            <button type="button" onClick={() => setSheet(true)} className="h-13 sm:h-14 min-h-[48px] rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm transition-all active:scale-[0.99] cursor-pointer">
-              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="1" y="5" width="10" height="6" rx="1.5" fill="#E42527" />
-                <rect x="13" y="5" width="10" height="6" rx="1.5" fill="#089949" />
-                <rect x="1" y="13" width="10" height="6" rx="1.5" fill="#226DB4" />
-                <rect x="13" y="13" width="10" height="6" rx="1.5" fill="#F9B21D" />
+                <path
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853"
+                />
+                <path
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  fill="#FBBC05"
+                />
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  fill="#EA4335"
+                />
               </svg>
-              <span>Zoho</span>
+              <span>Continue with Google</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSheet(true)}
+              className="h-13 sm:h-14 min-h-[48px] rounded-[20px] sm:rounded-[24px] bg-[#18181b] dark:bg-white hover:bg-black dark:hover:bg-neutral-100 text-white dark:text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-sm transition-all active:scale-[0.99] cursor-pointer"
+            >
+              <span>Continue with Zoho</span>
             </button>
           </div>
           <div className="w-full flex items-center my-0.5 select-none">
@@ -251,33 +93,49 @@ export function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) {
             noValidate
             onSubmit={(e) => {
               e.preventDefault();
-              if (email.includes("@") && !busy) void send();
+              setSheet(true);
             }}
           >
-            <div className="w-full relative">
+            <div id="email-input-container" className="w-full relative">
               <input
                 id="email-input"
                 type="email"
+                data-auth-input="true"
                 autoComplete="email"
                 autoCorrect="off"
                 autoCapitalize="off"
                 spellCheck={false}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-13 sm:h-14 min-h-[48px] bg-transparent rounded-[20px] sm:rounded-[24px] text-gray-950 dark:text-white text-[16px] sm:text-base font-normal text-center focus:outline-none transition-all duration-200 px-5 xs:px-6 border-2 border-black dark:border-white"
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                className={`w-full h-13 sm:h-14 min-h-[48px] bg-transparent rounded-[20px] sm:rounded-[24px] text-gray-950 dark:text-white text-[16px] sm:text-base font-normal text-center focus:outline-none transition-all duration-200 ${hasText ? "px-14" : "px-5 xs:px-6"} ${focused ? "border-2 border-black dark:border-white" : hasText ? "border border-gray-400 dark:border-gray-500" : "border border-gray-300 dark:border-gray-700"}`}
               />
               <label
                 htmlFor="email-input"
-                className="absolute pointer-events-none transition-all duration-200 ease-out select-none top-0 -translate-y-1/2 left-4 xs:left-5 text-xs px-1.5 font-medium bg-[#fafafa] dark:bg-[#0c0d12] z-10 text-black dark:text-white font-semibold"
+                className={`absolute pointer-events-none transition-all duration-200 ease-out select-none ${focused || hasText ? "top-0 -translate-y-1/2 left-4 xs:left-5 text-xs px-1.5 font-medium bg-[#fafafa] dark:bg-[#0c0d12] z-10 " + (focused ? "text-black dark:text-white font-semibold" : "text-gray-500 dark:text-gray-400") : "top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-sm sm:text-base text-gray-400 dark:text-gray-500 whitespace-nowrap"}`}
               >
                 Enter your email
               </label>
+              {hasText ? (
+                <button
+                  type="button"
+                  id="email-submit-btn"
+                  onClick={() => setSheet(true)}
+                  aria-label="Submit email"
+                  className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 min-w-[36px] min-h-[36px] bg-black dark:bg-white text-white dark:text-black rounded-full shadow-md active:scale-95 hover:bg-neutral-900 dark:hover:bg-neutral-100 transition-all duration-150 cursor-pointer flex items-center justify-center shrink-0 z-10"
+                >
+                  <svg
+                    className="w-4 h-4 stroke-[2.5]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              ) : null}
             </div>
-            {error ? (
-              <p role="alert" className="mt-3 text-center text-sm text-red-600 dark:text-red-400">
-                {error}
-              </p>
-            ) : null}
           </form>
           <p className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 leading-relaxed text-center mt-1 px-1 select-none">
             By continuing, you agree to Wealthspan's{" "}

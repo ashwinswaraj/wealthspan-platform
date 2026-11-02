@@ -1,24 +1,7 @@
 # Cloud Storage
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
+**Not used yet.** Exports (PDF, Excel, CSV, Word) are generated on request by the `files` function and streamed to the browser; nothing is stored.
 
-Describe the scope and intent of **Cloud Storage** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Planned: Catalyst File Store for scheduled backups ([DevOps/69](../DevOps/69_Backup_Strategy.md)) and for statement upload in Phase 2. Any stored file would be private, per user, and deleted with the account.

@@ -1,24 +1,16 @@
-# Third Party APIs
+# Third-Party Services
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
+| Service                        | Use                                            | Status             |
+| ------------------------------ | ---------------------------------------------- | ------------------ |
+| Zoho Catalyst                  | hosting, functions, Data Store, authentication | in use             |
+| Sarvam AI                      | chat model                                     | in use             |
+| Google / Zoho sign-in          | via Catalyst Embedded Authentication           | in use             |
+| Google Fonts                   | web fonts on the landing page                  | in use             |
+| Payment gateway                | subscriptions                                  | TBD                |
+| Transactional e-mail           | notifications                                  | TBD                |
+| Account Aggregator, SMS reader | auto-import                                    | Phase 2, not built |
+| Maps, push, SMS sending        | -                                              | not in Phase 1     |
 
-Describe the scope and intent of **Third Party APIs** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Rule: add a service only after documenting what user data it receives.

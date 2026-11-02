@@ -1,24 +1,10 @@
 # Future Features
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Ideas, not committed · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **Future Features** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+- Voice input for the chatbot.
+- Indian-language chat and interface.
+- Receipt photo capture.
+- Live valuation of investments (Phase 1: the user types the current value).
+- Shared project with an accountant (read-only link).
+- Bill and EMI reminders.

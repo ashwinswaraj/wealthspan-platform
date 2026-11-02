@@ -1,24 +1,18 @@
-# Users Directory
+# Users Directory (user app)
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Not applicable to the user app · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
-Describe the scope and intent of **Users Directory** for the Jobrio platform.
+Subscribers never see other users: every row is keyed by `user_id` and every store method is scoped to one user (`apps/api/src/features/catalog/types.ts`).
 
-## Scope
+## What the user app has instead
 
-- What this document covers
-- What it explicitly does not cover
+- A profile and plan view from `GET /finance/me` and `GET /finance/subscription`.
+- Own **Accounts** (cash, bank, credit card, wallet) and **Projects** lists.
 
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
+The cross-user directory exists only in the admin panel: see `docs/Admin/92_Users_Directory.md`.
 
 ## References
 
-- [Master Context](../../00_Master_Context.md)
+- [Data model](../Database/41_Wealthspan_Data_Model.md)

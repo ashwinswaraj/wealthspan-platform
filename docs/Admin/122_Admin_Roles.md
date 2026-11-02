@@ -1,24 +1,12 @@
 # Admin Roles
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Planned (one role today) · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+| Role        | Status  | Intended scope                    |
+| ----------- | ------- | --------------------------------- |
+| Super admin | Shipped | everything in the panel           |
+| Support     | Planned | users read-only, support requests |
+| Finance     | Planned | payments, billing, ledger read    |
+| Viewer      | Planned | overview and health, read-only    |
 
-Describe the scope and intent of **Admin Roles** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Today every allowlisted admin is a super admin.

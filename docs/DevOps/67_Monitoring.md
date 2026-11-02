@@ -1,24 +1,10 @@
 # Monitoring
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
+Today:
 
-Describe the scope and intent of **Monitoring** for the Jobrio platform.
+- Admin `GET /admin/health` measures real Data Store latency and reports the core API as up. Chat (Sarvam) and Files show "not checked".
+- Catalyst's own console shows function invocations, errors and execution time.
 
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Planned: uptime ping on `/server/finance/me` expecting 401, alert on error-rate spikes, alert on Sarvam failures and 429 spikes, track free-tier Data Store and mail limits before launch.

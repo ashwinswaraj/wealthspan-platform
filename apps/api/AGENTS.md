@@ -5,13 +5,10 @@ covered here.
 
 ## Current state
 
-`apps/api` is a **thin edge layer, not the system of record**. Identity is
-handled by Supabase Auth directly — this app's `features/auth/` only
-verifies bearer tokens and exposes the resolved session, it does not own
-user data. `src/index.ts` is currently an unwired stub (`export {}`); no
-HTTP framework is mounted yet. Don't assume routes are being served just
-because a `features/<domain>/routes.ts` file exists — check `src/index.ts`
-first.
+`apps/api` is the backend of Wealthspan: shared feature code in `src/` plus three Catalyst Advanced I/O
+functions in `catalyst/functions/` (`finance`, `chat`, `files`; 30 s limit each). Identity is Catalyst
+Authentication (session cookie, same domain); data is the Catalyst Data Store. Check
+`catalyst/functions/*/src/entry.ts` to see which routes are really served.
 
 ## Rules
 
@@ -20,17 +17,12 @@ first.
   logic) → `types.ts` (shared shapes) → `routes.ts` (route map) →
   `index.ts` (barrel). See `features/auth/` for the reference shape.
 - `[SEC]` **Never log or return raw secrets.** Every value in `.env.example`
-  (`SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, `STRIPE_SECRET_KEY`,
-  `RESEND_API_KEY`, `DATABASE_URL`) is server-only — none of them may reach
+  (`SARVAM_API_KEY`, `ADMIN_EMAILS`, `ADMIN_USER_IDS`) is server-only — none of them may reach
   a client response, a log line, or an error message. If you add a new
   secret, add its name (not its value) to `.env.example`.
-- `[SEC]` **Never bypass token verification.** Every handler that reads
-  user-scoped data must go through the same bearer-token verification
-  pattern as `features/auth/controller.ts` — don't trust a `userId` passed
-  in a request body.
-- `[SCALE]` Before adding a second feature, confirm the HTTP framework
-  choice (see `.lovable/plan.md` step 1) — don't wire ad-hoc routing
-  per-feature; use whatever framework gets chosen, consistently.
+- `[SEC]` **Never bypass the session check.** Every handler that reads
+  user-scoped data must take the user from the Catalyst session
+  (`features/auth`) — don't trust a `userId` passed in a request body.
 - `[CLR]` Copy `.env.example` to `.env` before running anything locally;
   never commit `.env`.
 

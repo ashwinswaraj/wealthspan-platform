@@ -1,10 +1,11 @@
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { Toaster as Sonner } from "@jobrio/ui/components/sonner";
-import { Toaster } from "@jobrio/ui/components/toaster";
-import { TooltipProvider } from "@jobrio/ui/components/tooltip";
+import { Toaster as Sonner } from "@wealthspan/ui/components/sonner";
+import { Toaster } from "@wealthspan/ui/components/toaster";
+import { TooltipProvider } from "@wealthspan/ui/components/tooltip";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
@@ -14,10 +15,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Wealthspan Admin" },
       {
         name: "description",
-        content:
-          "Internal Wealthspan admin console: subscription payment approvals.",
+        content: "Internal Wealthspan admin console: subscription payment approvals.",
       },
       { name: "author", content: "Wealthspan" },
+      { name: "referrer", content: "strict-origin-when-cross-origin" },
       { property: "og:site_name", content: "Wealthspan Admin" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -64,7 +65,19 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Clickjacking brake: static hosting cannot send X-Frame-Options, so a page inside someone else's frame hides itself. */
+function useFrameGuard() {
+  useEffect(() => {
+    try {
+      if (window.top !== window.self) document.documentElement.style.display = "none";
+    } catch {
+      document.documentElement.style.display = "none";
+    }
+  }, []);
+}
+
 function RootComponent() {
+  useFrameGuard();
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>

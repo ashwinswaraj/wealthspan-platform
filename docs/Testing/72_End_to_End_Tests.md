@@ -1,24 +1,5 @@
-# End to End Tests
+# End-to-End Tests
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **End to End Tests** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+None yet (`tests/` is reserved). First flows to automate with Playwright against a deployed Development environment: sign in, create project, add income and expense, transfer for a card bill, conclude an event, start trial, ask chat, export a file, admin approves a payment.

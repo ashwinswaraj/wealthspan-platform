@@ -1,24 +1,5 @@
 # Authentication
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **Authentication** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+See [Auth_Flow](Auth_Flow.md). Summary: Catalyst Embedded Authentication (Google, Zoho, e-mail), session cookie, user read server-side on every request. Google sign-in needs our own Client ID/Secret and Public Signup enabled in Catalyst. Passwords for e-mail sign-in are handled by Catalyst; we store none. MFA: whatever Catalyst offers, to be enabled before launch (TBD).

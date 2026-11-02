@@ -1,24 +1,15 @@
-# ADR-009 Admin QA
+# ADR-009: Data-quality review (Planned)
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Proposed · Last updated: 2026-11-01
 
-## Purpose
+## Context
 
-Describe the scope and intent of **ADR-004 Finance** for the Jobrio platform.
+Entries made by the chatbot or typed by hand can be wrong (wrong account, duplicate, card bill counted twice).
 
-## Scope
+## Decision (proposed)
 
-- What this document covers
-- What it explicitly does not cover
+Quality is handled first in code: double-counting guards (`looksLikeCardBillPayment`, `findSameAmountCardExpenses`), validation, `created_by` (`manual` / `chatbot` / `system`) and the `audit_log`. A separate admin review queue is not built; it is only considered if support volume shows a need.
 
-## Details
+## Consequences
 
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Admins can already read the audit log. Nothing here is shipped beyond that.

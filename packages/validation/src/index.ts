@@ -1,5 +1,5 @@
 /**
- * @jobrio/validation — single source of truth for client-side input validation.
+ * @wealthspan/validation — single source of truth for client-side input validation.
  *
  * Every auth surface, signup step and dashboard form MUST validate through
  * these helpers so error copy, rules and strength scoring stay identical

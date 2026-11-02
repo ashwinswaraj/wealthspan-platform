@@ -1,24 +1,12 @@
 # Phase 2
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Planned · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+Theme: less typing. Nothing below is built.
 
-Describe the scope and intent of **Phase 2** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+- SMS reader (Android) to propose transactions for review.
+- Bank and card auto-connect via Account Aggregator.
+- Statement upload (PDF / CSV) with duplicate detection.
+- Automated payment gateway for subscriptions.
+- E-mail and push notifications (trial, payments, EMI due).
+- Data-quality review: possible duplicates and unusual amounts.

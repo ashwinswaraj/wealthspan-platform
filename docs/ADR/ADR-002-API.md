@@ -1,24 +1,29 @@
-# ADR-002 API
+# ADR-002: API as Zoho Catalyst Advanced I/O functions (Express)
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Accepted · Last updated: 2026-11-01
 
-## Purpose
+## Context
 
-Describe the scope and intent of **ADR-002 API** for the Jobrio platform.
+The owner chose to run everything on Zoho Catalyst. Advanced I/O functions have a 30 s execution limit and are reached at `/server/<function>/...` on the app's own domain.
 
-## Scope
+## Decision
 
-- What this document covers
-- What it explicitly does not cover
+Three Node 22 Express functions, built from `apps/api/src/features/*` by `apps/api/catalyst/build.mjs`:
 
-## Details
+| Function  | Job                                                                  |
+| --------- | -------------------------------------------------------------------- |
+| `finance` | transactions, summary, catalog entities, subscription, admin console |
+| `chat`    | AI accountant (Sarvam `sarvam-105b` behind an adapter)               |
+| `files`   | PDF / Excel / CSV / Word exports and sheet `.xlsx`                   |
 
-_TODO: fill in._
+The browser calls them same-domain with the session cookie; the user id is read from the Catalyst session on every request and never from the body or query.
 
-## Open Questions
+## Consequences
 
-- [ ] TBD
+- No separate API gateway; the 30 s limit forces the Sarvam client to time out below 30 s.
+- Rate limits are in memory per function instance (a brake, not an exact quota).
+- Generated `functions/*/index.js` is committed and must be rebuilt after source changes.
 
 ## References
 
-- [Master Context](../00_Master_Context.md)
+- [API Architecture](../API/41_API_Architecture.md), [API Specification](../API/42_API_Specification.md)

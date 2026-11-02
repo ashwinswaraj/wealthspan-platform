@@ -1,24 +1,7 @@
-# Disputes
+# Support & Refund Process
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Planned · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## Intended steps
 
-Describe the scope and intent of **Disputes** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Receive request, check payment and usage, decide, reply, and record the outcome. Refunds are manual until a gateway exists. No tooling is built. See `100_Dispute_Center.md`.

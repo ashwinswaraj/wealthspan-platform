@@ -5,11 +5,9 @@ Auth is sensitive — confirm before changing. Falls back to root
 
 ## Current state
 
-Shared by `apps/web` and `apps/admin` (both declare
-`"@jobrio/auth": "workspace:*"`). Contains `SignIn.tsx`, `SignUp.tsx`,
-`useSession.ts`, and `signupStorage.ts` (client-side signup-flow draft
-persistence — not a token store). `apps/api` does not depend on this
-package; it talks to Supabase Auth directly (see `apps/api/AGENTS.md`).
+Shared session logic for `apps/web` and `apps/admin`. It holds the `useSession` hook, which asks the Catalyst
+function (`/server/finance/me`) whether the cookie session is valid. Sign-in and sign-out themselves run on
+Catalyst's Embedded Authentication (`catalyst.auth.signIn` / `signOut`), not in this package.
 
 ## Rules
 
@@ -21,7 +19,7 @@ package; it talks to Supabase Auth directly (see `apps/api/AGENTS.md`).
   `signupStorage.ts` or any other client storage — it's for non-sensitive
   in-progress form state only (names, selected options), so a user doesn't
   lose partially-filled signup data on refresh.
-- `[RULE]` This package exports auth *logic and components*, not app-specific
+- `[RULE]` This package exports auth _logic and components_, not app-specific
   styling — `SignIn.tsx`/`SignUp.tsx` should stay usable by both the public
   web app and the admin panel without per-app forks. App-specific chrome
   (page layout, marketing copy) belongs in the consuming app's own

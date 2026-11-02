@@ -1,43 +1,41 @@
 # API Specification
 
-> Status: Draft · Owner: TBD · Last updated: 2026-08-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
+Base: `/server/<function>`. Login required everywhere (401 otherwise). Writes need header `X-Requested-With: wealthspan` (403 otherwise). Source of truth: the `entry.ts` files.
 
-Document the endpoints `apps/api` actually exposes. Only `auth` exists so
-far — this file grows as real features are added; it does not speculate
-about endpoints that don't exist yet.
+## finance
 
-## Scope
+| Route                                                             | Purpose                                                 |
+| ----------------------------------------------------------------- | ------------------------------------------------------- |
+| `GET /me`                                                         | 200 if logged in                                        |
+| `GET /transactions?from&to&projectId&accountId&type&limit&offset` | list                                                    |
+| `POST /transactions`, `PATCH                                      | DELETE /transactions/:id`                               | create / edit / soft delete                                  |
+| `GET /summary?from&to&projectId`                                  | totals computed by `packages/utils`                     |
+| `GET                                                              | POST /projects                                          | accounts                                                     | events               | loans      | investments`, `PATCH | DELETE /<entity>/:id`       | catalog (409 if still in use) |
+| `POST /events/:id/conclude                                        | reopen`, `/loans/:id/close                              | reopen`, `/projects                                          | accounts/:id/archive | unarchive` | state changes        |
+| `GET /subscription`                                               | plan, `active`, `endsOn`, `daysLeft`, `trialUsed`       |
+| `POST /subscription/trial`                                        | start the free 1-month trial (409 if already used)      |
+| `GET                                                              | POST /subscription/payments`                            | my payment submissions / submit plan + 12-digit UTR + amount |
+| `GET /admin/me`                                                   | am I an admin (and, if listed but unpinned, my user id) |
+| `GET /admin/overview                                              | users                                                   | payments                                                     | ledger               | audit      | health`              | admins only (403 otherwise) |
+| `POST /admin/payments/:id/approve                                 | reject`                                                 | admins only, optional `note`                                 |
 
-- Covers: endpoints built and present in `apps/api/src/features/`
-- Does not cover: endpoints that only exist as ideas (see `.lovable/plan.md`
-  for what's planned next)
+Limits: 90 writes/min and 300 reads/min per user (per instance).
 
-## Endpoints
+## chat
 
-### `auth` feature
+`POST /chat` with `{ messages: [{ role, content }] }`: last 12 messages, 2000 chars each. Returns `{ reply, usage }`. Errors: `402 subscription_required` (no live trial/plan), `429 daily_limit` (40 messages per IST day), `400 validation`, provider errors 502. Tool calls (create/update/delete with server-side confirmation) are Planned; today it is plain Q&A.
 
-| Method & path | Handler | Auth required | Returns |
-| --- | --- | --- | --- |
-| `GET /auth/session` | `getSession` | Bearer token (`Authorization: Bearer <token>`) | `{ userId, email, role }` or `401 { error: "Unauthorized" }` |
-| `POST /auth/signout` | `signOut` | Bearer token | `{ ok: true }` or `401 { error: "Unauthorized" }` |
+## files
 
-Both verify the token against Supabase Auth (`GET /auth/v1/user` /
-`POST /auth/v1/logout` on the configured Supabase project) rather than
-maintaining sessions locally — see `apps/api/src/features/auth/service.ts`.
+| Route                                 | Purpose        |
+| ------------------------------------- | -------------- |
+| `GET /export?format=csv               | xlsx           | docx                                                                                                              | pdf&from&to&projectId` | report file (PDF uses "Rs.") |
+| `GET /sheet?sheet=<key>&month=YYYY-MM | all&projectId` | one sheet as `.xlsx`; keys: income, expense, debt-loan, savings-investing, festivals-functions, accounts, project |
 
-`role` in the session payload comes from the Supabase user's
-`app_metadata.role`, defaulting to `"user"` if unset.
+Limit: 5 requests/min per client address.
 
-## Open Questions
+## Errors
 
-- [ ] Error response shape beyond 401 (validation errors, 500s) isn't
-      standardized yet — only one failure mode exists per endpoint so far
-- [ ] No endpoints beyond `auth` exist yet — next candidate is `orders`
-      (see `.lovable/plan.md`)
-
-## References
-
-- [Master Context](../00_Master_Context.md)
-- `apps/api/src/features/auth/`
+`{ error: "validation" | "forbidden" | "not_found" | "conflict" | "rate_limited" | "too_large" | "server" | ..., message, fields? }` with matching HTTP status.

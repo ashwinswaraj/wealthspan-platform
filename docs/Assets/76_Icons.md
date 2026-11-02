@@ -1,24 +1,7 @@
 # Icons
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+Icons come from the shared UI package (`@wealthspan/ui`); apps should not add their own icon sets. Use one consistent stroke style and size per context (navigation, table, button).
 
-Describe the scope and intent of **Icons** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+Which icon library `@wealthspan/ui` wraps is not recorded here: check `packages/ui` before adding icons. Section icons (Income, Expense, Debt, Savings, Festivals) are TBD.

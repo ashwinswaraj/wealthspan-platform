@@ -1,24 +1,12 @@
 # Access Control
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## How admin access works
 
-Describe the scope and intent of **Access Control** for the Jobrio platform.
+- Every `/finance/admin/*` request passes an admin check at the edge (`app.use("/admin", ...)` in the finance function).
+- Admin = email in `ADMIN_EMAILS`; if `ADMIN_USER_IDS` is set the Catalyst user id must also be listed, so registering with someone else's email is not enough.
+- Bootstrap: read your id from `GET /admin/me`, then pin it.
+- Writes need the CSRF header; the admin UI sends `X-Requested-With: wealthspan`.
 
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Finer roles: `123_RBAC.md` (Planned).

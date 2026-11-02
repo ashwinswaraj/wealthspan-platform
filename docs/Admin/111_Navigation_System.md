@@ -1,24 +1,5 @@
 # Navigation System
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
-
-Describe the scope and intent of **Navigation System** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+A left sidebar (`ADMIN_NAV` in `AdminDashboardLayout.tsx`) with six items: Overview, User Directory, Subscriptions & Billing, Security & Access Logs, Financial Ledger & Projects, System Configuration & Health. The active item is inverted (dark pill). On small screens the sidebar slides in from a menu button. The header has notifications and profile buttons. Routes: `apps/admin/src/routes` (`/dashboard/admin`).

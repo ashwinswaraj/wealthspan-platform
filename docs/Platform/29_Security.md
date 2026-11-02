@@ -1,24 +1,14 @@
-# Admin Security
+# Security
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## Controls in code
 
-Describe the scope and intent of **Admin Security** for the Jobrio platform.
+- Catalyst Embedded Authentication; session cookie; user id only from the session.
+- CSRF: writes require `X-Requested-With: wealthspan`; cross-site requests are refused (`apps/api/src/middleware/security.ts`).
+- Per-user in-memory rate limit plus a Data Store daily chat quota.
+- JSON error handler that does not leak stack traces; `no-store` caching.
+- Admin access needs an allowlisted email, optionally pinned to a Catalyst user id.
+- Admin screens never show what a user typed (names, categories, notes).
 
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Threat model and policy: `docs/Security/`.

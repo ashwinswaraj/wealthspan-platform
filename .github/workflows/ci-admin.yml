@@ -28,6 +28,6 @@ jobs:
       - name: Check repo structure
         run: pnpm check:structure
       - name: Typecheck
-        run: pnpm --filter @jobrio/admin typecheck
+        run: pnpm --filter @wealthspan/admin typecheck
       - name: Build
-        run: pnpm --filter @jobrio/admin build
+        run: pnpm --filter @wealthspan/admin build

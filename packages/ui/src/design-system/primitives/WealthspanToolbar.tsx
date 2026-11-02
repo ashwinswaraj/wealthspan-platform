@@ -1,6 +1,6 @@
 import * as React from "react";
 import { SlidersHorizontal, ArrowDownWideNarrow, type LucideIcon } from "lucide-react";
-import { cn } from "@jobrio/utils/utils";
+import { cn } from "@wealthspan/utils/utils";
 
 interface ToolbarButtonProps {
   icon: LucideIcon;
@@ -40,7 +40,7 @@ const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(
 );
 ToolbarButton.displayName = "ToolbarButton";
 
-export interface JobrioToolbarProps {
+export interface WealthspanToolbarProps {
   filterLabel?: string;
   filterCount?: number;
   onFilterClick?: () => void;
@@ -52,15 +52,15 @@ export interface JobrioToolbarProps {
   className?: string;
 }
 
-export const JobrioFilterButton = (
+export const WealthspanFilterButton = (
   props: Omit<ToolbarButtonProps, "icon"> & { icon?: LucideIcon },
 ) => <ToolbarButton icon={props.icon ?? SlidersHorizontal} {...props} />;
 
-export const JobrioSortButton = (
+export const WealthspanSortButton = (
   props: Omit<ToolbarButtonProps, "icon"> & { icon?: LucideIcon },
 ) => <ToolbarButton icon={props.icon ?? ArrowDownWideNarrow} {...props} />;
 
-export const JobrioToolbar = ({
+export const WealthspanToolbar = ({
   filterLabel = "Filter",
   filterCount,
   onFilterClick,
@@ -70,7 +70,7 @@ export const JobrioToolbar = ({
   onSortClick,
   sortActive,
   className,
-}: JobrioToolbarProps) => (
+}: WealthspanToolbarProps) => (
   <div
     className={cn(
       "flex items-stretch bg-surface rounded-2xl border border-outline-variant/40 overflow-hidden",
@@ -79,14 +79,14 @@ export const JobrioToolbar = ({
     role="toolbar"
     aria-label="Filter and sort"
   >
-    <JobrioFilterButton
+    <WealthspanFilterButton
       label={filterLabel}
       count={filterCount}
       onClick={onFilterClick}
       active={filterActive}
     />
     <div aria-hidden className="w-px my-2 bg-outline-variant/60" />
-    <JobrioSortButton
+    <WealthspanSortButton
       label={sortLabel}
       count={sortCount}
       onClick={onSortClick}

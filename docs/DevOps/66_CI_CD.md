@@ -1,24 +1,18 @@
 # CI/CD
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
+## CI (GitHub Actions, real)
 
-Describe the scope and intent of **CI/CD** for the Jobrio platform.
+- `ci-web`, `ci-admin`: structure check, typecheck, build.
+- `ci-api`: structure check, typecheck, unit tests.
+- `test`: `pnpm test` (constants, validation, utils, api).
+- `lint`: ESLint + Prettier.
+- `database`: typecheck of `packages/database`.
+- `security-scan`: `pnpm audit` (high/critical), CodeQL, secret scan, weekly.
 
-## Scope
+Run `pnpm check:structure` locally; it enforces the README folder tree.
 
-- What this document covers
-- What it explicitly does not cover
+## CD
 
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+None automated. Deploying to Catalyst is a manual CLI step ([64](64_Deployment.md)). Automating it needs a Catalyst CLI token as a GitHub secret and a decision on who may deploy to production; TBD.

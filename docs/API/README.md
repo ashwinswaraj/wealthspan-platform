@@ -1,15 +1,12 @@
 # API Documentation
 
-Contracts for `apps/api` and the server functions in `apps/web`.
+Contracts for the Catalyst functions in `apps/api` (finance, chat, files).
 
-Files are numbered by topic:
+| File                      | Contents                                                |
+| ------------------------- | ------------------------------------------------------- |
+| `41_API_Architecture.md`  | How the functions are built, authenticated and guarded. |
+| `42_API_Specification.md` | Every route, with auth and limits.                      |
+| `43_Webhooks.md`          | Webhooks: none in Phase 1.                              |
+| `44_Event_System.md`      | Events: the audit log; no event bus in Phase 1.         |
 
-| File | Contents |
-| --- | --- |
-| `41_API_Architecture.md` | API architecture and per-domain module breakdown. |
-| `42_API_Specification.md` | Endpoint-by-endpoint specification (paths, payloads, responses). |
-| `43_Webhooks.md` | Inbound/outbound webhook contracts and signature verification. |
-| `44_Event_System.md` | Domain events emitted and consumed by the platform. |
-
-Authentication and middleware topics (token issuance, sessions, rate limiting,
-RBAC) will be added here as `apps/api` grows past the scaffold stage.
+All routes are same-domain: `/server/<function>/<path>`. Errors are JSON `{ error, message, fields? }`.

@@ -1,24 +1,11 @@
-# Order Desk
+# Entry Review
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Partly built · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
-Describe the scope and intent of **Order Desk** for the Jobrio platform.
+Inspect transactions across the platform without seeing private content.
 
-## Scope
+## State
 
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+The Financial Ledger & Projects screen lists recent transactions (`GET /admin/ledger`): project, type, payment mode, amount, date. Counterparty shows "Hidden" and categories are reduced to the type. Status is always "Cleared" because Wealthspan records money that already moved. See `116_Order_Review.md`.

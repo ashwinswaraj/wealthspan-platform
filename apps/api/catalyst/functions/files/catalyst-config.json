@@ -1,4 +1,9 @@
 {
-  "deployment": { "name": "files", "type": "advancedio", "stack": "node22", "env_variables": {} },
+  "deployment": {
+    "name": "files",
+    "type": "advancedio",
+    "stack": "node22",
+    "env_variables": { "NODE_ENV": "production" }
+  },
   "execution": { "main": "index.js" }
 }

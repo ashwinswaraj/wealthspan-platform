@@ -1,24 +1,14 @@
 # System
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Active · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+## Layout
 
-Describe the scope and intent of **System** for the Jobrio platform.
+- `apps/web`: TanStack Start SPA, hosted by Catalyst Web Client Hosting under `/app/`.
+- `apps/api`: Catalyst Advanced I/O functions `finance`, `chat`, `files` (Express, Zod, bundled by `apps/api/catalyst/build.mjs`).
+- Zoho Catalyst Data Store (ZCQL) for data; Cloud Scale Embedded Authentication for sign-in.
+- AI: Sarvam `sarvam-105b`.
+- Exports: `GET /files/export` (PDF, Excel, CSV, Word) and `GET /files/sheet`.
+- Monorepo: pnpm + Turborepo.
 
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../../00_Master_Context.md)
+Admin can see service health at `GET /finance/admin/health`.

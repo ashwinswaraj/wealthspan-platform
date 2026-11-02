@@ -3,7 +3,7 @@
  * CSV / Excel / Word / PDF writers all take this same object, so the four
  * files always show the same numbers.
  */
-import type { FinanceSummary, FinanceTransaction } from "@jobrio/types";
+import type { FinanceSummary, FinanceTransaction } from "@wealthspan/types";
 
 export const FILE_FORMATS = ["csv", "xlsx", "docx", "pdf"] as const;
 export type FileFormat = (typeof FILE_FORMATS)[number];
@@ -73,7 +73,8 @@ export interface BuildReportInput {
 
 export function buildReport(input: BuildReportInput): Report {
   const n = input.names ?? {};
-  const name = (map: Record<string, string> | undefined, id: string | null) => (id ? (map?.[id] ?? id) : "");
+  const name = (map: Record<string, string> | undefined, id: string | null) =>
+    id ? (map?.[id] ?? id) : "";
   const s = input.summary;
 
   const rows: ReportRow[] = [...input.transactions]
@@ -107,7 +108,8 @@ export function buildReport(input: BuildReportInput): Report {
 
   return {
     title: "Wealthspan — Transactions report",
-    period: input.from || input.to ? `${input.from ?? "start"} to ${input.to ?? "today"}` : "All time",
+    period:
+      input.from || input.to ? `${input.from ?? "start"} to ${input.to ?? "today"}` : "All time",
     generatedOn: input.today ?? new Date().toISOString().slice(0, 10),
     totals: [
       { label: "Income", amount: rupees(s.incomePaise) },
@@ -123,7 +125,10 @@ export function buildReport(input: BuildReportInput): Report {
 
 /** Indian-style number, e.g. 1,23,456.50 */
 export const inr = (n: number) =>
-  n.toLocaleString("en-IN", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
+  n.toLocaleString("en-IN", {
+    minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
 
 /**
  * Spreadsheet programs run text that starts with = + - @ as a formula. Notes and
@@ -132,6 +137,9 @@ export const inr = (n: number) =>
 export const safeText = (v: string) => (/^[=+\-@\t\r]/.test(v) ? `'${v}` : v);
 
 export function fileName(format: FileFormat, r: Report): string {
-  const tag = r.period === "All time" ? "all" : r.period.replace(/ to /g, "_to_").replace(/[^0-9a-z_-]/gi, "");
+  const tag =
+    r.period === "All time"
+      ? "all"
+      : r.period.replace(/ to /g, "_to_").replace(/[^0-9a-z_-]/gi, "");
   return `wealthspan-transactions-${tag}.${format}`;
 }

@@ -1,14 +1,14 @@
-# @jobrio/admin
+# @wealthspan/admin
 
-Jobrio Super Admin control panel.
+Wealthspan Super Admin control panel.
 
 ## Layout
 
 ```
 src/
   features/
-    admin-dashboard/  the bulk of this app's logic (finance, disputes,
-                       security, workforce, roles, audit, order-desk, QA,
+    admin-dashboard/  the bulk of this app's logic (users, subscriptions,
+                       payments, plans, roles, security, audit, system,
                        and more) — consolidated into one feature rather
                        than split per-domain; see root AGENTS.md §9.2 for why
   routes/              file-based TanStack routes (auto-generates
@@ -23,7 +23,7 @@ tests/                 test suite
 
 Module specs live in `docs/Admin/` (one numbered doc per module) and
 `docs/ADR/ADR-006` through `ADR-010`. Shared UI comes from
-`@jobrio/ui/design-system`; shared types from `@jobrio/types`.
+`@wealthspan/ui/design-system`; shared types from `@wealthspan/types`.
 
 ## Rules
 

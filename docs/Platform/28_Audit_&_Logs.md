@@ -1,24 +1,17 @@
 # Audit & Logs
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Partly built · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
 ## Purpose
 
-Describe the scope and intent of **Audit & Logs** for the Jobrio platform.
+A record of who changed what.
 
-## Scope
+## State
 
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
+- Table `audit` (Data Store) stores action, entity, entity id, actor and time; admins read the latest rows via `GET /finance/admin/audit`.
+- The data model requires every chatbot change to log actor, tool, before, after and `undone_at`; this lands with the chatbot tools (Planned).
+- The audit view shows no user-typed content.
 
 ## References
 
-- [Master Context](../../00_Master_Context.md)
+- [Data model](../Database/41_Wealthspan_Data_Model.md)

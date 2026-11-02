@@ -1,24 +1,10 @@
 # Backup Strategy
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Last updated: 2026-11-01
 
-## Purpose
+Not yet defined. Facts and plan:
 
-Describe the scope and intent of **Backup Strategy** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+- Data lives in the Catalyst Data Store (India DC). Soft delete gives users a 30-day recovery window for their own records; it is not a backup.
+- Planned: scheduled export of all tables (a Catalyst cron function writing to File Store or an external bucket), tested restore into Development, and a documented retention period.
+- Admins can already read the ledger and audit log, which helps reconstruct changes.
+- Before launch: confirm Catalyst's own backup/restore options and record them here.

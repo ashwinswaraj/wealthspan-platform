@@ -1,24 +1,7 @@
 # Illustrations
 
-> Status: Draft · Owner: TBD · Last updated: 2026-07-31
+> Status: Draft · Owner: Ashwin Swaraj · Last updated: 2026-11-01
 
-## Purpose
+No illustration set exists. Phase 1 uses typography, the arc mark and plain empty states ("No <noun> details found for ...", from `SHEETS`).
 
-Describe the scope and intent of **Illustrations** for the Jobrio platform.
-
-## Scope
-
-- What this document covers
-- What it explicitly does not cover
-
-## Details
-
-_TODO: fill in._
-
-## Open Questions
-
-- [ ] TBD
-
-## References
-
-- [Master Context](../00_Master_Context.md)
+If illustrations are added: simple line style in the brand blue, no stock photos of money or people, no invented figures.
