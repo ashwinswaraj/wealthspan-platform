@@ -1,4 +1,5 @@
 <!-- LOVABLE:BEGIN -->
+
 > [!IMPORTANT]
 > This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
 > published git history — force pushing, or rebasing/amending/squashing commits
@@ -7,6 +8,7 @@
 >
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
+
 <!-- LOVABLE:END -->
 
 # AGENTS.md — Rules for AI-assisted development
@@ -129,7 +131,7 @@ the folder/file structure directly determines URL structure, and
   build/dev tooling after any change under `routes/`.
 - **Don't restructure `routes/` the way you would `features/` or
   `components/`.** Moving/renaming files here changes real URLs. If a route
-  file's *implementation* is doing too much, move the logic into a feature
+  file's _implementation_ is doing too much, move the logic into a feature
   and leave a thin route file behind — don't move the route file itself
   without a specific reason.
 - `pages/` and `routes/` are deliberately separate: `routes/` = URL → thin

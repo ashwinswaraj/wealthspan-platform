@@ -47,7 +47,14 @@ export const AuthInput = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement> & AuthControlProps
 >(({ className, invalid, ...props }, ref) => {
-  console.log("[AuthInput] type:", props.type, "value:", props.value, "onChange:", typeof props.onChange);
+  console.log(
+    "[AuthInput] type:",
+    props.type,
+    "value:",
+    props.value,
+    "onChange:",
+    typeof props.onChange,
+  );
   return (
     <input
       ref={ref}
@@ -165,10 +172,6 @@ export const AuthFieldShell = ({
 }) => {
   const [focused, setFocused] = React.useState(false);
   const floated = focused || hasControlValue(children);
-  if (label === "Phone number" || label === "Full name") {
-    const child = React.Children.toArray(children)[0] as any;
-    console.log("[AuthFieldShell]", label, "type:", child?.type?.displayName || child?.type?.name, "keys:", child ? Object.keys(child.props || {}) : [], "value:", child?.props?.value, "floated:", floated);
-  }
 
   return (
     <label className={`block ${className ?? ""}`}>
@@ -177,14 +180,18 @@ export const AuthFieldShell = ({
           className={`pointer-events-none absolute left-3 z-10 px-1 font-semibold transition-all duration-300 ease-out ${
             floated ? "-top-2 text-xs" : "top-3.5 text-sm"
           }`}
-          style={{ color: error ? ERROR_BORDER : focused ? FOCUS_BORDER : "#434655", background: floated ? "#ffffff" : "transparent" }}
+          style={{
+            color: error ? ERROR_BORDER : focused ? FOCUS_BORDER : "#434655",
+            background: floated ? "#ffffff" : "transparent",
+          }}
         >
           {label}
         </span>
         <span
           onFocusCapture={() => setFocused(true)}
           onBlurCapture={(event) => {
-            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false);
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+              setFocused(false);
           }}
         >
           {children}

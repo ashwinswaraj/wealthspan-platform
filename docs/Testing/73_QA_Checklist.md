@@ -3,6 +3,7 @@
 > Status: Draft · Last updated: 2026-11-01
 
 Manual checks before a release:
+
 - [ ] Money: totals match a hand calculation; card-bill payment is a transfer; open-event spending is outside Expense until concluded.
 - [ ] Isolation: second user cannot see or edit the first user's rows (including by guessing ids).
 - [ ] Trial can be started once; chat blocked without trial or plan; daily limit message at 40.

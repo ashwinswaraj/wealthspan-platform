@@ -16,11 +16,11 @@ A personal accountant in your pocket that keeps all your income sources in one c
 
 ## Versus alternatives
 
-| Alternative | Gap Wealthspan fills |
-| --- | --- |
-| Paper / Excel | No manual formulas; chat entry; balances computed |
-| Expense apps | Support several businesses, loans, investments and events |
-| Human accountant | Always available, far cheaper for small volumes |
+| Alternative      | Gap Wealthspan fills                                      |
+| ---------------- | --------------------------------------------------------- |
+| Paper / Excel    | No manual formulas; chat entry; balances computed         |
+| Expense apps     | Support several businesses, loans, investments and events |
+| Human accountant | Always available, far cheaper for small volumes           |
 
 ## Honest limits (Phase 1)
 

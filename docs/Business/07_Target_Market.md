@@ -4,12 +4,12 @@
 
 ## Primary segments
 
-| Segment | Need |
-| --- | --- |
-| Salaried with side income | Track salary, side gigs, EMIs and SIPs together |
-| Small shop owners (kirana, services) | Separate shop profit from household money |
-| Freelancers | Income by customer/source, expenses, exportable reports |
-| Families | Plan and track festival and function spending |
+| Segment                              | Need                                                    |
+| ------------------------------------ | ------------------------------------------------------- |
+| Salaried with side income            | Track salary, side gigs, EMIs and SIPs together         |
+| Small shop owners (kirana, services) | Separate shop profit from household money               |
+| Freelancers                          | Income by customer/source, expenses, exportable reports |
+| Families                             | Plan and track festival and function spending           |
 
 ## Geography and language
 

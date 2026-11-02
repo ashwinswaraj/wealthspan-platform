@@ -4,9 +4,9 @@
 
 There are two roles: **user** and **admin**.
 
-| Role | How decided | Can do |
-|---|---|---|
-| User | any signed-in Catalyst account | read and write only their own rows; own subscription; chat if plan active; exports |
+| Role  | How decided                                                                                   | Can do                                                                                                        |
+| ----- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| User  | any signed-in Catalyst account                                                                | read and write only their own rows; own subscription; chat if plan active; exports                            |
 | Admin | e-mail in `ADMIN_EMAILS`; if `ADMIN_USER_IDS` is set, the Catalyst user id must be listed too | everything under `/server/finance/admin/*`: overview, users, payments (approve/reject), ledger, audit, health |
 
 ## Rules

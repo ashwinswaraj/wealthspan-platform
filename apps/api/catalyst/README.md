@@ -8,6 +8,7 @@ Project: Wealthspan (Catalyst). Deploy from this folder with the Catalyst CLI:
     catalyst deploy
 
 ## functions/finance (transactions API)
+
 Routes: `GET/POST /transactions`, `PATCH/DELETE /transactions/:id`, `GET /summary`. Login required; the user comes from the Catalyst session.
 `functions/finance/index.js` is GENERATED: after changing anything in `apps/api/src/features/finance`, run
 `pnpm --filter @wealthspan/api build:catalyst`, commit the result, then deploy (`catalyst deploy` from this folder; run `npm install` in `functions/finance` first).
@@ -32,4 +33,5 @@ Build all functions with `pnpm --filter @wealthspan/api build:catalyst` (script:
 Code: `apps/api/src/features/catalog`. Deleting something still used by transactions answers 409.
 
 ## Login
+
 There is no custom login function. Sign-in is Catalyst Cloud Scale Authentication (Google / Zoho / email) through the Embedded Auth sheet; every function reads the user from the session.

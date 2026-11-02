@@ -35,11 +35,11 @@ User
 
 ## 2. Transaction types
 
-| Type | Meaning | Required | Counts toward profit |
-|---|---|---|---|
-| income | money came in | project, account, payment mode, category, amount, date | yes |
-| expense | money went out | project, account, payment mode, category, amount, date | yes (except open events) |
-| transfer | own money moved between own accounts | from account, to account, amount, date | **never** |
+| Type     | Meaning                              | Required                                               | Counts toward profit     |
+| -------- | ------------------------------------ | ------------------------------------------------------ | ------------------------ |
+| income   | money came in                        | project, account, payment mode, category, amount, date | yes                      |
+| expense  | money went out                       | project, account, payment mode, category, amount, date | yes (except open events) |
+| transfer | own money moved between own accounts | from account, to account, amount, date                 | **never**                |
 
 Transfer is how a credit-card bill payment, a cash deposit, or money put
 into an investment is recorded. This is what prevents counting the same
@@ -73,13 +73,13 @@ A project is a "money space" with its own profit and loss.
 
 ## 5. The five sections of the app
 
-| Section | What it is |
-|---|---|
-| Income | transactions with type = income |
-| Expense | transactions with type = expense |
-| Debt, loan, EMI | Loans list. Each EMI is an expense transaction linked by `loan_id`. Outstanding = loan amount − linked EMIs (Phase 1: interest is not split from principal). |
-| Savings & investing | Investments list. Money put in is a **transfer** (`investment_id`), never an expense. The current value is typed in by the user. |
-| Festivals & functions | Events with an optional budget. Expenses link to an event with `event_id`. |
+| Section               | What it is                                                                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Income                | transactions with type = income                                                                                                                              |
+| Expense               | transactions with type = expense                                                                                                                             |
+| Debt, loan, EMI       | Loans list. Each EMI is an expense transaction linked by `loan_id`. Outstanding = loan amount − linked EMIs (Phase 1: interest is not split from principal). |
+| Savings & investing   | Investments list. Money put in is a **transfer** (`investment_id`), never an expense. The current value is typed in by the user.                             |
+| Festivals & functions | Events with an optional budget. Expenses link to an event with `event_id`.                                                                                   |
 
 ## 6. Events: how a festival moves into Expense
 
@@ -106,11 +106,11 @@ A project is a "money space" with its own profit and loss.
 The chatbot never touches the database. It calls fixed tools; the server
 enforces everything. The user's identity comes from the login token only.
 
-| Level | Tools | Behaviour |
-|---|---|---|
-| none | search / summary / list / generate file | runs immediately |
-| undo | create_* | runs immediately, shows Undo |
-| confirm | update_*, delete_*, conclude/reopen event | shows what will change, waits for confirmation |
+| Level   | Tools                                     | Behaviour                                      |
+| ------- | ----------------------------------------- | ---------------------------------------------- |
+| none    | search / summary / list / generate file   | runs immediately                               |
+| undo    | create_*                                  | runs immediately, shows Undo                   |
+| confirm | update__, delete__, conclude/reopen event | shows what will change, waits for confirmation |
 
 - More than 3 rows affected in one call → always confirm.
 - Deletes are soft deletes (30 days).

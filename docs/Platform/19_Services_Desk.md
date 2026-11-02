@@ -8,11 +8,11 @@ What a user can subscribe to, and the lists they pick from.
 
 ## Plans (`apps/api/src/features/subscription/types.ts`, `PLANS`)
 
-| Plan id | Label | Price | Access |
-| --- | --- | --- | --- |
-| `trial` | 1 month free trial (shown as "Go") | free | 30 days, once per user |
-| `pro_monthly` | Pro, monthly | Rs 199 (19900 paise) | 30 days |
-| `pro_annual` | Pro, annual | Rs 1,999 (199900 paise) | 365 days |
+| Plan id       | Label                              | Price                   | Access                 |
+| ------------- | ---------------------------------- | ----------------------- | ---------------------- |
+| `trial`       | 1 month free trial (shown as "Go") | free                    | 30 days, once per user |
+| `pro_monthly` | Pro, monthly                       | Rs 199 (19900 paise)    | 30 days                |
+| `pro_annual`  | Pro, annual                        | Rs 1,999 (199900 paise) | 365 days               |
 
 ## Catalog (`apps/api/src/features/catalog`)
 

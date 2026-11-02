@@ -2,11 +2,11 @@
 
 > **Draft — not legal advice, needs lawyer review.** Operator: Wealthspan (legal entity, address and grievance officer: TBD). Last updated: 2026-11-01.
 
-| Plan | Price (current, may change) | Access |
-|---|---|---|
-| Free trial | Rs. 0, once per user | 30 days |
-| Pro monthly | Rs. 199 | 30 days |
-| Pro annual | Rs. 1,999 | 365 days |
+| Plan        | Price (current, may change) | Access   |
+| ----------- | --------------------------- | -------- |
+| Free trial  | Rs. 0, once per user        | 30 days  |
+| Pro monthly | Rs. 199                     | 30 days  |
+| Pro annual  | Rs. 1,999                   | 365 days |
 
 - Access starts when your trial begins or when an admin approves your payment, and ends on the last day shown in the app.
 - Chat requires an active trial or plan and is limited to 40 messages per day.

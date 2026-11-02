@@ -10,11 +10,11 @@ The owner chose to run everything on Zoho Catalyst. Advanced I/O functions have 
 
 Three Node 22 Express functions, built from `apps/api/src/features/*` by `apps/api/catalyst/build.mjs`:
 
-| Function | Job |
-|---|---|
+| Function  | Job                                                                  |
+| --------- | -------------------------------------------------------------------- |
 | `finance` | transactions, summary, catalog entities, subscription, admin console |
-| `chat` | AI accountant (Sarvam `sarvam-105b` behind an adapter) |
-| `files` | PDF / Excel / CSV / Word exports and sheet `.xlsx` |
+| `chat`    | AI accountant (Sarvam `sarvam-105b` behind an adapter)               |
+| `files`   | PDF / Excel / CSV / Word exports and sheet `.xlsx`                   |
 
 The browser calls them same-domain with the session cookie; the user id is read from the Catalyst session on every request and never from the body or query.
 

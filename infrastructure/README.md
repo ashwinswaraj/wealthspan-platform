@@ -8,7 +8,7 @@ Ops & security configuration — no application code lives here (see
 - `database/` — rules for the Catalyst Data Store schema (see its own `AGENTS.md`)
 - `proxy/` — reverse-proxy rules (`nginx.conf`)
 - `secrets/` — secrets-management policy (`secrets-management.md`) — this
-  documents *how* secrets are handled, actual secret values never live in
+  documents _how_ secrets are handled, actual secret values never live in
   this repo
 - `seed/` — how the first admin is pinned (`README.md`); no seed scripts
 - `audit/` — audit-logging strategy for sensitive/admin actions

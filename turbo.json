@@ -1,34 +1,15 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    ".env",
-    ".env.example",
-    "tsconfig.json"
-  ],
-  "globalEnv": [
-    "LOVABLE_NITRO_PRESET",
-    "LOVABLE_SANDBOX",
-    "NODE_ENV",
-    "SANDBOX"
-  ],
+  "globalDependencies": [".env", ".env.example", "tsconfig.json"],
+  "globalEnv": ["LOVABLE_NITRO_PRESET", "LOVABLE_SANDBOX", "NODE_ENV", "SANDBOX"],
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**",
-        ".output/**"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".output/**"]
     },
     "build:dev": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**",
-        ".output/**"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".output/**"]
     },
     "dev": {
       "cache": false,
@@ -39,14 +20,10 @@
       "cache": false
     },
     "typecheck": {
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "test": {
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     }
   }
 }

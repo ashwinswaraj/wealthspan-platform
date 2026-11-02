@@ -7,6 +7,7 @@ labels: bug
 ## Description
 
 ## Steps to reproduce
+
 1.
 
 ## Expected
@@ -14,5 +15,6 @@ labels: bug
 ## Actual
 
 ## Environment
+
 - Device / browser:
 - Route:

@@ -165,6 +165,7 @@ WEALTHSPAN/
 ```
 
 **Key notes:**
+
 - Each app under `apps/` is a standalone Vite/React project with its own `package.json`. `build`, `typecheck`, and `test` run from the repo root via Turborepo, fanning out to every app in parallel. `dev` is scoped to `apps/web` only (see below) — `web` and `admin` currently default to the same dev port, so running both via one root command isn't safe yet.
 - Every `apps/*/src/` follows the same shape: `features/<domain>/` for business logic (each with an `index.ts` barrel — see [`AGENTS.md`](AGENTS.md) §3), plus top-level `components/`, `pages/`, `routes/`, `layouts/`, `hooks/`, `utils/`, `lib/`, `services/`, `config/`, `store/` for cross-feature or infrastructural code.
 - Shared packages are managed as workspace dependencies (referenced via `"@wealthspan/x": "workspace:*"`, never a version number).
@@ -173,6 +174,7 @@ WEALTHSPAN/
 ## Development
 
 ### Prerequisites
+
 - Node.js 22+
 - pnpm 9.0.0+
 
@@ -226,6 +228,7 @@ pnpm --filter @wealthspan/admin preview
 Start at [`docs/00_Master_Context.md`](docs/00_Master_Context.md) for the project overview.
 
 **Development guides:**
+
 - AI agent rules: [`AGENTS.md`](AGENTS.md) — stack, folder rules, and what an AI must never do unconfirmed
 - Why each file/folder exists: [`ARCHITECTURE_RATIONALE.md`](ARCHITECTURE_RATIONALE.md)
 - Coding standards: [`docs/Architecture/Coding_Standards.md`](docs/Architecture/Coding_Standards.md) — rules for refactoring, naming, and code quality

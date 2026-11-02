@@ -39,6 +39,7 @@ pnpm lint
 
 See `AGENTS.md` (this folder's own, falling back to the root one) for the
 full list. In short:
+
 - Import UI only from `@wealthspan/ui/design-system`, never `@wealthspan/ui/components/*`.
 - Import from a feature's barrel (`@/features/sheets`), not its internals
   — except `lazy()`-wrapped imports, which stay deep on purpose.

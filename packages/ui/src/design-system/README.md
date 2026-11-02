@@ -50,5 +50,11 @@ src/design-system/
 Usage:
 
 ```ts
-import { Button, Input, DashboardContainer, PageHeader, StatCard } from "@wealthspan/ui/design-system";
+import {
+  Button,
+  Input,
+  DashboardContainer,
+  PageHeader,
+  StatCard,
+} from "@wealthspan/ui/design-system";
 ```

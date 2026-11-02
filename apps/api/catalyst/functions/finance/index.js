@@ -7,21 +7,29 @@ var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
+  if ((from && typeof from === "object") || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
       if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+        __defProp(to, key, {
+          get: () => from[key],
+          enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable,
+        });
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
+var __toESM = (mod, isNodeMode, target) => (
+  (target = mod != null ? __create(__getProtoOf(mod)) : {}),
+  __copyProps(
+    // If the importer is in node compatibility mode or this is not an ESM
+    // file that has been converted to a CommonJS file using a Babel-
+    // compatible transform (i.e. "__esModule" has not been set), then set
+    // "default" to the CommonJS "module.exports" for node compatibility.
+    isNodeMode || !mod || !mod.__esModule
+      ? __defProp(target, "default", { value: mod, enumerable: true })
+      : target,
+    mod,
+  )
+);
 
 // catalyst/functions/finance/src/entry.ts
 var import_express = __toESM(require("express"));
@@ -35,7 +43,7 @@ var PAYMENT_MODES = [
   { id: "credit_card", label: "Credit card" },
   { id: "bank_transfer", label: "Bank transfer (NEFT / IMPS / RTGS)" },
   { id: "cheque", label: "Cheque" },
-  { id: "wallet", label: "Wallet" }
+  { id: "wallet", label: "Wallet" },
 ];
 var PAYMENT_MODE_IDS = PAYMENT_MODES.map((m) => m.id);
 var ACCOUNT_KINDS = ["cash", "bank", "credit_card", "wallet"];
@@ -46,7 +54,7 @@ var PAYMENT_MODE_ACCOUNT_KINDS = {
   credit_card: ["credit_card"],
   bank_transfer: ["bank"],
   cheque: ["bank"],
-  wallet: ["wallet"]
+  wallet: ["wallet"],
 };
 var PROJECT_KINDS = ["personal", "business"];
 var INVESTMENT_KINDS = [
@@ -58,12 +66,12 @@ var INVESTMENT_KINDS = [
   "gold",
   "ppf_epf_nps",
   "real_estate",
-  "other"
+  "other",
 ];
 
 // ../../packages/validation/src/finance.ts
 var MAX_AMOUNT_RUPEES = 1e9;
-var isBlank = (v) => v === void 0 || v === null || typeof v === "string" && !v.trim();
+var isBlank = (v) => v === void 0 || v === null || (typeof v === "string" && !v.trim());
 var parseRupees = (value) => {
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
   if (typeof value !== "string") return null;
@@ -86,7 +94,8 @@ var isValidIsoDate = (value) => {
   const dt = new Date(Date.UTC(y, m - 1, d));
   return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
 };
-var daysBetween = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 864e5);
+var daysBetween = (a, b) =>
+  Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 864e5);
 var validateDate = (value, today, label = "Date") => {
   if (isBlank(value)) return `${label} is required.`;
   if (!isValidIsoDate(value)) return `${label} must be a valid date (YYYY-MM-DD).`;
@@ -99,8 +108,14 @@ var validatePaymentMode = (value, label = "Payment mode") => {
   if (!PAYMENT_MODE_IDS.includes(value)) return `Please choose a valid ${label.toLowerCase()}.`;
   return null;
 };
-var validatePaymentModeForAccount = (mode, accountKind) => PAYMENT_MODE_ACCOUNT_KINDS[mode].includes(accountKind) ? null : `A ${accountKind.replace("_", " ")} account can't be used with this payment mode.`;
-var maxLen = (v, max, label) => typeof v === "string" && v.trim().length > max ? `${label} must be at most ${max} characters.` : null;
+var validatePaymentModeForAccount = (mode, accountKind) =>
+  PAYMENT_MODE_ACCOUNT_KINDS[mode].includes(accountKind)
+    ? null
+    : `A ${accountKind.replace("_", " ")} account can't be used with this payment mode.`;
+var maxLen = (v, max, label) =>
+  typeof v === "string" && v.trim().length > max
+    ? `${label} must be at most ${max} characters.`
+    : null;
 var validateTransactionInput = (input, opts = {}) => {
   const e = {};
   const set = (field, msg) => {
@@ -138,7 +153,8 @@ var validateTransactionInput = (input, opts = {}) => {
     if (!isBlank(input.projectId)) set("projectId", "A transfer does not belong to a project.");
     if (!isBlank(input.category)) set("category", "A transfer has no category.");
     if (!isBlank(input.eventId)) set("eventId", "A transfer cannot belong to an event.");
-    if (!isBlank(input.loanId)) set("loanId", "Record loan payments as an expense linked to the loan.");
+    if (!isBlank(input.loanId))
+      set("loanId", "Record loan payments as an expense linked to the loan.");
     if (!isBlank(input.source)) set("source", "Income source is only for income.");
   }
   return e;
@@ -170,7 +186,8 @@ var validateAccountInput = (input) => {
     const v = parseRupees(input.openingBalance);
     if (v === null) e.openingBalance = "Opening balance must be a number.";
     else if (v > MAX_AMOUNT_RUPEES) e.openingBalance = "Opening balance looks too large.";
-    else if (Math.round(v * 100) / 100 !== v) e.openingBalance = "Opening balance can have at most 2 decimal places.";
+    else if (Math.round(v * 100) / 100 !== v)
+      e.openingBalance = "Opening balance can have at most 2 decimal places.";
   }
   if (!isBlank(input.creditLimit)) {
     if (input.kind !== "credit_card") e.creditLimit = "Credit limit is only for credit cards.";
@@ -194,15 +211,18 @@ var validateLoanInput = (input) => {
   }
   if (!isBlank(input.interestRatePct)) {
     const r = Number(input.interestRatePct);
-    if (!Number.isFinite(r) || r < 0 || r > 100) e.interestRatePct = "Interest rate must be between 0 and 100.";
+    if (!Number.isFinite(r) || r < 0 || r > 100)
+      e.interestRatePct = "Interest rate must be between 0 and 100.";
   }
   if (!isBlank(input.emiDayOfMonth)) {
     const d = Number(input.emiDayOfMonth);
-    if (!Number.isInteger(d) || d < 1 || d > 31) e.emiDayOfMonth = "EMI day must be between 1 and 31.";
+    if (!Number.isInteger(d) || d < 1 || d > 31)
+      e.emiDayOfMonth = "EMI day must be between 1 and 31.";
   }
   if (!isBlank(input.tenureMonths)) {
     const t2 = Number(input.tenureMonths);
-    if (!Number.isInteger(t2) || t2 < 1 || t2 > 600) e.tenureMonths = "Tenure must be between 1 and 600 months.";
+    if (!Number.isInteger(t2) || t2 < 1 || t2 > 600)
+      e.tenureMonths = "Tenure must be between 1 and 600 months.";
   }
   return e;
 };
@@ -229,9 +249,17 @@ var validateEventInput = (input) => {
     const err = validateAmountRupees(input.budget, "Budget");
     if (err) e.budget = err;
   }
-  if (!isBlank(input.startDate) && !isValidIsoDate(input.startDate)) e.startDate = "Start date must be a valid date.";
-  if (!isBlank(input.endDate) && !isValidIsoDate(input.endDate)) e.endDate = "End date must be a valid date.";
-  if (!e.startDate && !e.endDate && input.startDate && input.endDate && input.endDate < input.startDate)
+  if (!isBlank(input.startDate) && !isValidIsoDate(input.startDate))
+    e.startDate = "Start date must be a valid date.";
+  if (!isBlank(input.endDate) && !isValidIsoDate(input.endDate))
+    e.endDate = "End date must be a valid date.";
+  if (
+    !e.startDate &&
+    !e.endDate &&
+    input.startDate &&
+    input.endDate &&
+    input.endDate < input.startDate
+  )
     e.endDate = "End date can't be before the start date.";
   return e;
 };
@@ -263,7 +291,7 @@ var summarize = (transactions, events, filter = {}) => {
     byCategory: {},
     byPaymentMode: {},
     bySource: {},
-    byEvent: {}
+    byEvent: {},
   };
   for (const tx of live(transactions)) {
     if (tx.type === "transfer") continue;
@@ -290,12 +318,19 @@ var summarize = (transactions, events, filter = {}) => {
   out.profitPaise = out.incomePaise - out.expensePaise;
   return out;
 };
-var CARD_BILL_WORDS = /(credit\s*card|card\s*(bill|payment|due|dues|outstanding)|cc\s*(bill|payment)|\bcard\s*pay)/i;
+var CARD_BILL_WORDS =
+  /(credit\s*card|card\s*(bill|payment|due|dues|outstanding)|cc\s*(bill|payment)|\bcard\s*pay)/i;
 var looksLikeCardBillPayment = (...texts) => texts.some((t2) => !!t2 && CARD_BILL_WORDS.test(t2));
-var dayDiff = (a, b) => Math.abs(Math.round((Date.parse(`${a}T00:00:00Z`) - Date.parse(`${b}T00:00:00Z`)) / 864e5));
-var findSameAmountCardExpenses = (candidate, existing, windowDays = 45) => live(existing).filter(
-  (t2) => t2.type === "expense" && t2.paymentMode === "credit_card" && t2.amountPaise === candidate.amountPaise && dayDiff(t2.date, candidate.date) <= windowDays
-);
+var dayDiff = (a, b) =>
+  Math.abs(Math.round((Date.parse(`${a}T00:00:00Z`) - Date.parse(`${b}T00:00:00Z`)) / 864e5));
+var findSameAmountCardExpenses = (candidate, existing, windowDays = 45) =>
+  live(existing).filter(
+    (t2) =>
+      t2.type === "expense" &&
+      t2.paymentMode === "credit_card" &&
+      t2.amountPaise === candidate.amountPaise &&
+      dayDiff(t2.date, candidate.date) <= windowDays,
+  );
 
 // src/features/finance/service.ts
 var FinanceError = class extends Error {
@@ -323,13 +358,13 @@ var FIELDS = [
   "note",
   "eventId",
   "loanId",
-  "investmentId"
+  "investmentId",
 ];
 var clean = (input) => {
   const out = {};
   for (const k of FIELDS) {
     const v = input[k];
-    out[k] = typeof v === "string" ? v.trim() || null : v ?? null;
+    out[k] = typeof v === "string" ? v.trim() || null : (v ?? null);
   }
   return out;
 };
@@ -348,12 +383,9 @@ var toInput = (t2) => ({
   note: t2.note,
   eventId: t2.eventId,
   loanId: t2.loanId,
-  investmentId: t2.investmentId
+  investmentId: t2.investmentId,
 });
-var createFinanceService = ({
-  store,
-  now = () => /* @__PURE__ */ new Date()
-}) => {
+var createFinanceService = ({ store, now = () => /* @__PURE__ */ new Date() }) => {
   const today = () => new Date(now().getTime() + IST_OFFSET_MS).toISOString().slice(0, 10);
   const nowIso = () => now().toISOString();
   const fail = (fields) => {
@@ -366,7 +398,7 @@ var createFinanceService = ({
       const to = await store.getAccount(userId, i.toAccountId);
       if (!from) e.fromAccountId = "That account was not found.";
       if (!to) e.toAccountId = "That account was not found.";
-      if (i.investmentId && !await store.getInvestment(userId, i.investmentId))
+      if (i.investmentId && !(await store.getInvestment(userId, i.investmentId)))
         e.investmentId = "That investment was not found.";
     } else {
       const project = await store.getProject(userId, i.projectId);
@@ -414,13 +446,13 @@ var createFinanceService = ({
     note: i.note ?? null,
     eventId: i.eventId ?? null,
     loanId: i.loanId ?? null,
-    investmentId: i.investmentId ?? null
+    investmentId: i.investmentId ?? null,
   });
   const warningsFor = async (userId, row) => {
     const w = [];
     if (row.type === "expense" && looksLikeCardBillPayment(row.party, row.note, row.category)) {
       w.push(
-        "This looks like a credit card bill payment. Paying a card bill is a transfer from your bank, not an expense, otherwise the spending is counted twice."
+        "This looks like a credit card bill payment. Paying a card bill is a transfer from your bank, not an expense, otherwise the spending is counted twice.",
       );
       const existing = await store.listTransactions(userId);
       if (findSameAmountCardExpenses(row, existing).length)
@@ -432,11 +464,14 @@ var createFinanceService = ({
     async createTransaction(userId, raw, source = "manual") {
       const input = clean(raw);
       await validate(userId, input);
-      if (store.countTransactions && await store.countTransactions(userId) >= MAX_TRANSACTIONS_PER_USER)
+      if (
+        store.countTransactions &&
+        (await store.countTransactions(userId)) >= MAX_TRANSACTIONS_PER_USER
+      )
         throw new FinanceError(
           "invalid",
           `You have reached the limit of ${MAX_TRANSACTIONS_PER_USER} entries. Export and delete old ones to add more.`,
-          429
+          429,
         );
       const row = toRow(userId, input, source);
       const warnings = await warningsFor(userId, row);
@@ -450,7 +485,7 @@ var createFinanceService = ({
         before: null,
         after: transaction,
         createdAt: nowIso(),
-        undoneAt: null
+        undoneAt: null,
       });
       return { transaction, warnings };
     },
@@ -472,7 +507,7 @@ var createFinanceService = ({
         before,
         after: transaction,
         createdAt: nowIso(),
-        undoneAt: null
+        undoneAt: null,
       });
       return { transaction, warnings };
     },
@@ -490,24 +525,30 @@ var createFinanceService = ({
         before,
         after: null,
         createdAt: nowIso(),
-        undoneAt: null
+        undoneAt: null,
       });
     },
     async listTransactions(userId, f = {}) {
       const limit = Math.min(Math.max(f.limit ?? 50, 1), 200);
       const offset = Math.max(f.offset ?? 0, 0);
-      const all = (await store.listTransactions(userId)).filter((t2) => (!f.from || t2.date >= f.from) && (!f.to || t2.date <= f.to)).filter((t2) => !f.projectId || t2.projectId === f.projectId).filter((t2) => !f.type || t2.type === f.type).filter(
-        (t2) => !f.accountId || [t2.accountId, t2.fromAccountId, t2.toAccountId].includes(f.accountId)
-      ).sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+      const all = (await store.listTransactions(userId))
+        .filter((t2) => (!f.from || t2.date >= f.from) && (!f.to || t2.date <= f.to))
+        .filter((t2) => !f.projectId || t2.projectId === f.projectId)
+        .filter((t2) => !f.type || t2.type === f.type)
+        .filter(
+          (t2) =>
+            !f.accountId || [t2.accountId, t2.fromAccountId, t2.toAccountId].includes(f.accountId),
+        )
+        .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
       return { total: all.length, items: all.slice(offset, offset + limit) };
     },
     async getSummary(userId, filter = {}) {
       const [txs, events] = await Promise.all([
         store.listTransactions(userId),
-        store.listEvents(userId)
+        store.listEvents(userId),
       ]);
       return summarize(txs, events, filter);
-    }
+    },
   };
 };
 var removeUndefined = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== void 0));
@@ -519,9 +560,9 @@ var id = (v) => {
   if (!/^\d{1,20}$/.test(String(v))) throw new Error("bad id");
   return String(v);
 };
-var nul = (v) => v === void 0 || v === null || v === "" || v === "null" ? null : v;
-var str = (v) => nul(v) === null ? null : String(v);
-var num = (v) => nul(v) === null ? null : Number(v);
+var nul = (v) => (v === void 0 || v === null || v === "" || v === "null" ? null : v);
+var str = (v) => (nul(v) === null ? null : String(v));
+var num = (v) => (nul(v) === null ? null : Number(v));
 var ts = (v) => String(nul(v) ?? "").replace(" ", "T");
 var base = (r) => ({
   id: String(r.ROWID),
@@ -529,7 +570,7 @@ var base = (r) => ({
   createdAt: ts(r.CREATEDTIME),
   updatedAt: ts(r.MODIFIEDTIME),
   deletedAt: str(r.deleted_at),
-  createdBy: str(r.created_by) ?? "manual"
+  createdBy: str(r.created_by) ?? "manual",
 });
 var rowToTransaction = (r) => ({
   ...base(r),
@@ -547,7 +588,7 @@ var rowToTransaction = (r) => ({
   note: str(r.note),
   eventId: str(r.event_id),
   loanId: str(r.loan_id),
-  investmentId: str(r.investment_id)
+  investmentId: str(r.investment_id),
 });
 var transactionToColumns = (t2) => {
   const m = [
@@ -567,20 +608,21 @@ var transactionToColumns = (t2) => {
     ["loanId", "loan_id"],
     ["investmentId", "investment_id"],
     ["userId", "user_id"],
-    ["createdBy", "created_by"]
+    ["createdBy", "created_by"],
   ];
   const out = {};
   for (const [k, col] of m) if (k in t2) out[col] = t2[k] ?? null;
   return out;
 };
 var createCatalystFinanceStore = (app2) => {
-  const query = async (q2, table) => (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
+  const query = async (q2, table) =>
+    (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
   const queryAll = async (select, table, where, order = "") => {
     const out = [];
     for (let offset = 0; ; offset += PAGE) {
       const rows = await query(
         `${select} FROM ${table} WHERE ${where} ${order} LIMIT ${offset},${PAGE}`,
-        table
+        table,
       );
       out.push(...rows);
       if (rows.length < PAGE) return out;
@@ -589,63 +631,68 @@ var createCatalystFinanceStore = (app2) => {
   const getOne = async (table, userId, rowId, map) => {
     const rows = await query(
       `SELECT * FROM ${table} WHERE ROWID = ${id(rowId)} AND user_id = '${esc(userId)}' AND deleted_at IS NULL LIMIT 0,1`,
-      table
+      table,
     );
     return rows[0] ? map(rows[0]) : null;
   };
   const archived = (r) => str(r.archived_at);
   return {
-    getProject: (u, i) => getOne("projects", u, i, (r) => ({
-      ...base(r),
-      name: String(r.name),
-      kind: r.kind,
-      archivedAt: archived(r)
-    })),
-    getAccount: (u, i) => getOne("accounts", u, i, (r) => ({
-      ...base(r),
-      name: String(r.name),
-      kind: r.kind,
-      openingBalancePaise: Number(r.opening_balance_paise ?? 0),
-      creditLimitPaise: num(r.credit_limit_paise),
-      defaultProjectId: str(r.default_project_id),
-      archivedAt: archived(r)
-    })),
-    getEvent: (u, i) => getOne("events", u, i, (r) => ({
-      ...base(r),
-      projectId: String(r.project_id),
-      name: String(r.name),
-      budgetPaise: num(r.budget_paise),
-      startDate: str(r.start_date),
-      endDate: str(r.end_date),
-      status: r.status,
-      concludedAt: str(r.concluded_at)
-    })),
-    getLoan: (u, i) => getOne("loans", u, i, (r) => ({
-      ...base(r),
-      projectId: String(r.project_id),
-      lender: String(r.lender),
-      principalPaise: Number(r.principal_paise),
-      interestRatePct: num(r.interest_rate_pct),
-      emiPaise: num(r.emi_paise),
-      emiDayOfMonth: num(r.emi_day_of_month),
-      startDate: str(r.start_date),
-      tenureMonths: num(r.tenure_months),
-      status: r.status
-    })),
-    getInvestment: (u, i) => getOne("investments", u, i, (r) => ({
-      ...base(r),
-      projectId: String(r.project_id),
-      name: String(r.name),
-      kind: r.kind,
-      currentValuePaise: num(r.current_value_paise),
-      folioNo: str(r.folio_no)
-    })),
+    getProject: (u, i) =>
+      getOne("projects", u, i, (r) => ({
+        ...base(r),
+        name: String(r.name),
+        kind: r.kind,
+        archivedAt: archived(r),
+      })),
+    getAccount: (u, i) =>
+      getOne("accounts", u, i, (r) => ({
+        ...base(r),
+        name: String(r.name),
+        kind: r.kind,
+        openingBalancePaise: Number(r.opening_balance_paise ?? 0),
+        creditLimitPaise: num(r.credit_limit_paise),
+        defaultProjectId: str(r.default_project_id),
+        archivedAt: archived(r),
+      })),
+    getEvent: (u, i) =>
+      getOne("events", u, i, (r) => ({
+        ...base(r),
+        projectId: String(r.project_id),
+        name: String(r.name),
+        budgetPaise: num(r.budget_paise),
+        startDate: str(r.start_date),
+        endDate: str(r.end_date),
+        status: r.status,
+        concludedAt: str(r.concluded_at),
+      })),
+    getLoan: (u, i) =>
+      getOne("loans", u, i, (r) => ({
+        ...base(r),
+        projectId: String(r.project_id),
+        lender: String(r.lender),
+        principalPaise: Number(r.principal_paise),
+        interestRatePct: num(r.interest_rate_pct),
+        emiPaise: num(r.emi_paise),
+        emiDayOfMonth: num(r.emi_day_of_month),
+        startDate: str(r.start_date),
+        tenureMonths: num(r.tenure_months),
+        status: r.status,
+      })),
+    getInvestment: (u, i) =>
+      getOne("investments", u, i, (r) => ({
+        ...base(r),
+        projectId: String(r.project_id),
+        name: String(r.name),
+        kind: r.kind,
+        currentValuePaise: num(r.current_value_paise),
+        folioNo: str(r.folio_no),
+      })),
     async listTransactions(userId) {
       const rows = await queryAll(
         "SELECT *",
         "transactions",
         `user_id = '${esc(userId)}' AND deleted_at IS NULL`,
-        "ORDER BY ROWID"
+        "ORDER BY ROWID",
       );
       return rows.map(rowToTransaction);
     },
@@ -654,7 +701,7 @@ var createCatalystFinanceStore = (app2) => {
         "SELECT *",
         "events",
         `user_id = '${esc(userId)}' AND deleted_at IS NULL`,
-        "ORDER BY ROWID"
+        "ORDER BY ROWID",
       );
       return rows.map((r) => ({
         ...base(r),
@@ -664,53 +711,71 @@ var createCatalystFinanceStore = (app2) => {
         startDate: str(r.start_date),
         endDate: str(r.end_date),
         status: r.status,
-        concludedAt: str(r.concluded_at)
+        concludedAt: str(r.concluded_at),
       }));
     },
     getTransaction: (u, i) => getOne("transactions", u, i, rowToTransaction),
     async countTransactions(userId) {
-      const rows = await app2.zcql().executeZCQLQuery(
-        `SELECT COUNT(ROWID) FROM transactions WHERE user_id = '${esc(userId)}' AND deleted_at IS NULL`
-      );
+      const rows = await app2
+        .zcql()
+        .executeZCQLQuery(
+          `SELECT COUNT(ROWID) FROM transactions WHERE user_id = '${esc(userId)}' AND deleted_at IS NULL`,
+        );
       const first = rows[0]?.transactions ?? Object.values(rows[0] ?? {})[0] ?? {};
       const n = Number(Object.values(first)[0]);
-      return Number.isFinite(n) ? n : (await queryAll(
-        "SELECT ROWID",
-        "transactions",
-        `user_id = '${esc(userId)}' AND deleted_at IS NULL`
-      )).length;
+      return Number.isFinite(n)
+        ? n
+        : (
+            await queryAll(
+              "SELECT ROWID",
+              "transactions",
+              `user_id = '${esc(userId)}' AND deleted_at IS NULL`,
+            )
+          ).length;
     },
     async insertTransaction(row) {
-      const saved = await app2.datastore().table("transactions").insertRow(transactionToColumns(row));
+      const saved = await app2
+        .datastore()
+        .table("transactions")
+        .insertRow(transactionToColumns(row));
       return rowToTransaction(saved);
     },
     async updateTransaction(userId, rowId, patch) {
       const current = await getOne("transactions", userId, rowId, rowToTransaction);
       if (!current) throw new Error("not found");
       const { userId: _u, createdBy: _c, ...allowed } = patch;
-      await app2.datastore().table("transactions").updateRow({ ROWID: id(rowId), ...transactionToColumns(allowed) });
+      await app2
+        .datastore()
+        .table("transactions")
+        .updateRow({ ROWID: id(rowId), ...transactionToColumns(allowed) });
       return { ...current, ...patch };
     },
     async softDeleteTransaction(userId, rowId, deletedAtIso) {
       const current = await getOne("transactions", userId, rowId, rowToTransaction);
       if (!current) throw new Error("not found");
-      await app2.datastore().table("transactions").updateRow({
-        ROWID: id(rowId),
-        deleted_at: deletedAtIso.slice(0, 19).replace("T", " ")
-      });
+      await app2
+        .datastore()
+        .table("transactions")
+        .updateRow({
+          ROWID: id(rowId),
+          deleted_at: deletedAtIso.slice(0, 19).replace("T", " "),
+        });
     },
     async insertAudit(e) {
-      await app2.datastore().table("audit_log").insertRow({
-        user_id: e.userId,
-        actor: e.actor,
-        action: e.action,
-        entity: e.entity,
-        entity_id: e.entityId,
-        // the column holds 10,000 characters; cut long payloads rather than failing the user's request
-        before_json: JSON.stringify(e.before ?? null).slice(0, 9500),
-        after_json: JSON.stringify(e.after ?? null).slice(0, 9500)
-      });
-    }
+      await app2
+        .datastore()
+        .table("audit_log")
+        .insertRow({
+          user_id: e.userId,
+          actor: e.actor,
+          action: e.action,
+          entity: e.entity,
+          entity_id: e.entityId,
+          // the column holds 10,000 characters; cut long payloads rather than failing the user's request
+          before_json: JSON.stringify(e.before ?? null).slice(0, 9500),
+          after_json: JSON.stringify(e.after ?? null).slice(0, 9500),
+        });
+    },
   };
 };
 
@@ -725,60 +790,60 @@ var CatalogError = class extends Error {
 };
 
 // src/features/catalog/service.ts
-var t = (v) => typeof v === "string" ? v.trim() || null : v ?? null;
+var t = (v) => (typeof v === "string" ? v.trim() || null : (v ?? null));
 var has = (i, k) => k in i;
-var paise = (v) => v === null || v === void 0 || v === "" ? null : rupeesToPaise(Number(v));
-var numOrNull = (v) => v === null || v === void 0 || v === "" ? null : Number(v);
+var paise = (v) => (v === null || v === void 0 || v === "" ? null : rupeesToPaise(Number(v)));
+var numOrNull = (v) => (v === null || v === void 0 || v === "" ? null : Number(v));
 var toStored = {
   projects: (i) => ({
-    ...has(i, "name") && { name: String(t(i.name) ?? "") },
-    ...has(i, "kind") && { kind: i.kind }
+    ...(has(i, "name") && { name: String(t(i.name) ?? "") }),
+    ...(has(i, "kind") && { kind: i.kind }),
   }),
   accounts: (i) => ({
-    ...has(i, "name") && { name: String(t(i.name) ?? "") },
-    ...has(i, "kind") && { kind: i.kind },
-    ...has(i, "openingBalance") && { openingBalancePaise: paise(i.openingBalance) ?? 0 },
-    ...has(i, "creditLimit") && { creditLimitPaise: paise(i.creditLimit) },
-    ...has(i, "defaultProjectId") && { defaultProjectId: t(i.defaultProjectId) }
+    ...(has(i, "name") && { name: String(t(i.name) ?? "") }),
+    ...(has(i, "kind") && { kind: i.kind }),
+    ...(has(i, "openingBalance") && { openingBalancePaise: paise(i.openingBalance) ?? 0 }),
+    ...(has(i, "creditLimit") && { creditLimitPaise: paise(i.creditLimit) }),
+    ...(has(i, "defaultProjectId") && { defaultProjectId: t(i.defaultProjectId) }),
   }),
   events: (i) => ({
-    ...has(i, "projectId") && { projectId: String(t(i.projectId) ?? "") },
-    ...has(i, "name") && { name: String(t(i.name) ?? "") },
-    ...has(i, "budget") && { budgetPaise: paise(i.budget) },
-    ...has(i, "startDate") && { startDate: t(i.startDate) },
-    ...has(i, "endDate") && { endDate: t(i.endDate) }
+    ...(has(i, "projectId") && { projectId: String(t(i.projectId) ?? "") }),
+    ...(has(i, "name") && { name: String(t(i.name) ?? "") }),
+    ...(has(i, "budget") && { budgetPaise: paise(i.budget) }),
+    ...(has(i, "startDate") && { startDate: t(i.startDate) }),
+    ...(has(i, "endDate") && { endDate: t(i.endDate) }),
   }),
   loans: (i) => ({
-    ...has(i, "projectId") && { projectId: String(t(i.projectId) ?? "") },
-    ...has(i, "lender") && { lender: String(t(i.lender) ?? "") },
-    ...has(i, "principal") && { principalPaise: paise(i.principal) ?? 0 },
-    ...has(i, "interestRatePct") && { interestRatePct: numOrNull(i.interestRatePct) },
-    ...has(i, "emi") && { emiPaise: paise(i.emi) },
-    ...has(i, "emiDayOfMonth") && { emiDayOfMonth: numOrNull(i.emiDayOfMonth) },
-    ...has(i, "startDate") && { startDate: t(i.startDate) },
-    ...has(i, "tenureMonths") && { tenureMonths: numOrNull(i.tenureMonths) }
+    ...(has(i, "projectId") && { projectId: String(t(i.projectId) ?? "") }),
+    ...(has(i, "lender") && { lender: String(t(i.lender) ?? "") }),
+    ...(has(i, "principal") && { principalPaise: paise(i.principal) ?? 0 }),
+    ...(has(i, "interestRatePct") && { interestRatePct: numOrNull(i.interestRatePct) }),
+    ...(has(i, "emi") && { emiPaise: paise(i.emi) }),
+    ...(has(i, "emiDayOfMonth") && { emiDayOfMonth: numOrNull(i.emiDayOfMonth) }),
+    ...(has(i, "startDate") && { startDate: t(i.startDate) }),
+    ...(has(i, "tenureMonths") && { tenureMonths: numOrNull(i.tenureMonths) }),
   }),
   investments: (i) => ({
-    ...has(i, "projectId") && { projectId: String(t(i.projectId) ?? "") },
-    ...has(i, "name") && { name: String(t(i.name) ?? "") },
-    ...has(i, "kind") && { kind: i.kind },
-    ...has(i, "currentValue") && { currentValuePaise: paise(i.currentValue) },
-    ...has(i, "folioNo") && { folioNo: t(i.folioNo) }
-  })
+    ...(has(i, "projectId") && { projectId: String(t(i.projectId) ?? "") }),
+    ...(has(i, "name") && { name: String(t(i.name) ?? "") }),
+    ...(has(i, "kind") && { kind: i.kind }),
+    ...(has(i, "currentValue") && { currentValuePaise: paise(i.currentValue) }),
+    ...(has(i, "folioNo") && { folioNo: t(i.folioNo) }),
+  }),
 };
 var validators = {
   projects: (i) => validateProjectInput(i),
   accounts: (i) => validateAccountInput(i),
   events: (i) => validateEventInput(i),
   loans: (i) => validateLoanInput(i),
-  investments: (i) => validateInvestmentInput(i)
+  investments: (i) => validateInvestmentInput(i),
 };
 var TX_REFS = {
   projects: ["projectId"],
   accounts: ["accountId", "fromAccountId", "toAccountId"],
   events: ["eventId"],
   loans: ["loanId"],
-  investments: ["investmentId"]
+  investments: ["investmentId"],
 };
 var MAX_PER_ENTITY = 500;
 var LABEL = {
@@ -786,31 +851,28 @@ var LABEL = {
   accounts: "Account",
   events: "Event",
   loans: "Loan",
-  investments: "Investment"
+  investments: "Investment",
 };
-var createCatalogService = ({
-  store,
-  finance,
-  now = () => /* @__PURE__ */ new Date()
-}) => {
+var createCatalogService = ({ store, finance, now = () => /* @__PURE__ */ new Date() }) => {
   const SINGULAR = {
     projects: "project",
     accounts: "account",
     events: "event",
     loans: "loan",
-    investments: "investment"
+    investments: "investment",
   };
-  const audit = (userId, source, action, entity, entityId, before, after) => finance.insertAudit({
-    userId,
-    actor: source,
-    action: `${action}_${SINGULAR[entity]}`,
-    entity: SINGULAR[entity],
-    entityId,
-    before,
-    after,
-    createdAt: now().toISOString(),
-    undoneAt: null
-  });
+  const audit = (userId, source, action, entity, entityId, before, after) =>
+    finance.insertAudit({
+      userId,
+      actor: source,
+      action: `${action}_${SINGULAR[entity]}`,
+      entity: SINGULAR[entity],
+      entityId,
+      before,
+      after,
+      createdAt: now().toISOString(),
+      undoneAt: null,
+    });
   const need = async (entity, userId, id3) => {
     const r = await store.get(entity, userId, id3);
     if (!r) throw new CatalogError("not_found", `${LABEL[entity]} not found.`, 404);
@@ -818,18 +880,17 @@ var createCatalogService = ({
   };
   const checkRefs = async (entity, userId, stored) => {
     const projectId = entity === "accounts" ? stored.defaultProjectId : stored.projectId;
-    if (typeof projectId === "string" && projectId && !await store.get("projects", userId, projectId))
+    if (
+      typeof projectId === "string" &&
+      projectId &&
+      !(await store.get("projects", userId, projectId))
+    )
       throw new CatalogError("invalid", "That project doesn't exist.", 400, {
-        [entity === "accounts" ? "defaultProjectId" : "projectId"]: "Choose one of your projects."
+        [entity === "accounts" ? "defaultProjectId" : "projectId"]: "Choose one of your projects.",
       });
   };
   const fail = (f) => {
-    throw new CatalogError(
-      "invalid",
-      Object.values(f)[0] ?? "Invalid entry.",
-      400,
-      f
-    );
+    throw new CatalogError("invalid", Object.values(f)[0] ?? "Invalid entry.", 400, f);
   };
   return {
     list: (entity, userId) => store.list(entity, userId),
@@ -842,7 +903,7 @@ var createCatalogService = ({
         throw new CatalogError(
           "conflict",
           `You can keep up to ${MAX_PER_ENTITY} ${entity}. Delete some first.`,
-          429
+          429,
         );
       const base2 = { userId, createdBy: source, ...stored };
       if (entity === "projects") base2.archivedAt = null;
@@ -851,7 +912,7 @@ var createCatalogService = ({
           archivedAt: null,
           defaultProjectId: stored.defaultProjectId ?? null,
           creditLimitPaise: stored.creditLimitPaise ?? null,
-          openingBalancePaise: stored.openingBalancePaise ?? 0
+          openingBalancePaise: stored.openingBalancePaise ?? 0,
         });
       if (entity === "events")
         Object.assign(base2, {
@@ -859,7 +920,7 @@ var createCatalogService = ({
           concludedAt: null,
           budgetPaise: stored.budgetPaise ?? null,
           startDate: stored.startDate ?? null,
-          endDate: stored.endDate ?? null
+          endDate: stored.endDate ?? null,
         });
       if (entity === "loans")
         Object.assign(base2, {
@@ -868,12 +929,12 @@ var createCatalogService = ({
           emiPaise: stored.emiPaise ?? null,
           emiDayOfMonth: stored.emiDayOfMonth ?? null,
           startDate: stored.startDate ?? null,
-          tenureMonths: stored.tenureMonths ?? null
+          tenureMonths: stored.tenureMonths ?? null,
         });
       if (entity === "investments")
         Object.assign(base2, {
           currentValuePaise: stored.currentValuePaise ?? null,
-          folioNo: stored.folioNo ?? null
+          folioNo: stored.folioNo ?? null,
         });
       const row = await store.insert(entity, base2);
       await audit(userId, source, "create", entity, row.id, null, row);
@@ -898,17 +959,15 @@ var createCatalogService = ({
         throw new CatalogError(
           "conflict",
           `${LABEL[entity]} has ${used} entr${used === 1 ? "y" : "ies"}. Delete or move them first.`,
-          409
+          409,
         );
       if (entity === "projects") {
         for (const other of ["events", "loans", "investments"]) {
-          if ((await store.list(other, userId)).some(
-            (r) => r.projectId === id3
-          ))
+          if ((await store.list(other, userId)).some((r) => r.projectId === id3))
             throw new CatalogError(
               "conflict",
               `Project still has ${other}. Delete them first.`,
-              409
+              409,
             );
         }
       }
@@ -922,7 +981,7 @@ var createCatalogService = ({
         throw new CatalogError("conflict", `Event is already ${status}.`, 409);
       const row = await store.update("events", userId, id3, {
         status,
-        concludedAt: status === "concluded" ? now().toISOString() : null
+        concludedAt: status === "concluded" ? now().toISOString() : null,
       });
       await audit(
         userId,
@@ -931,7 +990,7 @@ var createCatalogService = ({
         "events",
         id3,
         before,
-        row
+        row,
       );
       return row;
     },
@@ -944,15 +1003,15 @@ var createCatalogService = ({
     async archive(entity, userId, id3, archived, source = "manual") {
       const before = await need(entity, userId, id3);
       const row = await store.update(entity, userId, id3, {
-        archivedAt: archived ? now().toISOString() : null
+        archivedAt: archived ? now().toISOString() : null,
       });
       await audit(userId, source, "update", entity, id3, before, row);
       return row;
-    }
+    },
   };
 };
 function recordAsInput(entity, r) {
-  const r2 = (p) => p === null || p === void 0 ? null : Number(p) / 100;
+  const r2 = (p) => (p === null || p === void 0 ? null : Number(p) / 100);
   switch (entity) {
     case "projects":
       return { name: r.name, kind: r.kind };
@@ -961,7 +1020,7 @@ function recordAsInput(entity, r) {
         name: r.name,
         kind: r.kind,
         openingBalance: r2(r.openingBalancePaise),
-        creditLimit: r2(r.creditLimitPaise)
+        creditLimit: r2(r.creditLimitPaise),
       };
     case "events":
       return {
@@ -969,7 +1028,7 @@ function recordAsInput(entity, r) {
         name: r.name,
         budget: r2(r.budgetPaise),
         startDate: r.startDate,
-        endDate: r.endDate
+        endDate: r.endDate,
       };
     case "loans":
       return {
@@ -979,14 +1038,14 @@ function recordAsInput(entity, r) {
         interestRatePct: r.interestRatePct,
         emi: r2(r.emiPaise),
         emiDayOfMonth: r.emiDayOfMonth,
-        tenureMonths: r.tenureMonths
+        tenureMonths: r.tenureMonths,
       };
     case "investments":
       return {
         projectId: r.projectId,
         name: r.name,
         kind: r.kind,
-        currentValue: r2(r.currentValuePaise)
+        currentValue: r2(r.currentValuePaise),
       };
   }
 }
@@ -998,8 +1057,8 @@ var SPEC = {
     fields: [
       ["name", "name", "reqstr"],
       ["kind", "kind", "reqstr"],
-      ["archivedAt", "archived_at", "str"]
-    ]
+      ["archivedAt", "archived_at", "str"],
+    ],
   },
   accounts: {
     table: "accounts",
@@ -1009,8 +1068,8 @@ var SPEC = {
       ["openingBalancePaise", "opening_balance_paise", "int"],
       ["creditLimitPaise", "credit_limit_paise", "int"],
       ["defaultProjectId", "default_project_id", "str"],
-      ["archivedAt", "archived_at", "str"]
-    ]
+      ["archivedAt", "archived_at", "str"],
+    ],
   },
   events: {
     table: "events",
@@ -1021,8 +1080,8 @@ var SPEC = {
       ["startDate", "start_date", "str"],
       ["endDate", "end_date", "str"],
       ["status", "status", "reqstr"],
-      ["concludedAt", "concluded_at", "str"]
-    ]
+      ["concludedAt", "concluded_at", "str"],
+    ],
   },
   loans: {
     table: "loans",
@@ -1035,8 +1094,8 @@ var SPEC = {
       ["emiDayOfMonth", "emi_day_of_month", "int"],
       ["startDate", "start_date", "str"],
       ["tenureMonths", "tenure_months", "int"],
-      ["status", "status", "reqstr"]
-    ]
+      ["status", "status", "reqstr"],
+    ],
   },
   investments: {
     table: "investments",
@@ -1045,9 +1104,9 @@ var SPEC = {
       ["name", "name", "reqstr"],
       ["kind", "kind", "reqstr"],
       ["currentValuePaise", "current_value_paise", "int"],
-      ["folioNo", "folio_no", "str"]
-    ]
-  }
+      ["folioNo", "folio_no", "str"],
+    ],
+  },
 };
 var PAGE2 = 250;
 var esc2 = (s) => String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
@@ -1055,10 +1114,11 @@ var id2 = (v) => {
   if (!/^\d{1,20}$/.test(String(v))) throw new Error("bad id");
   return String(v);
 };
-var nul2 = (v) => v === void 0 || v === null || v === "" || v === "null" ? null : v;
+var nul2 = (v) => (v === void 0 || v === null || v === "" || v === "null" ? null : v);
 var ts2 = (v) => String(nul2(v) ?? "").replace(" ", "T");
 var createCatalystCatalogStore = (app2) => {
-  const run = async (q2, table) => (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
+  const run = async (q2, table) =>
+    (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
   const toRecord = (entity, r) => {
     const out = {
       id: String(r.ROWID),
@@ -1066,11 +1126,12 @@ var createCatalystCatalogStore = (app2) => {
       createdAt: ts2(r.CREATEDTIME),
       updatedAt: ts2(r.MODIFIEDTIME),
       deletedAt: nul2(r.deleted_at) === null ? null : String(r.deleted_at),
-      createdBy: String(nul2(r.created_by) ?? "manual")
+      createdBy: String(nul2(r.created_by) ?? "manual"),
     };
     for (const [f, col, kind] of SPEC[entity].fields) {
       const v = nul2(r[col]);
-      out[f] = v === null ? kind === "reqstr" ? "" : null : kind === "int" ? Number(v) : String(v);
+      out[f] =
+        v === null ? (kind === "reqstr" ? "" : null) : kind === "int" ? Number(v) : String(v);
     }
     if (entity === "accounts" && out.openingBalancePaise === null) out.openingBalancePaise = 0;
     if (entity === "loans" && out.principalPaise === null) out.principalPaise = 0;
@@ -1085,7 +1146,7 @@ var createCatalystCatalogStore = (app2) => {
     const t2 = SPEC[entity].table;
     const rows = await run(
       `SELECT * FROM ${t2} WHERE ROWID = ${id2(rowId)} AND user_id = '${esc2(userId)}' AND deleted_at IS NULL LIMIT 0,1`,
-      t2
+      t2,
     );
     return rows[0] ? toRecord(entity, rows[0]) : null;
   };
@@ -1096,7 +1157,7 @@ var createCatalystCatalogStore = (app2) => {
       for (let offset = 0; ; offset += PAGE2) {
         const rows = await run(
           `SELECT * FROM ${t2} WHERE user_id = '${esc2(userId)}' AND deleted_at IS NULL ORDER BY ROWID LIMIT ${offset},${PAGE2}`,
-          t2
+          t2,
         );
         out.push(...rows);
         if (rows.length < PAGE2) break;
@@ -1105,23 +1166,32 @@ var createCatalystCatalogStore = (app2) => {
     },
     get: (entity, userId, rowId) => getOne(entity, userId, rowId),
     async insert(entity, row) {
-      const saved = await app2.datastore().table(SPEC[entity].table).insertRow({
-        user_id: row.userId,
-        created_by: row.createdBy,
-        ...toColumns(entity, row)
-      });
+      const saved = await app2
+        .datastore()
+        .table(SPEC[entity].table)
+        .insertRow({
+          user_id: row.userId,
+          created_by: row.createdBy,
+          ...toColumns(entity, row),
+        });
       return toRecord(entity, saved);
     },
     async update(entity, userId, rowId, patch) {
       const current = await getOne(entity, userId, rowId);
       if (!current) throw new Error("not found");
-      await app2.datastore().table(SPEC[entity].table).updateRow({ ROWID: id2(rowId), ...toColumns(entity, patch) });
+      await app2
+        .datastore()
+        .table(SPEC[entity].table)
+        .updateRow({ ROWID: id2(rowId), ...toColumns(entity, patch) });
       return { ...current, ...patch };
     },
     async softDelete(entity, userId, rowId, deletedAtIso) {
-      if (!await getOne(entity, userId, rowId)) throw new Error("not found");
-      await app2.datastore().table(SPEC[entity].table).updateRow({ ROWID: id2(rowId), deleted_at: deletedAtIso.slice(0, 19).replace("T", " ") });
-    }
+      if (!(await getOne(entity, userId, rowId))) throw new Error("not found");
+      await app2
+        .datastore()
+        .table(SPEC[entity].table)
+        .updateRow({ ROWID: id2(rowId), deleted_at: deletedAtIso.slice(0, 19).replace("T", " ") });
+    },
   };
 };
 
@@ -1129,7 +1199,7 @@ var createCatalystCatalogStore = (app2) => {
 var PLANS = {
   trial: { label: "1 month free trial", pricePaise: 0, days: 30 },
   pro_monthly: { label: "Pro \u2014 monthly", pricePaise: 19900, days: 30 },
-  pro_annual: { label: "Pro \u2014 annual", pricePaise: 199900, days: 365 }
+  pro_annual: { label: "Pro \u2014 annual", pricePaise: 199900, days: 365 },
 };
 var SubscriptionError = class extends Error {
   constructor(code, message, status = 400) {
@@ -1155,16 +1225,22 @@ var createSubscriptionService = (deps) => {
   const isAdmin2 = (id3) => (deps.adminIds ?? []).includes(id3);
   const entitlementOf = (subs) => {
     const t2 = today();
-    const live2 = subs.filter((s) => s.startsOn <= t2 && s.endsOn >= t2).sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0];
+    const live2 = subs
+      .filter((s) => s.startsOn <= t2 && s.endsOn >= t2)
+      .sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0];
     const trialUsed = subs.some((s) => s.plan === "trial");
     if (!live2) return { plan: "free", active: false, endsOn: null, daysLeft: 0, trialUsed };
-    const daysLeft = Math.round(
-      (Date.parse(`${live2.endsOn}T00:00:00Z`) - Date.parse(`${t2}T00:00:00Z`)) / 864e5
-    ) + 1;
+    const daysLeft =
+      Math.round(
+        (Date.parse(`${live2.endsOn}T00:00:00Z`) - Date.parse(`${t2}T00:00:00Z`)) / 864e5,
+      ) + 1;
     return { plan: live2.plan, active: true, endsOn: live2.endsOn, daysLeft, trialUsed };
   };
   const startFor = (subs) => {
-    const latest = subs.map((s) => s.endsOn).sort().pop();
+    const latest = subs
+      .map((s) => s.endsOn)
+      .sort()
+      .pop();
     return latest && latest >= today() ? addDays(latest, 1) : today();
   };
   return {
@@ -1184,7 +1260,7 @@ var createSubscriptionService = (deps) => {
           endsOn: addDays(startsOn, PLANS.trial.days - 1),
           paymentId: null,
           subKey: `trial:${userId}`,
-          createdAt: now().toISOString()
+          createdAt: now().toISOString(),
         });
       } catch (e) {
         if ((await store.listSubscriptions(userId)).some((x) => x.plan === "trial"))
@@ -1203,7 +1279,7 @@ var createSubscriptionService = (deps) => {
       if (Math.round(Number(input.amountRupees) * 100) !== expected) {
         throw new SubscriptionError(
           "validation",
-          `Amount must be \u20B9${expected / 100} for this plan.`
+          `Amount must be \u20B9${expected / 100} for this plan.`,
         );
       }
       if (await store.findPaymentByUtr(utr))
@@ -1213,7 +1289,7 @@ var createSubscriptionService = (deps) => {
         throw new SubscriptionError(
           "conflict",
           "You already have payments waiting for review.",
-          429
+          429,
         );
       return store.insertPayment({
         userId,
@@ -1224,12 +1300,12 @@ var createSubscriptionService = (deps) => {
         note: null,
         createdAt: now().toISOString(),
         reviewedAt: null,
-        reviewedBy: null
+        reviewedBy: null,
       });
     },
     async listMyPayments(userId) {
-      return (await store.listPayments(userId)).sort(
-        (a, b) => b.createdAt.localeCompare(a.createdAt)
+      return (await store.listPayments(userId)).sort((a, b) =>
+        b.createdAt.localeCompare(a.createdAt),
       );
     },
     async listPending(adminId) {
@@ -1244,12 +1320,12 @@ var createSubscriptionService = (deps) => {
       const reviewed = {
         reviewedAt: now().toISOString(),
         reviewedBy: adminId,
-        note: note?.slice(0, 200) ?? null
+        note: note?.slice(0, 200) ?? null,
       };
       if (decision === "reject")
         return {
           payment: await store.updatePayment(p.id, { status: "rejected", ...reviewed }),
-          subscription: null
+          subscription: null,
         };
       const subs = await store.listSubscriptions(p.userId);
       const startsOn = startFor(subs);
@@ -1262,7 +1338,7 @@ var createSubscriptionService = (deps) => {
           endsOn: addDays(startsOn, PLANS[p.plan].days - 1),
           paymentId: p.id,
           subKey: `pay:${p.id}`,
-          createdAt: now().toISOString()
+          createdAt: now().toISOString(),
         });
       } catch (e) {
         if ((await store.getPayment(paymentId))?.status !== "pending")
@@ -1273,9 +1349,9 @@ var createSubscriptionService = (deps) => {
       }
       return {
         payment: await store.updatePayment(p.id, { status: "approved", ...reviewed }),
-        subscription
+        subscription,
       };
-    }
+    },
   };
 };
 
@@ -1286,8 +1362,8 @@ var rid = (v) => {
   if (!/^\d{1,20}$/.test(String(v))) throw new Error("bad id");
   return String(v);
 };
-var nul3 = (v) => v === void 0 || v === null || v === "" || v === "null" ? null : v;
-var str2 = (v) => nul3(v) === null ? null : String(v);
+var nul3 = (v) => (v === void 0 || v === null || v === "" || v === "null" ? null : v);
+var str2 = (v) => (nul3(v) === null ? null : String(v));
 var ts3 = (v) => String(nul3(v) ?? "").replace(" ", "T");
 var rowToSubscription = (r) => ({
   id: String(r.ROWID),
@@ -1296,7 +1372,7 @@ var rowToSubscription = (r) => ({
   startsOn: String(r.starts_on),
   endsOn: String(r.ends_on),
   paymentId: str2(r.payment_id),
-  createdAt: ts3(r.CREATEDTIME)
+  createdAt: ts3(r.CREATEDTIME),
 });
 var rowToPayment = (r) => ({
   id: String(r.ROWID),
@@ -1308,16 +1384,17 @@ var rowToPayment = (r) => ({
   note: str2(r.note),
   createdAt: ts3(r.CREATEDTIME),
   reviewedAt: str2(r.reviewed_at),
-  reviewedBy: str2(r.reviewed_by)
+  reviewedBy: str2(r.reviewed_by),
 });
 var createCatalystSubscriptionStore = (app2) => {
-  const query = async (q2, table) => (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
+  const query = async (q2, table) =>
+    (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
   const queryAll = async (table, where) => {
     const out = [];
     for (let offset = 0; ; offset += PAGE3) {
       const rows = await query(
         `SELECT * FROM ${table} WHERE ${where} ORDER BY ROWID DESC LIMIT ${offset},${PAGE3}`,
-        table
+        table,
       );
       out.push(...rows);
       if (rows.length < PAGE3) return out;
@@ -1325,35 +1402,40 @@ var createCatalystSubscriptionStore = (app2) => {
   };
   return {
     async listSubscriptions(userId) {
-      return (await queryAll("subscriptions", `user_id = '${esc3(userId)}'`)).map(rowToSubscription);
+      return (await queryAll("subscriptions", `user_id = '${esc3(userId)}'`)).map(
+        rowToSubscription,
+      );
     },
     async insertSubscription(s) {
-      const saved = await app2.datastore().table("subscriptions").insertRow({
-        user_id: s.userId,
-        plan: s.plan,
-        starts_on: s.startsOn,
-        ends_on: s.endsOn,
-        payment_id: s.paymentId,
-        ...s.subKey ? { sub_key: s.subKey } : {}
-      });
+      const saved = await app2
+        .datastore()
+        .table("subscriptions")
+        .insertRow({
+          user_id: s.userId,
+          plan: s.plan,
+          starts_on: s.startsOn,
+          ends_on: s.endsOn,
+          payment_id: s.paymentId,
+          ...(s.subKey ? { sub_key: s.subKey } : {}),
+        });
       return rowToSubscription(saved);
     },
     async listPayments(userId) {
       return (await queryAll("payment_submissions", `user_id = '${esc3(userId)}'`)).map(
-        rowToPayment
+        rowToPayment,
       );
     },
     async getPayment(paymentId) {
       const rows = await query(
         `SELECT * FROM payment_submissions WHERE ROWID = ${rid(paymentId)} LIMIT 0,1`,
-        "payment_submissions"
+        "payment_submissions",
       );
       return rows[0] ? rowToPayment(rows[0]) : null;
     },
     async findPaymentByUtr(utr) {
       const rows = await query(
         `SELECT * FROM payment_submissions WHERE utr = '${esc3(utr)}' LIMIT 0,1`,
-        "payment_submissions"
+        "payment_submissions",
       );
       return rows[0] ? rowToPayment(rows[0]) : null;
     },
@@ -1366,7 +1448,7 @@ var createCatalystSubscriptionStore = (app2) => {
         status: p.status,
         note: p.note,
         reviewed_at: p.reviewedAt,
-        reviewed_by: p.reviewedBy
+        reviewed_by: p.reviewedBy,
       });
       return rowToPayment(saved);
     },
@@ -1385,11 +1467,13 @@ var createCatalystSubscriptionStore = (app2) => {
       return (await queryAll("payment_submissions", "status = 'pending'")).map(rowToPayment);
     },
     async listAllPayments(status) {
-      return (await queryAll("payment_submissions", status ? `status = '${esc3(status)}'` : "ROWID > 0")).map(rowToPayment);
+      return (
+        await queryAll("payment_submissions", status ? `status = '${esc3(status)}'` : "ROWID > 0")
+      ).map(rowToPayment);
     },
     async listAllSubscriptions() {
       return (await queryAll("subscriptions", "ROWID > 0")).map(rowToSubscription);
-    }
+    },
   };
 };
 
@@ -1400,7 +1484,7 @@ var dmy = (iso) => {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
   return m ? `${m[3]} ${MONTHS[Number(m[2]) - 1] ?? ""} ${m[1]}` : "";
 };
-var tierOf = (plan) => plan === "trial" ? "Go" : "Pro";
+var tierOf = (plan) => (plan === "trial" ? "Go" : "Pro");
 var createAdminService = (deps) => {
   const { store } = deps;
   const now = () => deps.now?.() ?? /* @__PURE__ */ new Date();
@@ -1408,15 +1492,21 @@ var createAdminService = (deps) => {
   const admins = new Set(deps.adminEmails.map((e) => e.trim().toLowerCase()).filter(Boolean));
   const isAdminEmail = (email) => !!email && admins.has(email.trim().toLowerCase());
   const pinned = new Set((deps.adminUserIds ?? []).map((i) => i.trim()).filter(Boolean));
-  const isAdmin2 = (who) => isAdminEmail(who.email) && (pinned.size === 0 || !!who.userId && pinned.has(String(who.userId)));
+  const isAdmin2 = (who) =>
+    isAdminEmail(who.email) &&
+    (pinned.size === 0 || (!!who.userId && pinned.has(String(who.userId))));
   const isPinned = () => pinned.size > 0;
   const liveSub = (subs) => {
     const t2 = today();
-    return subs.filter((s) => s.startsOn <= t2 && s.endsOn >= t2).sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0] ?? null;
+    return (
+      subs
+        .filter((s) => s.startsOn <= t2 && s.endsOn >= t2)
+        .sort((a, b) => b.endsOn.localeCompare(a.endsOn))[0] ?? null
+    );
   };
   const byUser = (subs) => {
     const m = /* @__PURE__ */ new Map();
-    for (const s of subs) m.set(s.userId, [...m.get(s.userId) ?? [], s]);
+    for (const s of subs) m.set(s.userId, [...(m.get(s.userId) ?? []), s]);
     return m;
   };
   return {
@@ -1429,7 +1519,7 @@ var createAdminService = (deps) => {
         store.listAllSubscriptions(),
         store.listAllPayments("pending"),
         store.countRows("projects"),
-        store.countRows("transactions")
+        store.countRows("transactions"),
       ]);
       const per = byUser(subs);
       const usersByPlan = { free: 0, go: 0, pro: 0 };
@@ -1441,7 +1531,7 @@ var createAdminService = (deps) => {
         else {
           usersByPlan.pro += 1;
           const p = PLANS[live2.plan];
-          mrrPaise += Math.round(p.pricePaise * 30 / p.days);
+          mrrPaise += Math.round((p.pricePaise * 30) / p.days);
         }
       }
       const t0 = Date.parse(`${today()}T00:00:00Z`);
@@ -1456,7 +1546,7 @@ var createAdminService = (deps) => {
         transactions,
         mrrPaise,
         pendingPayments: payments.length,
-        usersTrend
+        usersTrend,
       };
     },
     async users() {
@@ -1475,25 +1565,27 @@ var createAdminService = (deps) => {
           planValidity: live2 ? dmy(live2.endsOn) : "Lifetime Free Tier",
           activeSince: dmy(u.createdAt),
           status: u.active ? "Active" : "Suspended",
-          isSuperAdmin: isSuper
+          isSuperAdmin: isSuper,
         };
       });
     },
     async payments(status) {
       const [rows, users] = await Promise.all([store.listAllPayments(status), store.listUsers()]);
       const email = new Map(users.map((u) => [u.id, u.email]));
-      return rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map((p) => ({
-        id: p.id,
-        utr: p.utr,
-        userEmail: email.get(p.userId) ?? p.userId,
-        /** Matches the reference the user writes in the UPI remark. */
-        reference: paymentReference(p.userId),
-        plan: PLANS[p.plan]?.label ?? p.plan,
-        amountPaise: p.amountPaise,
-        orderId: `ORD-${p.id.slice(-6)}`,
-        createdAt: p.createdAt,
-        status: p.status
-      }));
+      return rows
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .map((p) => ({
+          id: p.id,
+          utr: p.utr,
+          userEmail: email.get(p.userId) ?? p.userId,
+          /** Matches the reference the user writes in the UPI remark. */
+          reference: paymentReference(p.userId),
+          plan: PLANS[p.plan]?.label ?? p.plan,
+          amountPaise: p.amountPaise,
+          orderId: `ORD-${p.id.slice(-6)}`,
+          createdAt: p.createdAt,
+          status: p.status,
+        }));
     },
     async ledger(limit = 100) {
       const rows = await store.recentTransactions(limit);
@@ -1507,7 +1599,7 @@ var createAdminService = (deps) => {
         mode: t2.paymentMode ? t2.paymentMode.replace(/_/g, " ").toUpperCase() : "\u2014",
         // Wealthspan records money that already moved; there is no pending/in-transit state.
         status: "Cleared",
-        createdAt: t2.createdAt
+        createdAt: t2.createdAt,
       }));
     },
     async audit(limit = 100) {
@@ -1517,38 +1609,44 @@ var createAdminService = (deps) => {
         title: a.action.replace(/_/g, " "),
         description: [a.entity, a.entityId].filter(Boolean).join(" "),
         actor: a.actor,
-        at: a.createdAt
+        at: a.createdAt,
       }));
-    }
+    },
   };
 };
 
 // src/features/admin/catalyst-store.ts
-var nul4 = (v) => v === void 0 || v === null || v === "" || v === "null" ? null : v;
-var str3 = (v) => nul4(v) === null ? null : String(v);
+var nul4 = (v) => (v === void 0 || v === null || v === "" || v === "null" ? null : v);
+var str3 = (v) => (nul4(v) === null ? null : String(v));
 var ts4 = (v) => String(nul4(v) ?? "").replace(" ", "T");
 var PAGE4 = 250;
 var createCatalystAdminStore = (app2) => {
   const subs = createCatalystSubscriptionStore(app2);
-  const query = async (q2, table) => (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
+  const query = async (q2, table) =>
+    (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
   return {
     async listUsers() {
-      const raw = await app2.userManagement().getAllUsers() ?? [];
-      return raw.map((u) => {
-        const first = str3(u.first_name) ?? "";
-        const last = str3(u.last_name) ?? "";
-        return {
-          id: String(u.user_id ?? u.userId ?? ""),
-          email: String(u.email_id ?? u.email ?? ""),
-          name: `${first} ${last}`.trim(),
-          createdAt: ts4(u.created_time ?? u.createdTime ?? ""),
-          active: String(u.status ?? "ACTIVE").toUpperCase() === "ACTIVE"
-        };
-      }).filter((u) => u.id);
+      const raw = (await app2.userManagement().getAllUsers()) ?? [];
+      return raw
+        .map((u) => {
+          const first = str3(u.first_name) ?? "";
+          const last = str3(u.last_name) ?? "";
+          return {
+            id: String(u.user_id ?? u.userId ?? ""),
+            email: String(u.email_id ?? u.email ?? ""),
+            name: `${first} ${last}`.trim(),
+            createdAt: ts4(u.created_time ?? u.createdTime ?? ""),
+            active: String(u.status ?? "ACTIVE").toUpperCase() === "ACTIVE",
+          };
+        })
+        .filter((u) => u.id);
     },
     async countRows(table) {
-      const where = table === "transactions" || table === "projects" ? "deleted_at IS NULL" : "ROWID > 0";
-      const rows = await app2.zcql().executeZCQLQuery(`SELECT COUNT(ROWID) FROM ${table} WHERE ${where}`);
+      const where =
+        table === "transactions" || table === "projects" ? "deleted_at IS NULL" : "ROWID > 0";
+      const rows = await app2
+        .zcql()
+        .executeZCQLQuery(`SELECT COUNT(ROWID) FROM ${table} WHERE ${where}`);
       const first = rows[0]?.[table] ?? Object.values(rows[0] ?? {})[0] ?? {};
       const v = Object.values(first)[0];
       return Number(v ?? 0);
@@ -1559,18 +1657,16 @@ var createCatalystAdminStore = (app2) => {
       const n = Math.max(1, Math.min(PAGE4, Math.floor(limit)));
       const rows = await query(
         `SELECT * FROM transactions WHERE deleted_at IS NULL ORDER BY ROWID DESC LIMIT 0,${n}`,
-        "transactions"
+        "transactions",
       );
       const ids = [
-        ...new Set(
-          rows.map((r) => str3(r.project_id)).filter((v) => !!v && /^\d{1,20}$/.test(v))
-        )
+        ...new Set(rows.map((r) => str3(r.project_id)).filter((v) => !!v && /^\d{1,20}$/.test(v))),
       ];
       const names = /* @__PURE__ */ new Map();
       if (ids.length) {
         const ps = await query(
           `SELECT ROWID, name FROM projects WHERE ROWID IN (${ids.join(",")}) LIMIT 0,${PAGE4}`,
-          "projects"
+          "projects",
         );
         for (const p of ps) names.set(String(p.ROWID), String(p.name));
       }
@@ -1583,14 +1679,14 @@ var createCatalystAdminStore = (app2) => {
         paymentMode: str3(r.payment_mode),
         amountPaise: Number(r.amount_paise ?? 0),
         projectName: names.get(String(r.project_id)) ?? null,
-        createdAt: ts4(r.CREATEDTIME)
+        createdAt: ts4(r.CREATEDTIME),
       }));
     },
     async recentAudit(limit) {
       const n = Math.max(1, Math.min(PAGE4, Math.floor(limit)));
       const rows = await query(
         `SELECT * FROM audit_log ORDER BY ROWID DESC LIMIT 0,${n}`,
-        "audit_log"
+        "audit_log",
       );
       return rows.map((r) => ({
         id: String(r.ROWID),
@@ -1598,9 +1694,9 @@ var createCatalystAdminStore = (app2) => {
         entity: String(r.entity ?? ""),
         entityId: str3(r.entity_id),
         actor: String(r.actor ?? ""),
-        createdAt: ts4(r.CREATEDTIME)
+        createdAt: ts4(r.CREATEDTIME),
       }));
-    }
+    },
   };
 };
 
@@ -1644,23 +1740,22 @@ function rateLimit(opts) {
     h.n += 1;
     if (h.n > opts.max) {
       res.setHeader("Retry-After", String(Math.max(1, Math.ceil((h.reset - t2) / 1e3))));
-      return void res.status(429).json({ error: "rate_limited", message: "Too many requests. Please slow down." });
+      return void res
+        .status(429)
+        .json({ error: "rate_limited", message: "Too many requests. Please slow down." });
     }
     next();
   };
 }
 var jsonErrors = () => (err, _req, res, _next) => {
-  const status = Number(
-    err?.status ?? err?.statusCode ?? 500
-  );
+  const status = Number(err?.status ?? err?.statusCode ?? 500);
   if (status === 413)
     return void res.status(413).json({ error: "too_large", message: "That request is too large." });
   if (status >= 400 && status < 500)
-    return void res.status(400).json({ error: "bad_request", message: "That request could not be read." });
-  console.error(
-    "unhandled error:",
-    String(err?.message ?? typeof err).slice(0, 200)
-  );
+    return void res
+      .status(400)
+      .json({ error: "bad_request", message: "That request could not be read." });
+  console.error("unhandled error:", String(err?.message ?? typeof err).slice(0, 200));
   res.status(500).json({ error: "server", message: "Something went wrong. Try again." });
 };
 var notFound = () => (_req, res) => {
@@ -1692,7 +1787,7 @@ app.use(async (req, res, next) => {
     req.admin = createAdminService({
       store: createCatalystAdminStore(c),
       adminEmails: ADMIN_EMAILS(),
-      adminUserIds: ADMIN_USER_IDS()
+      adminUserIds: ADMIN_USER_IDS(),
     });
     req.svc = createFinanceService({ store: fin });
     req.cat = createCatalogService({ store: createCatalystCatalogStore(c), finance: fin });
@@ -1704,7 +1799,7 @@ app.use(async (req, res, next) => {
 app.use(rateLimit({ windowMs: 6e4, max: 90, methods: ["POST", "PATCH", "PUT", "DELETE"] }));
 app.use(rateLimit({ windowMs: 6e4, max: 300, methods: ["GET"] }));
 var DATE2 = /^\d{4}-\d{2}-\d{2}$/;
-var q = (v) => typeof v === "string" && v ? v : void 0;
+var q = (v) => (typeof v === "string" && v ? v : void 0);
 var date = (v) => {
   const s = q(v);
   return s && DATE2.test(s) ? s : void 0;
@@ -1724,119 +1819,116 @@ var wrap = (fn) => async (req, res) => {
       return res.status(e.status).json({ error: e.code, message: e.message });
     if (e instanceof FinanceError)
       return res.status(e.status).json({ error: e.code, message: e.message, fields: e.fields });
-    console.error(
-      "finance error:",
-      String(e?.message ?? typeof e).slice(0, 300)
-    );
+    console.error("finance error:", String(e?.message ?? typeof e).slice(0, 300));
     res.status(500).json({ error: "server", message: "Something went wrong. Try again." });
   }
 };
 app.get(
   "/transactions",
-  wrap(
-    (req) => req.svc.listTransactions(req.userId, {
+  wrap((req) =>
+    req.svc.listTransactions(req.userId, {
       from: date(req.query.from),
       to: date(req.query.to),
       projectId: q(req.query.projectId),
       accountId: q(req.query.accountId),
       type: TYPES.find((t2) => t2 === req.query.type),
       limit: int(req.query.limit),
-      offset: int(req.query.offset)
-    })
-  )
+      offset: int(req.query.offset),
+    }),
+  ),
 );
 app.post(
   "/transactions",
-  wrap((req) => req.svc.createTransaction(req.userId, req.body ?? {}, "manual"))
+  wrap((req) => req.svc.createTransaction(req.userId, req.body ?? {}, "manual")),
 );
 app.patch(
   "/transactions/:id",
-  wrap((req) => req.svc.updateTransaction(req.userId, req.params.id, req.body ?? {}, "manual"))
+  wrap((req) => req.svc.updateTransaction(req.userId, req.params.id, req.body ?? {}, "manual")),
 );
 app.delete(
   "/transactions/:id",
   wrap(async (req) => {
     await req.svc.deleteTransaction(req.userId, req.params.id, "manual");
     return { deleted: true };
-  })
+  }),
 );
 app.get(
   "/summary",
-  wrap(
-    (req) => req.svc.getSummary(req.userId, {
+  wrap((req) =>
+    req.svc.getSummary(req.userId, {
       from: date(req.query.from),
       to: date(req.query.to),
-      projectId: q(req.query.projectId)
-    })
-  )
+      projectId: q(req.query.projectId),
+    }),
+  ),
 );
 app.get(
   "/me",
-  wrap(async (req) => ({ userId: req.userId }))
+  wrap(async (req) => ({ userId: req.userId })),
 );
 var ENTITIES = ["projects", "accounts", "events", "loans", "investments"];
 for (const entity of ENTITIES) {
   app.get(
     `/${entity}`,
-    wrap((req) => req.cat.list(entity, req.userId).then((items) => ({ items })))
+    wrap((req) => req.cat.list(entity, req.userId).then((items) => ({ items }))),
   );
   app.post(
     `/${entity}`,
-    wrap((req) => req.cat.create(entity, req.userId, req.body ?? {}, "manual"))
+    wrap((req) => req.cat.create(entity, req.userId, req.body ?? {}, "manual")),
   );
   app.patch(
     `/${entity}/:id`,
-    wrap((req) => req.cat.update(entity, req.userId, req.params.id, req.body ?? {}, "manual"))
+    wrap((req) => req.cat.update(entity, req.userId, req.params.id, req.body ?? {}, "manual")),
   );
   app.delete(
     `/${entity}/:id`,
     wrap(async (req) => {
       await req.cat.remove(entity, req.userId, req.params.id, "manual");
       return { deleted: true };
-    })
+    }),
   );
 }
 app.post(
   "/events/:id/conclude",
-  wrap((req) => req.cat.setEventStatus(req.userId, req.params.id, "concluded"))
+  wrap((req) => req.cat.setEventStatus(req.userId, req.params.id, "concluded")),
 );
 app.post(
   "/events/:id/reopen",
-  wrap((req) => req.cat.setEventStatus(req.userId, req.params.id, "open"))
+  wrap((req) => req.cat.setEventStatus(req.userId, req.params.id, "open")),
 );
 app.post(
   "/loans/:id/close",
-  wrap((req) => req.cat.setLoanStatus(req.userId, req.params.id, "closed"))
+  wrap((req) => req.cat.setLoanStatus(req.userId, req.params.id, "closed")),
 );
 app.post(
   "/loans/:id/reopen",
-  wrap((req) => req.cat.setLoanStatus(req.userId, req.params.id, "active"))
+  wrap((req) => req.cat.setLoanStatus(req.userId, req.params.id, "active")),
 );
 for (const entity of ["projects", "accounts"]) {
   app.post(
     `/${entity}/:id/archive`,
-    wrap((req) => req.cat.archive(entity, req.userId, req.params.id, true))
+    wrap((req) => req.cat.archive(entity, req.userId, req.params.id, true)),
   );
   app.post(
     `/${entity}/:id/unarchive`,
-    wrap((req) => req.cat.archive(entity, req.userId, req.params.id, false))
+    wrap((req) => req.cat.archive(entity, req.userId, req.params.id, false)),
   );
 }
 app.get(
   "/subscription",
-  wrap((req) => req.sub.getEntitlement(req.userId))
+  wrap((req) => req.sub.getEntitlement(req.userId)),
 );
 app.post(
   "/subscription/trial",
-  wrap((req) => req.sub.startTrial(req.userId))
+  wrap((req) => req.sub.startTrial(req.userId)),
 );
 app.get(
   "/subscription/payments",
-  wrap((req) => req.sub.listMyPayments(req.userId).then((payments) => ({ payments })))
+  wrap((req) => req.sub.listMyPayments(req.userId).then((payments) => ({ payments }))),
 );
 app.post(
   "/subscription/payments",
-  wrap((req) => req.sub.submitPayment(req.userId, req.body ?? {}))
+  wrap((req) => req.sub.submitPayment(req.userId, req.body ?? {})),
 );
 var isAdmin = (req) => req.admin.isAdmin({ email: req.email, userId: req.userId });
 app.get(
@@ -1848,10 +1940,10 @@ app.get(
       email: req.email ?? "",
       name: req.name || req.email || "",
       isAdmin: ok,
-      ...needsPin || ok && !req.admin.isPinned() ? { userId: req.userId } : {},
-      idPinned: req.admin.isPinned()
+      ...(needsPin || (ok && !req.admin.isPinned()) ? { userId: req.userId } : {}),
+      idPinned: req.admin.isPinned(),
     };
-  })
+  }),
 );
 app.use("/admin", (req, res, next) => {
   if (!isAdmin(req)) {
@@ -1864,25 +1956,27 @@ app.use("/admin", (req, res, next) => {
 var PAYMENT_STATUS = ["pending", "approved", "rejected"];
 app.get(
   "/admin/overview",
-  wrap((req) => req.admin.overview())
+  wrap((req) => req.admin.overview()),
 );
 app.get(
   "/admin/users",
-  wrap((req) => req.admin.users().then((users) => ({ users })))
+  wrap((req) => req.admin.users().then((users) => ({ users }))),
 );
 app.get(
   "/admin/payments",
-  wrap(
-    (req) => req.admin.payments(PAYMENT_STATUS.find((s) => s === req.query.status)).then((payments) => ({ payments }))
-  )
+  wrap((req) =>
+    req.admin
+      .payments(PAYMENT_STATUS.find((s) => s === req.query.status))
+      .then((payments) => ({ payments })),
+  ),
 );
 app.get(
   "/admin/ledger",
-  wrap((req) => req.admin.ledger().then((rows) => ({ rows })))
+  wrap((req) => req.admin.ledger().then((rows) => ({ rows }))),
 );
 app.get(
   "/admin/audit",
-  wrap((req) => req.admin.audit().then((rows) => ({ rows })))
+  wrap((req) => req.admin.audit().then((rows) => ({ rows }))),
 );
 for (const decision of ["approve", "reject"]) {
   app.post(
@@ -1890,12 +1984,12 @@ for (const decision of ["approve", "reject"]) {
     wrap(async (req) => {
       const svc = createSubscriptionService({
         store: createCatalystSubscriptionStore(req.c),
-        adminIds: [req.userId]
+        adminIds: [req.userId],
       });
       const note = typeof req.body?.note === "string" ? req.body.note : void 0;
       const r = await svc.review(req.userId, req.params.id, decision, note);
       return { payment: r.payment };
-    })
+    }),
   );
 }
 app.get(
@@ -1914,10 +2008,10 @@ app.get(
         { name: "Core API (finance)", ok: true, latencyMs: null },
         { name: "Data Store", ok: dataOk, latencyMs: dataOk ? dataMs : null },
         { name: "Chat (Sarvam)", ok: null, latencyMs: null },
-        { name: "Files", ok: null, latencyMs: null }
-      ]
+        { name: "Files", ok: null, latencyMs: null },
+      ],
     };
-  })
+  }),
 );
 app.use(notFound());
 app.use(jsonErrors());

@@ -11,13 +11,7 @@
 
 export type FinanceTransactionType = "income" | "expense" | "transfer";
 export type FinancePaymentMode =
-  | "cash"
-  | "upi"
-  | "debit_card"
-  | "credit_card"
-  | "bank_transfer"
-  | "cheque"
-  | "wallet";
+  "cash" | "upi" | "debit_card" | "credit_card" | "bank_transfer" | "cheque" | "wallet";
 export type FinanceAccountKind = "cash" | "bank" | "credit_card" | "wallet";
 export type FinanceProjectKind = "personal" | "business";
 export type FinanceEventStatusType = "open" | "concluded";

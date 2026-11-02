@@ -44,10 +44,14 @@ export function CatalystLoginSheet({ onClose }: { onClose: () => void }) {
         await loadScript(SDK);
         await loadScript(INIT);
         if (!window.catalyst) throw new Error("sdk");
-        window.catalyst.auth.signIn(BOX_ID, { service_url: `${import.meta.env.BASE_URL}index.html` });
+        window.catalyst.auth.signIn(BOX_ID, {
+          service_url: `${import.meta.env.BASE_URL}index.html`,
+        });
         window.setTimeout(() => {
           if (!document.querySelector(`#${BOX_ID} iframe`))
-            setError("Login form did not load. Reload the page from the Wealthspan app address and try again.");
+            setError(
+              "Login form did not load. Reload the page from the Wealthspan app address and try again.",
+            );
         }, 8000);
       } catch {
         setError("Login is available only on the Wealthspan app address (Catalyst hosting).");
@@ -64,7 +68,11 @@ export function CatalystLoginSheet({ onClose }: { onClose: () => void }) {
           </button>
         </div>
         {error ? <p className="text-sm text-red-500 px-2 pb-3">{error}</p> : null}
-        <div id={BOX_ID} style={{ height: 460 }} className="w-full overflow-hidden rounded-2xl [&_iframe]:h-full [&_iframe]:w-full [&_iframe]:border-0" />
+        <div
+          id={BOX_ID}
+          style={{ height: 460 }}
+          className="w-full overflow-hidden rounded-2xl [&_iframe]:h-full [&_iframe]:w-full [&_iframe]:border-0"
+        />
       </div>
     </div>
   );

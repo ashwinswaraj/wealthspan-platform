@@ -17,18 +17,18 @@ Document the actual token set in `packages/ui/src/design-system/tokens/index.ts`
 
 ## Details
 
-| Category | Export | Examples |
-| --- | --- | --- |
-| Color | `colors` | Material-Design-3-style role naming: `primary`, `primaryContainer`, `onPrimary`, `secondary`, `tertiary`, a full surface stack (`surface`, `surfaceLow`...`surfaceHighest`), `outline`, `destructive` |
-| Typography | `typography` | `family.headline` = Manrope, `family.body`/`family.label` = Inter; a `scale` from `display` down to `caption` (Tailwind utility strings, not raw sizes) |
-| Spacing | `spacing` | `section`, `sectionCompact`, `page` — Tailwind's default spacing scale is the only sanctioned spacing beyond these |
-| Radius | `radius` | `xs` (2px) through `3xl` (24px), plus `pill` |
-| Elevation | `elevation` | Standard shadows (`sm`/`md`/`lg`) plus named glow effects (for example `ctaBlue`, `ctaWhite`; some names are leftovers from the previous product) |
-| Opacity | `opacity` | `disabled`, `muted`, `ghost` |
-| Z-index | `zIndex` | `base` through `tooltip` (0–70) |
-| Motion | `motion` | Durations (`fast`/`base`/`slow`), easings, and named interaction patterns (`press`, `hover`, `hoverLift`, `fadeIn`, `scaleIn`) |
-| Breakpoints | `breakpoints` | Standard Tailwind breakpoints (`sm` 640 – `2xl` 1536) |
-| Icon sizing | `iconSizes`, `iconStroke` | `xs` (14) – `xl` (28), stroke width 1.5 |
+| Category    | Export                    | Examples                                                                                                                                                                                              |
+| ----------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Color       | `colors`                  | Material-Design-3-style role naming: `primary`, `primaryContainer`, `onPrimary`, `secondary`, `tertiary`, a full surface stack (`surface`, `surfaceLow`...`surfaceHighest`), `outline`, `destructive` |
+| Typography  | `typography`              | `family.headline` = Manrope, `family.body`/`family.label` = Inter; a `scale` from `display` down to `caption` (Tailwind utility strings, not raw sizes)                                               |
+| Spacing     | `spacing`                 | `section`, `sectionCompact`, `page` — Tailwind's default spacing scale is the only sanctioned spacing beyond these                                                                                    |
+| Radius      | `radius`                  | `xs` (2px) through `3xl` (24px), plus `pill`                                                                                                                                                          |
+| Elevation   | `elevation`               | Standard shadows (`sm`/`md`/`lg`) plus named glow effects (for example `ctaBlue`, `ctaWhite`; some names are leftovers from the previous product)                                                     |
+| Opacity     | `opacity`                 | `disabled`, `muted`, `ghost`                                                                                                                                                                          |
+| Z-index     | `zIndex`                  | `base` through `tooltip` (0–70)                                                                                                                                                                       |
+| Motion      | `motion`                  | Durations (`fast`/`base`/`slow`), easings, and named interaction patterns (`press`, `hover`, `hoverLift`, `fadeIn`, `scaleIn`)                                                                        |
+| Breakpoints | `breakpoints`             | Standard Tailwind breakpoints (`sm` 640 – `2xl` 1536)                                                                                                                                                 |
+| Icon sizing | `iconSizes`, `iconStroke` | `xs` (14) – `xl` (28), stroke width 1.5                                                                                                                                                               |
 
 Every color token resolves via a CSS custom property (`hsl(var(--primary))`,
 etc.) defined in `apps/web/src/styles.css` — that file is where the actual

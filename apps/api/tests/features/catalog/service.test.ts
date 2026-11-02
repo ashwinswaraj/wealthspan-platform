@@ -8,6 +8,7 @@ import {
 } from "../../../src/features/catalog";
 
 function memStore(): CatalogStore {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rows: Record<string, any[]> = {};
   let n = 0;
   const t = (e: string) => (rows[e] ??= []);

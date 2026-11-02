@@ -4,7 +4,9 @@ All notable changes to this project are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/), versioning per [SemVer](https://semver.org/).
 
 ## [Unreleased]
+
 ### Changed
+
 - Restructured the monorepo into `apps/{web,admin,api}` + `packages/*` +
   `infrastructure/`, each app's `src/` following a `features/<domain>/`
   pattern with barrel exports (see `ARCHITECTURE_RATIONALE.md` and root
@@ -21,6 +23,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), versioning per 
   and `apps/admin` to fix a fatal `matchedRoutes is not iterable` SSR crash
 
 ### Fixed
+
 - Root `package.json` no longer duplicates `apps/web`'s entire runtime
   dependency list; `dev`/`build` now delegate to Turborepo instead of
   calling `vite` directly (previously only started `apps/web`, silently
@@ -34,5 +37,6 @@ Format based on [Keep a Changelog](https://keepachangelog.com/), versioning per 
   merging back 3 bug-fixed files it had that the current copy didn't
 
 ### Added
+
 - Monorepo folder structure (`apps/`, `packages/`, `infrastructure/`)
 - Full documentation set under `docs/` (platform + admin)

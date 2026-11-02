@@ -4,7 +4,7 @@
 
 ## Decision
 
-Phase 1 has no push, SMS or marketing email. Reminders (EMI due, budget cap) are planned as in-app only. Push needs a mobile app or service worker plan; SMS needs a sender registration (DLT in India) and cost approval. SMS *reading* is a Phase 2 feature with its own consent design.
+Phase 1 has no push, SMS or marketing email. Reminders (EMI due, budget cap) are planned as in-app only. Push needs a mobile app or service worker plan; SMS needs a sender registration (DLT in India) and cost approval. SMS _reading_ is a Phase 2 feature with its own consent design.
 
 ## Consequences
 

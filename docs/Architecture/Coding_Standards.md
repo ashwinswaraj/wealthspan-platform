@@ -11,11 +11,11 @@ in the code, the code is wrong, not this file.
 
 Decide by file size, not by mood:
 
-| File size        | What to do                | Rule |
-|------------------|----------------------------|------|
-| 20–50 lines      | **Tidy up only.** Rename a variable/function only if the current name is genuinely confusing. Do not add comments just to add them. | Minimal touch |
-| 100–200 lines    | **Extract functions.** Break logic into small, reusable functions. Any function over **30 lines** must be split. | Medium touch |
-| 300+ lines        | **Modularize.** Split the file into a folder structure (see §5). Do this **first** for any file that changes almost every week — churn rate matters more than raw size. | Structural |
+| File size     | What to do                                                                                                                                                              | Rule          |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| 20–50 lines   | **Tidy up only.** Rename a variable/function only if the current name is genuinely confusing. Do not add comments just to add them.                                     | Minimal touch |
+| 100–200 lines | **Extract functions.** Break logic into small, reusable functions. Any function over **30 lines** must be split.                                                        | Medium touch  |
+| 300+ lines    | **Modularize.** Split the file into a folder structure (see §5). Do this **first** for any file that changes almost every week — churn rate matters more than raw size. | Structural    |
 
 ### YAGNI gate (applies before all of the above)
 
@@ -35,12 +35,13 @@ in code nobody was asking to change.
 
 2. **Single Responsibility Principle (SRP).**
    One function, one job. A function that validates a user, saves it to
-   the DB, *and* sends an email is three functions wearing a trenchcoat.
+   the DB, _and_ sends an email is three functions wearing a trenchcoat.
    Split it into `validateUser()`, `saveUser()`, `sendWelcomeEmail()`, and
    call them in sequence from whatever orchestrates the flow.
 
 3. **Top-to-bottom flow.**
    Every file reads in this order, no exceptions:
+
    ```
    Imports
    Constants / Config
@@ -57,7 +58,7 @@ in code nobody was asking to change.
 5. **Comments explain "why", never "what".**
    Bad: `// incrementing i by 1` above `i++;`
    Good: `// Retrying 3 times because the third-party API is unstable`
-   The code already says *what* it does. A comment that repeats that is
+   The code already says _what_ it does. A comment that repeats that is
    noise. Delete comments that don't survive this test.
 
 ---
@@ -83,6 +84,7 @@ Follow this order for every refactor, no matter how small:
 ### Definition of "done"
 
 A refactor is done only when **all** of these are true:
+
 - A new/junior developer can read the code without it being explained to
   them out loud.
 - All existing tests still pass.

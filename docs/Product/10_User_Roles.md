@@ -4,10 +4,10 @@
 
 ## Roles today
 
-| Role | App | How it is decided |
-| --- | --- | --- |
-| **User** (subscriber) | `apps/web` | Any signed-in Catalyst user (Google / Zoho / email). Sees only their own rows. |
-| **Admin** | `apps/admin` | E-mail is in `ADMIN_EMAILS`; if `ADMIN_USER_IDS` is also set, the Catalyst user id must be listed too (`apps/api/src/features/admin/service.ts`). |
+| Role                  | App          | How it is decided                                                                                                                                 |
+| --------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **User** (subscriber) | `apps/web`   | Any signed-in Catalyst user (Google / Zoho / email). Sees only their own rows.                                                                    |
+| **Admin**             | `apps/admin` | E-mail is in `ADMIN_EMAILS`; if `ADMIN_USER_IDS` is also set, the Catalyst user id must be listed too (`apps/api/src/features/admin/service.ts`). |
 
 There is a single user role: no separate account types. A user's subscription state is **Free** (no live plan), **Go** (trial) or **Pro** (paid).
 

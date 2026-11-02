@@ -7,21 +7,29 @@ var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
+  if ((from && typeof from === "object") || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
       if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+        __defProp(to, key, {
+          get: () => from[key],
+          enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable,
+        });
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
+var __toESM = (mod, isNodeMode, target) => (
+  (target = mod != null ? __create(__getProtoOf(mod)) : {}),
+  __copyProps(
+    // If the importer is in node compatibility mode or this is not an ESM
+    // file that has been converted to a CommonJS file using a Babel-
+    // compatible transform (i.e. "__esModule" has not been set), then set
+    // "default" to the CommonJS "module.exports" for node compatibility.
+    isNodeMode || !mod || !mod.__esModule
+      ? __defProp(target, "default", { value: mod, enumerable: true })
+      : target,
+    mod,
+  )
+);
 
 // catalyst/functions/files/src/entry.ts
 var import_express = __toESM(require("express"));
@@ -35,7 +43,7 @@ var PAYMENT_MODES = [
   { id: "credit_card", label: "Credit card" },
   { id: "bank_transfer", label: "Bank transfer (NEFT / IMPS / RTGS)" },
   { id: "cheque", label: "Cheque" },
-  { id: "wallet", label: "Wallet" }
+  { id: "wallet", label: "Wallet" },
 ];
 var PAYMENT_MODE_IDS = PAYMENT_MODES.map((m) => m.id);
 var ACCOUNT_KINDS = ["cash", "bank", "credit_card", "wallet"];
@@ -46,7 +54,7 @@ var PAYMENT_MODE_ACCOUNT_KINDS = {
   credit_card: ["credit_card"],
   bank_transfer: ["bank"],
   cheque: ["bank"],
-  wallet: ["wallet"]
+  wallet: ["wallet"],
 };
 var EXPENSE_CATEGORIES = [
   "Food & Groceries",
@@ -60,7 +68,7 @@ var EXPENSE_CATEGORIES = [
   "Stock & Inventory",
   "Salaries & Wages",
   "Loan EMI",
-  "Other"
+  "Other",
 ];
 var INCOME_CATEGORIES = [
   "Salary",
@@ -68,7 +76,7 @@ var INCOME_CATEGORIES = [
   "Freelance & Services",
   "Rent Received",
   "Interest & Dividends",
-  "Other"
+  "Other",
 ];
 var LOAN_STATUSES = ["active", "closed"];
 var INVESTMENT_KINDS = [
@@ -80,12 +88,12 @@ var INVESTMENT_KINDS = [
   "gold",
   "ppf_epf_nps",
   "real_estate",
-  "other"
+  "other",
 ];
 
 // ../../packages/validation/src/finance.ts
 var MAX_AMOUNT_RUPEES = 1e9;
-var isBlank = (v) => v === void 0 || v === null || typeof v === "string" && !v.trim();
+var isBlank = (v) => v === void 0 || v === null || (typeof v === "string" && !v.trim());
 var parseRupees = (value) => {
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
   if (typeof value !== "string") return null;
@@ -108,7 +116,8 @@ var isValidIsoDate = (value) => {
   const dt = new Date(Date.UTC(y, m - 1, d));
   return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
 };
-var daysBetween = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 864e5);
+var daysBetween = (a, b) =>
+  Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 864e5);
 var validateDate = (value, today, label = "Date") => {
   if (isBlank(value)) return `${label} is required.`;
   if (!isValidIsoDate(value)) return `${label} must be a valid date (YYYY-MM-DD).`;
@@ -121,8 +130,14 @@ var validatePaymentMode = (value, label = "Payment mode") => {
   if (!PAYMENT_MODE_IDS.includes(value)) return `Please choose a valid ${label.toLowerCase()}.`;
   return null;
 };
-var validatePaymentModeForAccount = (mode, accountKind) => PAYMENT_MODE_ACCOUNT_KINDS[mode].includes(accountKind) ? null : `A ${accountKind.replace("_", " ")} account can't be used with this payment mode.`;
-var maxLen = (v, max, label) => typeof v === "string" && v.trim().length > max ? `${label} must be at most ${max} characters.` : null;
+var validatePaymentModeForAccount = (mode, accountKind) =>
+  PAYMENT_MODE_ACCOUNT_KINDS[mode].includes(accountKind)
+    ? null
+    : `A ${accountKind.replace("_", " ")} account can't be used with this payment mode.`;
+var maxLen = (v, max, label) =>
+  typeof v === "string" && v.trim().length > max
+    ? `${label} must be at most ${max} characters.`
+    : null;
 var validateTransactionInput = (input, opts2 = {}) => {
   const e = {};
   const set = (field, msg) => {
@@ -160,7 +175,8 @@ var validateTransactionInput = (input, opts2 = {}) => {
     if (!isBlank(input.projectId)) set("projectId", "A transfer does not belong to a project.");
     if (!isBlank(input.category)) set("category", "A transfer has no category.");
     if (!isBlank(input.eventId)) set("eventId", "A transfer cannot belong to an event.");
-    if (!isBlank(input.loanId)) set("loanId", "Record loan payments as an expense linked to the loan.");
+    if (!isBlank(input.loanId))
+      set("loanId", "Record loan payments as an expense linked to the loan.");
     if (!isBlank(input.source)) set("source", "Income source is only for income.");
   }
   return e;
@@ -193,7 +209,7 @@ var summarize = (transactions, events, filter = {}) => {
     byCategory: {},
     byPaymentMode: {},
     bySource: {},
-    byEvent: {}
+    byEvent: {},
   };
   for (const tx of live(transactions)) {
     if (tx.type === "transfer") continue;
@@ -220,12 +236,19 @@ var summarize = (transactions, events, filter = {}) => {
   out.profitPaise = out.incomePaise - out.expensePaise;
   return out;
 };
-var CARD_BILL_WORDS = /(credit\s*card|card\s*(bill|payment|due|dues|outstanding)|cc\s*(bill|payment)|\bcard\s*pay)/i;
+var CARD_BILL_WORDS =
+  /(credit\s*card|card\s*(bill|payment|due|dues|outstanding)|cc\s*(bill|payment)|\bcard\s*pay)/i;
 var looksLikeCardBillPayment = (...texts) => texts.some((t) => !!t && CARD_BILL_WORDS.test(t));
-var dayDiff = (a, b) => Math.abs(Math.round((Date.parse(`${a}T00:00:00Z`) - Date.parse(`${b}T00:00:00Z`)) / 864e5));
-var findSameAmountCardExpenses = (candidate, existing, windowDays = 45) => live(existing).filter(
-  (t) => t.type === "expense" && t.paymentMode === "credit_card" && t.amountPaise === candidate.amountPaise && dayDiff(t.date, candidate.date) <= windowDays
-);
+var dayDiff = (a, b) =>
+  Math.abs(Math.round((Date.parse(`${a}T00:00:00Z`) - Date.parse(`${b}T00:00:00Z`)) / 864e5));
+var findSameAmountCardExpenses = (candidate, existing, windowDays = 45) =>
+  live(existing).filter(
+    (t) =>
+      t.type === "expense" &&
+      t.paymentMode === "credit_card" &&
+      t.amountPaise === candidate.amountPaise &&
+      dayDiff(t.date, candidate.date) <= windowDays,
+  );
 
 // src/features/finance/service.ts
 var FinanceError = class extends Error {
@@ -253,13 +276,13 @@ var FIELDS = [
   "note",
   "eventId",
   "loanId",
-  "investmentId"
+  "investmentId",
 ];
 var clean = (input) => {
   const out = {};
   for (const k of FIELDS) {
     const v = input[k];
-    out[k] = typeof v === "string" ? v.trim() || null : v ?? null;
+    out[k] = typeof v === "string" ? v.trim() || null : (v ?? null);
   }
   return out;
 };
@@ -278,12 +301,9 @@ var toInput = (t) => ({
   note: t.note,
   eventId: t.eventId,
   loanId: t.loanId,
-  investmentId: t.investmentId
+  investmentId: t.investmentId,
 });
-var createFinanceService = ({
-  store,
-  now = () => /* @__PURE__ */ new Date()
-}) => {
+var createFinanceService = ({ store, now = () => /* @__PURE__ */ new Date() }) => {
   const today = () => new Date(now().getTime() + IST_OFFSET_MS).toISOString().slice(0, 10);
   const nowIso = () => now().toISOString();
   const fail = (fields) => {
@@ -296,7 +316,7 @@ var createFinanceService = ({
       const to = await store.getAccount(userId, i.toAccountId);
       if (!from) e.fromAccountId = "That account was not found.";
       if (!to) e.toAccountId = "That account was not found.";
-      if (i.investmentId && !await store.getInvestment(userId, i.investmentId))
+      if (i.investmentId && !(await store.getInvestment(userId, i.investmentId)))
         e.investmentId = "That investment was not found.";
     } else {
       const project = await store.getProject(userId, i.projectId);
@@ -344,13 +364,13 @@ var createFinanceService = ({
     note: i.note ?? null,
     eventId: i.eventId ?? null,
     loanId: i.loanId ?? null,
-    investmentId: i.investmentId ?? null
+    investmentId: i.investmentId ?? null,
   });
   const warningsFor = async (userId, row) => {
     const w = [];
     if (row.type === "expense" && looksLikeCardBillPayment(row.party, row.note, row.category)) {
       w.push(
-        "This looks like a credit card bill payment. Paying a card bill is a transfer from your bank, not an expense, otherwise the spending is counted twice."
+        "This looks like a credit card bill payment. Paying a card bill is a transfer from your bank, not an expense, otherwise the spending is counted twice.",
       );
       const existing = await store.listTransactions(userId);
       if (findSameAmountCardExpenses(row, existing).length)
@@ -362,11 +382,14 @@ var createFinanceService = ({
     async createTransaction(userId, raw, source = "manual") {
       const input = clean(raw);
       await validate(userId, input);
-      if (store.countTransactions && await store.countTransactions(userId) >= MAX_TRANSACTIONS_PER_USER)
+      if (
+        store.countTransactions &&
+        (await store.countTransactions(userId)) >= MAX_TRANSACTIONS_PER_USER
+      )
         throw new FinanceError(
           "invalid",
           `You have reached the limit of ${MAX_TRANSACTIONS_PER_USER} entries. Export and delete old ones to add more.`,
-          429
+          429,
         );
       const row = toRow(userId, input, source);
       const warnings = await warningsFor(userId, row);
@@ -380,7 +403,7 @@ var createFinanceService = ({
         before: null,
         after: transaction,
         createdAt: nowIso(),
-        undoneAt: null
+        undoneAt: null,
       });
       return { transaction, warnings };
     },
@@ -402,7 +425,7 @@ var createFinanceService = ({
         before,
         after: transaction,
         createdAt: nowIso(),
-        undoneAt: null
+        undoneAt: null,
       });
       return { transaction, warnings };
     },
@@ -420,24 +443,30 @@ var createFinanceService = ({
         before,
         after: null,
         createdAt: nowIso(),
-        undoneAt: null
+        undoneAt: null,
       });
     },
     async listTransactions(userId, f = {}) {
       const limit = Math.min(Math.max(f.limit ?? 50, 1), 200);
       const offset = Math.max(f.offset ?? 0, 0);
-      const all = (await store.listTransactions(userId)).filter((t) => (!f.from || t.date >= f.from) && (!f.to || t.date <= f.to)).filter((t) => !f.projectId || t.projectId === f.projectId).filter((t) => !f.type || t.type === f.type).filter(
-        (t) => !f.accountId || [t.accountId, t.fromAccountId, t.toAccountId].includes(f.accountId)
-      ).sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+      const all = (await store.listTransactions(userId))
+        .filter((t) => (!f.from || t.date >= f.from) && (!f.to || t.date <= f.to))
+        .filter((t) => !f.projectId || t.projectId === f.projectId)
+        .filter((t) => !f.type || t.type === f.type)
+        .filter(
+          (t) =>
+            !f.accountId || [t.accountId, t.fromAccountId, t.toAccountId].includes(f.accountId),
+        )
+        .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
       return { total: all.length, items: all.slice(offset, offset + limit) };
     },
     async getSummary(userId, filter = {}) {
       const [txs, events] = await Promise.all([
         store.listTransactions(userId),
-        store.listEvents(userId)
+        store.listEvents(userId),
       ]);
       return summarize(txs, events, filter);
-    }
+    },
   };
 };
 var removeUndefined = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== void 0));
@@ -449,9 +478,9 @@ var id = (v) => {
   if (!/^\d{1,20}$/.test(String(v))) throw new Error("bad id");
   return String(v);
 };
-var nul = (v) => v === void 0 || v === null || v === "" || v === "null" ? null : v;
-var str = (v) => nul(v) === null ? null : String(v);
-var num = (v) => nul(v) === null ? null : Number(v);
+var nul = (v) => (v === void 0 || v === null || v === "" || v === "null" ? null : v);
+var str = (v) => (nul(v) === null ? null : String(v));
+var num = (v) => (nul(v) === null ? null : Number(v));
 var ts = (v) => String(nul(v) ?? "").replace(" ", "T");
 var base = (r) => ({
   id: String(r.ROWID),
@@ -459,7 +488,7 @@ var base = (r) => ({
   createdAt: ts(r.CREATEDTIME),
   updatedAt: ts(r.MODIFIEDTIME),
   deletedAt: str(r.deleted_at),
-  createdBy: str(r.created_by) ?? "manual"
+  createdBy: str(r.created_by) ?? "manual",
 });
 var rowToTransaction = (r) => ({
   ...base(r),
@@ -477,7 +506,7 @@ var rowToTransaction = (r) => ({
   note: str(r.note),
   eventId: str(r.event_id),
   loanId: str(r.loan_id),
-  investmentId: str(r.investment_id)
+  investmentId: str(r.investment_id),
 });
 var transactionToColumns = (t) => {
   const m = [
@@ -497,20 +526,21 @@ var transactionToColumns = (t) => {
     ["loanId", "loan_id"],
     ["investmentId", "investment_id"],
     ["userId", "user_id"],
-    ["createdBy", "created_by"]
+    ["createdBy", "created_by"],
   ];
   const out = {};
   for (const [k, col] of m) if (k in t) out[col] = t[k] ?? null;
   return out;
 };
 var createCatalystFinanceStore = (app2) => {
-  const query = async (q2, table) => (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
+  const query = async (q2, table) =>
+    (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
   const queryAll = async (select, table, where, order = "") => {
     const out = [];
     for (let offset = 0; ; offset += PAGE) {
       const rows = await query(
         `${select} FROM ${table} WHERE ${where} ${order} LIMIT ${offset},${PAGE}`,
-        table
+        table,
       );
       out.push(...rows);
       if (rows.length < PAGE) return out;
@@ -519,63 +549,68 @@ var createCatalystFinanceStore = (app2) => {
   const getOne = async (table, userId, rowId, map) => {
     const rows = await query(
       `SELECT * FROM ${table} WHERE ROWID = ${id(rowId)} AND user_id = '${esc(userId)}' AND deleted_at IS NULL LIMIT 0,1`,
-      table
+      table,
     );
     return rows[0] ? map(rows[0]) : null;
   };
   const archived = (r) => str(r.archived_at);
   return {
-    getProject: (u, i) => getOne("projects", u, i, (r) => ({
-      ...base(r),
-      name: String(r.name),
-      kind: r.kind,
-      archivedAt: archived(r)
-    })),
-    getAccount: (u, i) => getOne("accounts", u, i, (r) => ({
-      ...base(r),
-      name: String(r.name),
-      kind: r.kind,
-      openingBalancePaise: Number(r.opening_balance_paise ?? 0),
-      creditLimitPaise: num(r.credit_limit_paise),
-      defaultProjectId: str(r.default_project_id),
-      archivedAt: archived(r)
-    })),
-    getEvent: (u, i) => getOne("events", u, i, (r) => ({
-      ...base(r),
-      projectId: String(r.project_id),
-      name: String(r.name),
-      budgetPaise: num(r.budget_paise),
-      startDate: str(r.start_date),
-      endDate: str(r.end_date),
-      status: r.status,
-      concludedAt: str(r.concluded_at)
-    })),
-    getLoan: (u, i) => getOne("loans", u, i, (r) => ({
-      ...base(r),
-      projectId: String(r.project_id),
-      lender: String(r.lender),
-      principalPaise: Number(r.principal_paise),
-      interestRatePct: num(r.interest_rate_pct),
-      emiPaise: num(r.emi_paise),
-      emiDayOfMonth: num(r.emi_day_of_month),
-      startDate: str(r.start_date),
-      tenureMonths: num(r.tenure_months),
-      status: r.status
-    })),
-    getInvestment: (u, i) => getOne("investments", u, i, (r) => ({
-      ...base(r),
-      projectId: String(r.project_id),
-      name: String(r.name),
-      kind: r.kind,
-      currentValuePaise: num(r.current_value_paise),
-      folioNo: str(r.folio_no)
-    })),
+    getProject: (u, i) =>
+      getOne("projects", u, i, (r) => ({
+        ...base(r),
+        name: String(r.name),
+        kind: r.kind,
+        archivedAt: archived(r),
+      })),
+    getAccount: (u, i) =>
+      getOne("accounts", u, i, (r) => ({
+        ...base(r),
+        name: String(r.name),
+        kind: r.kind,
+        openingBalancePaise: Number(r.opening_balance_paise ?? 0),
+        creditLimitPaise: num(r.credit_limit_paise),
+        defaultProjectId: str(r.default_project_id),
+        archivedAt: archived(r),
+      })),
+    getEvent: (u, i) =>
+      getOne("events", u, i, (r) => ({
+        ...base(r),
+        projectId: String(r.project_id),
+        name: String(r.name),
+        budgetPaise: num(r.budget_paise),
+        startDate: str(r.start_date),
+        endDate: str(r.end_date),
+        status: r.status,
+        concludedAt: str(r.concluded_at),
+      })),
+    getLoan: (u, i) =>
+      getOne("loans", u, i, (r) => ({
+        ...base(r),
+        projectId: String(r.project_id),
+        lender: String(r.lender),
+        principalPaise: Number(r.principal_paise),
+        interestRatePct: num(r.interest_rate_pct),
+        emiPaise: num(r.emi_paise),
+        emiDayOfMonth: num(r.emi_day_of_month),
+        startDate: str(r.start_date),
+        tenureMonths: num(r.tenure_months),
+        status: r.status,
+      })),
+    getInvestment: (u, i) =>
+      getOne("investments", u, i, (r) => ({
+        ...base(r),
+        projectId: String(r.project_id),
+        name: String(r.name),
+        kind: r.kind,
+        currentValuePaise: num(r.current_value_paise),
+        folioNo: str(r.folio_no),
+      })),
     async listTransactions(userId) {
       const rows = await queryAll(
         "SELECT *",
         "transactions",
         `user_id = '${esc(userId)}' AND deleted_at IS NULL`,
-        "ORDER BY ROWID"
+        "ORDER BY ROWID",
       );
       return rows.map(rowToTransaction);
     },
@@ -584,7 +619,7 @@ var createCatalystFinanceStore = (app2) => {
         "SELECT *",
         "events",
         `user_id = '${esc(userId)}' AND deleted_at IS NULL`,
-        "ORDER BY ROWID"
+        "ORDER BY ROWID",
       );
       return rows.map((r) => ({
         ...base(r),
@@ -594,53 +629,71 @@ var createCatalystFinanceStore = (app2) => {
         startDate: str(r.start_date),
         endDate: str(r.end_date),
         status: r.status,
-        concludedAt: str(r.concluded_at)
+        concludedAt: str(r.concluded_at),
       }));
     },
     getTransaction: (u, i) => getOne("transactions", u, i, rowToTransaction),
     async countTransactions(userId) {
-      const rows = await app2.zcql().executeZCQLQuery(
-        `SELECT COUNT(ROWID) FROM transactions WHERE user_id = '${esc(userId)}' AND deleted_at IS NULL`
-      );
+      const rows = await app2
+        .zcql()
+        .executeZCQLQuery(
+          `SELECT COUNT(ROWID) FROM transactions WHERE user_id = '${esc(userId)}' AND deleted_at IS NULL`,
+        );
       const first = rows[0]?.transactions ?? Object.values(rows[0] ?? {})[0] ?? {};
       const n = Number(Object.values(first)[0]);
-      return Number.isFinite(n) ? n : (await queryAll(
-        "SELECT ROWID",
-        "transactions",
-        `user_id = '${esc(userId)}' AND deleted_at IS NULL`
-      )).length;
+      return Number.isFinite(n)
+        ? n
+        : (
+            await queryAll(
+              "SELECT ROWID",
+              "transactions",
+              `user_id = '${esc(userId)}' AND deleted_at IS NULL`,
+            )
+          ).length;
     },
     async insertTransaction(row) {
-      const saved = await app2.datastore().table("transactions").insertRow(transactionToColumns(row));
+      const saved = await app2
+        .datastore()
+        .table("transactions")
+        .insertRow(transactionToColumns(row));
       return rowToTransaction(saved);
     },
     async updateTransaction(userId, rowId, patch) {
       const current = await getOne("transactions", userId, rowId, rowToTransaction);
       if (!current) throw new Error("not found");
       const { userId: _u, createdBy: _c, ...allowed } = patch;
-      await app2.datastore().table("transactions").updateRow({ ROWID: id(rowId), ...transactionToColumns(allowed) });
+      await app2
+        .datastore()
+        .table("transactions")
+        .updateRow({ ROWID: id(rowId), ...transactionToColumns(allowed) });
       return { ...current, ...patch };
     },
     async softDeleteTransaction(userId, rowId, deletedAtIso) {
       const current = await getOne("transactions", userId, rowId, rowToTransaction);
       if (!current) throw new Error("not found");
-      await app2.datastore().table("transactions").updateRow({
-        ROWID: id(rowId),
-        deleted_at: deletedAtIso.slice(0, 19).replace("T", " ")
-      });
+      await app2
+        .datastore()
+        .table("transactions")
+        .updateRow({
+          ROWID: id(rowId),
+          deleted_at: deletedAtIso.slice(0, 19).replace("T", " "),
+        });
     },
     async insertAudit(e) {
-      await app2.datastore().table("audit_log").insertRow({
-        user_id: e.userId,
-        actor: e.actor,
-        action: e.action,
-        entity: e.entity,
-        entity_id: e.entityId,
-        // the column holds 10,000 characters; cut long payloads rather than failing the user's request
-        before_json: JSON.stringify(e.before ?? null).slice(0, 9500),
-        after_json: JSON.stringify(e.after ?? null).slice(0, 9500)
-      });
-    }
+      await app2
+        .datastore()
+        .table("audit_log")
+        .insertRow({
+          user_id: e.userId,
+          actor: e.actor,
+          action: e.action,
+          entity: e.entity,
+          entity_id: e.entityId,
+          // the column holds 10,000 characters; cut long payloads rather than failing the user's request
+          before_json: JSON.stringify(e.before ?? null).slice(0, 9500),
+          after_json: JSON.stringify(e.after ?? null).slice(0, 9500),
+        });
+    },
   };
 };
 
@@ -651,8 +704,8 @@ var SPEC = {
     fields: [
       ["name", "name", "reqstr"],
       ["kind", "kind", "reqstr"],
-      ["archivedAt", "archived_at", "str"]
-    ]
+      ["archivedAt", "archived_at", "str"],
+    ],
   },
   accounts: {
     table: "accounts",
@@ -662,8 +715,8 @@ var SPEC = {
       ["openingBalancePaise", "opening_balance_paise", "int"],
       ["creditLimitPaise", "credit_limit_paise", "int"],
       ["defaultProjectId", "default_project_id", "str"],
-      ["archivedAt", "archived_at", "str"]
-    ]
+      ["archivedAt", "archived_at", "str"],
+    ],
   },
   events: {
     table: "events",
@@ -674,8 +727,8 @@ var SPEC = {
       ["startDate", "start_date", "str"],
       ["endDate", "end_date", "str"],
       ["status", "status", "reqstr"],
-      ["concludedAt", "concluded_at", "str"]
-    ]
+      ["concludedAt", "concluded_at", "str"],
+    ],
   },
   loans: {
     table: "loans",
@@ -688,8 +741,8 @@ var SPEC = {
       ["emiDayOfMonth", "emi_day_of_month", "int"],
       ["startDate", "start_date", "str"],
       ["tenureMonths", "tenure_months", "int"],
-      ["status", "status", "reqstr"]
-    ]
+      ["status", "status", "reqstr"],
+    ],
   },
   investments: {
     table: "investments",
@@ -698,9 +751,9 @@ var SPEC = {
       ["name", "name", "reqstr"],
       ["kind", "kind", "reqstr"],
       ["currentValuePaise", "current_value_paise", "int"],
-      ["folioNo", "folio_no", "str"]
-    ]
-  }
+      ["folioNo", "folio_no", "str"],
+    ],
+  },
 };
 var PAGE2 = 250;
 var esc2 = (s) => String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
@@ -708,10 +761,11 @@ var id2 = (v) => {
   if (!/^\d{1,20}$/.test(String(v))) throw new Error("bad id");
   return String(v);
 };
-var nul2 = (v) => v === void 0 || v === null || v === "" || v === "null" ? null : v;
+var nul2 = (v) => (v === void 0 || v === null || v === "" || v === "null" ? null : v);
 var ts2 = (v) => String(nul2(v) ?? "").replace(" ", "T");
 var createCatalystCatalogStore = (app2) => {
-  const run = async (q2, table) => (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
+  const run = async (q2, table) =>
+    (await app2.zcql().executeZCQLQuery(q2)).map((r) => r[table] ?? Object.values(r)[0]);
   const toRecord = (entity, r) => {
     const out = {
       id: String(r.ROWID),
@@ -719,11 +773,12 @@ var createCatalystCatalogStore = (app2) => {
       createdAt: ts2(r.CREATEDTIME),
       updatedAt: ts2(r.MODIFIEDTIME),
       deletedAt: nul2(r.deleted_at) === null ? null : String(r.deleted_at),
-      createdBy: String(nul2(r.created_by) ?? "manual")
+      createdBy: String(nul2(r.created_by) ?? "manual"),
     };
     for (const [f, col, kind] of SPEC[entity].fields) {
       const v = nul2(r[col]);
-      out[f] = v === null ? kind === "reqstr" ? "" : null : kind === "int" ? Number(v) : String(v);
+      out[f] =
+        v === null ? (kind === "reqstr" ? "" : null) : kind === "int" ? Number(v) : String(v);
     }
     if (entity === "accounts" && out.openingBalancePaise === null) out.openingBalancePaise = 0;
     if (entity === "loans" && out.principalPaise === null) out.principalPaise = 0;
@@ -738,7 +793,7 @@ var createCatalystCatalogStore = (app2) => {
     const t = SPEC[entity].table;
     const rows = await run(
       `SELECT * FROM ${t} WHERE ROWID = ${id2(rowId)} AND user_id = '${esc2(userId)}' AND deleted_at IS NULL LIMIT 0,1`,
-      t
+      t,
     );
     return rows[0] ? toRecord(entity, rows[0]) : null;
   };
@@ -749,7 +804,7 @@ var createCatalystCatalogStore = (app2) => {
       for (let offset = 0; ; offset += PAGE2) {
         const rows = await run(
           `SELECT * FROM ${t} WHERE user_id = '${esc2(userId)}' AND deleted_at IS NULL ORDER BY ROWID LIMIT ${offset},${PAGE2}`,
-          t
+          t,
         );
         out.push(...rows);
         if (rows.length < PAGE2) break;
@@ -758,23 +813,32 @@ var createCatalystCatalogStore = (app2) => {
     },
     get: (entity, userId, rowId) => getOne(entity, userId, rowId),
     async insert(entity, row) {
-      const saved = await app2.datastore().table(SPEC[entity].table).insertRow({
-        user_id: row.userId,
-        created_by: row.createdBy,
-        ...toColumns(entity, row)
-      });
+      const saved = await app2
+        .datastore()
+        .table(SPEC[entity].table)
+        .insertRow({
+          user_id: row.userId,
+          created_by: row.createdBy,
+          ...toColumns(entity, row),
+        });
       return toRecord(entity, saved);
     },
     async update(entity, userId, rowId, patch) {
       const current = await getOne(entity, userId, rowId);
       if (!current) throw new Error("not found");
-      await app2.datastore().table(SPEC[entity].table).updateRow({ ROWID: id2(rowId), ...toColumns(entity, patch) });
+      await app2
+        .datastore()
+        .table(SPEC[entity].table)
+        .updateRow({ ROWID: id2(rowId), ...toColumns(entity, patch) });
       return { ...current, ...patch };
     },
     async softDelete(entity, userId, rowId, deletedAtIso) {
-      if (!await getOne(entity, userId, rowId)) throw new Error("not found");
-      await app2.datastore().table(SPEC[entity].table).updateRow({ ROWID: id2(rowId), deleted_at: deletedAtIso.slice(0, 19).replace("T", " ") });
-    }
+      if (!(await getOne(entity, userId, rowId))) throw new Error("not found");
+      await app2
+        .datastore()
+        .table(SPEC[entity].table)
+        .updateRow({ ROWID: id2(rowId), deleted_at: deletedAtIso.slice(0, 19).replace("T", " ") });
+    },
   };
 };
 
@@ -786,7 +850,7 @@ var SHEET_KEYS = [
   "savings-investing",
   "festivals-functions",
   "accounts",
-  "project"
+  "project",
 ];
 var opts = (list) => list.map((v) => ({ value: v, label: v }));
 var pretty = (v) => v.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
@@ -800,7 +864,7 @@ var common = {
     type: "money",
     width: 120,
     required: true,
-    sum: true
+    sum: true,
   },
   project: {
     key: "projectId",
@@ -808,7 +872,7 @@ var common = {
     type: "ref",
     ref: "projects",
     width: 140,
-    required: true
+    required: true,
   },
   account: {
     key: "accountId",
@@ -816,7 +880,7 @@ var common = {
     type: "ref",
     ref: "accounts",
     width: 140,
-    required: true
+    required: true,
   },
   mode: {
     key: "paymentMode",
@@ -824,9 +888,9 @@ var common = {
     type: "select",
     options: modeOpts,
     width: 130,
-    required: true
+    required: true,
   },
-  note: { key: "note", label: "Note", type: "text", width: 200 }
+  note: { key: "note", label: "Note", type: "text", width: 200 },
 };
 var SHEETS = {
   income: {
@@ -847,15 +911,15 @@ var SHEETS = {
         type: "select",
         options: opts(INCOME_CATEGORIES),
         width: 170,
-        required: true
+        required: true,
       },
       { key: "source", label: "Income source", type: "text", width: 150 },
       { key: "party", label: "From", type: "text", width: 140 },
       common.project,
       common.account,
       common.mode,
-      common.note
-    ]
+      common.note,
+    ],
   },
   expense: {
     key: "expense",
@@ -875,7 +939,7 @@ var SHEETS = {
         type: "select",
         options: opts(EXPENSE_CATEGORIES),
         width: 170,
-        required: true
+        required: true,
       },
       { key: "party", label: "Paid to", type: "text", width: 140 },
       common.project,
@@ -883,8 +947,8 @@ var SHEETS = {
       common.mode,
       { key: "eventId", label: "Festival / function", type: "ref", ref: "events", width: 160 },
       { key: "loanId", label: "Loan (EMI)", type: "ref", ref: "loans", width: 140 },
-      common.note
-    ]
+      common.note,
+    ],
   },
   "debt-loan": {
     key: "debt-loan",
@@ -902,7 +966,7 @@ var SHEETS = {
         type: "money",
         width: 130,
         required: true,
-        sum: true
+        sum: true,
       },
       { key: "interestRatePct", label: "Interest %", type: "number", width: 100 },
       { key: "emi", label: "EMI (\u20B9)", type: "money", width: 110, sum: true },
@@ -915,9 +979,9 @@ var SHEETS = {
         label: "Status",
         type: "select",
         options: enumOpts(LOAN_STATUSES),
-        width: 110
-      }
-    ]
+        width: 110,
+      },
+    ],
   },
   "savings-investing": {
     key: "savings-investing",
@@ -935,12 +999,18 @@ var SHEETS = {
         type: "select",
         options: enumOpts(INVESTMENT_KINDS),
         width: 170,
-        required: true
+        required: true,
       },
-      { key: "currentValue", label: "Current value (\u20B9)", type: "money", width: 140, sum: true },
+      {
+        key: "currentValue",
+        label: "Current value (\u20B9)",
+        type: "money",
+        width: 140,
+        sum: true,
+      },
       { key: "folioNo", label: "Folio / account no.", type: "text", width: 160 },
-      common.project
-    ]
+      common.project,
+    ],
   },
   "festivals-functions": {
     key: "festivals-functions",
@@ -962,11 +1032,11 @@ var SHEETS = {
         type: "select",
         options: [
           { value: "open", label: "Open" },
-          { value: "concluded", label: "Concluded" }
+          { value: "concluded", label: "Concluded" },
         ],
-        width: 120
-      }
-    ]
+        width: 120,
+      },
+    ],
   },
   accounts: {
     key: "accounts",
@@ -984,11 +1054,17 @@ var SHEETS = {
         type: "select",
         options: enumOpts(ACCOUNT_KINDS),
         width: 130,
-        required: true
+        required: true,
       },
-      { key: "openingBalance", label: "Opening balance (\u20B9)", type: "money", width: 150, sum: true },
-      { key: "creditLimit", label: "Credit limit (\u20B9)", type: "money", width: 140 }
-    ]
+      {
+        key: "openingBalance",
+        label: "Opening balance (\u20B9)",
+        type: "money",
+        width: 150,
+        sum: true,
+      },
+      { key: "creditLimit", label: "Credit limit (\u20B9)", type: "money", width: 140 },
+    ],
   },
   // A project's own dashboard: every income and expense of that project in one sheet.
   project: {
@@ -1007,10 +1083,10 @@ var SHEETS = {
         type: "select",
         options: [
           { value: "income", label: "Income" },
-          { value: "expense", label: "Expense" }
+          { value: "expense", label: "Expense" },
         ],
         width: 110,
-        required: true
+        required: true,
       },
       common.amount,
       {
@@ -1019,19 +1095,17 @@ var SHEETS = {
         type: "select",
         options: opts([
           ...INCOME_CATEGORIES,
-          ...EXPENSE_CATEGORIES.filter(
-            (c) => !INCOME_CATEGORIES.includes(c)
-          )
+          ...EXPENSE_CATEGORIES.filter((c) => !INCOME_CATEGORIES.includes(c)),
         ]),
         width: 170,
-        required: true
+        required: true,
       },
       { key: "party", label: "Party", type: "text", width: 140 },
       common.account,
       common.mode,
-      common.note
-    ]
-  }
+      common.note,
+    ],
+  },
 };
 
 // ../../packages/utils/src/sheet.ts
@@ -1062,7 +1136,7 @@ var FILE_MIME = {
   csv: "text/csv; charset=utf-8",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  pdf: "application/pdf"
+  pdf: "application/pdf",
 };
 var REPORT_COLUMNS = [
   { key: "date", header: "Date" },
@@ -1073,54 +1147,67 @@ var REPORT_COLUMNS = [
   { key: "paymentMode", header: "Payment mode" },
   { key: "category", header: "Category" },
   { key: "party", header: "Party" },
-  { key: "note", header: "Note" }
+  { key: "note", header: "Note" },
 ];
 var rupees = (paise) => Math.round(paise) / 100;
-var pretty2 = (s) => s ? s.replace(/_/g, " ") : "";
+var pretty2 = (s) => (s ? s.replace(/_/g, " ") : "");
 function buildReport(input) {
   const n = input.names ?? {};
-  const name = (map, id3) => id3 ? map?.[id3] ?? id3 : "";
+  const name = (map, id3) => (id3 ? (map?.[id3] ?? id3) : "");
   const s = input.summary;
-  const rows = [...input.transactions].sort((a, b) => a.date.localeCompare(b.date) || a.createdAt.localeCompare(b.createdAt)).map((t) => ({
-    date: t.date,
-    type: t.type,
-    amount: rupees(t.amountPaise),
-    project: name(n.projects, t.projectId),
-    account: t.type === "transfer" ? `${name(n.accounts, t.fromAccountId)} \u2192 ${name(n.accounts, t.toAccountId)}` : name(n.accounts, t.accountId),
-    paymentMode: pretty2(t.paymentMode),
-    category: pretty2(t.category),
-    party: t.party ?? "",
-    note: t.note ?? ""
-  }));
-  const lines = (rec, map) => Object.entries(rec).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ label: pretty2(map?.[k] ?? k), amount: rupees(v) }));
+  const rows = [...input.transactions]
+    .sort((a, b) => a.date.localeCompare(b.date) || a.createdAt.localeCompare(b.createdAt))
+    .map((t) => ({
+      date: t.date,
+      type: t.type,
+      amount: rupees(t.amountPaise),
+      project: name(n.projects, t.projectId),
+      account:
+        t.type === "transfer"
+          ? `${name(n.accounts, t.fromAccountId)} \u2192 ${name(n.accounts, t.toAccountId)}`
+          : name(n.accounts, t.accountId),
+      paymentMode: pretty2(t.paymentMode),
+      category: pretty2(t.category),
+      party: t.party ?? "",
+      note: t.note ?? "",
+    }));
+  const lines = (rec, map) =>
+    Object.entries(rec)
+      .sort((a, b) => b[1] - a[1])
+      .map(([k, v]) => ({ label: pretty2(map?.[k] ?? k), amount: rupees(v) }));
   const breakdowns = [
     { title: "Expense by category", lines: lines(s.byCategory) },
     { title: "By payment mode", lines: lines(s.byPaymentMode) },
     { title: "Income by source", lines: lines(s.bySource) },
-    { title: "Events", lines: lines(s.byEvent, n.events) }
+    { title: "Events", lines: lines(s.byEvent, n.events) },
   ].filter((b) => b.lines.length > 0);
   return {
     title: "Wealthspan \u2014 Transactions report",
-    period: input.from || input.to ? `${input.from ?? "start"} to ${input.to ?? "today"}` : "All time",
-    generatedOn: input.today ?? (/* @__PURE__ */ new Date()).toISOString().slice(0, 10),
+    period:
+      input.from || input.to ? `${input.from ?? "start"} to ${input.to ?? "today"}` : "All time",
+    generatedOn: input.today ?? /* @__PURE__ */ new Date().toISOString().slice(0, 10),
     totals: [
       { label: "Income", amount: rupees(s.incomePaise) },
       { label: "Expense", amount: rupees(s.expensePaise) },
       { label: "Profit", amount: rupees(s.profitPaise) },
-      { label: "Open-event spending (not in profit)", amount: rupees(s.openEventsPaise) }
+      { label: "Open-event spending (not in profit)", amount: rupees(s.openEventsPaise) },
     ],
     breakdowns,
     rows,
-    columns: REPORT_COLUMNS
+    columns: REPORT_COLUMNS,
   };
 }
-var inr = (n) => n.toLocaleString("en-IN", {
-  minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
-  maximumFractionDigits: 2
-});
-var safeText = (v) => /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
+var inr = (n) =>
+  n.toLocaleString("en-IN", {
+    minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+var safeText = (v) => (/^[=+\-@\t\r]/.test(v) ? `'${v}` : v);
 function fileName(format, r) {
-  const tag = r.period === "All time" ? "all" : r.period.replace(/ to /g, "_to_").replace(/[^0-9a-z_-]/gi, "");
+  const tag =
+    r.period === "All time"
+      ? "all"
+      : r.period.replace(/ to /g, "_to_").replace(/[^0-9a-z_-]/gi, "");
   return `wealthspan-transactions-${tag}.${format}`;
 }
 
@@ -1158,7 +1245,7 @@ async function toXlsx(r) {
   ws.columns = r.columns.map((c) => ({
     header: c.header,
     key: c.key,
-    width: c.key === "note" ? 40 : c.key === "amount" ? 14 : 18
+    width: c.key === "note" ? 40 : c.key === "amount" ? 14 : 18,
   }));
   ws.getRow(1).font = { bold: true };
   for (const row of r.rows) {
@@ -1166,56 +1253,63 @@ async function toXlsx(r) {
       Object.fromEntries(
         r.columns.map((c) => [
           c.key,
-          typeof row[c.key] === "string" ? safeText(row[c.key]) : row[c.key]
-        ])
-      )
+          typeof row[c.key] === "string" ? safeText(row[c.key]) : row[c.key],
+        ]),
+      ),
     );
   }
   ws.getColumn("amount").numFmt = "#,##0.00";
   ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: r.columns.length } };
   return Buffer.from(await wb.xlsx.writeBuffer());
 }
-var cell = (text, bold = false, right = false) => new import_docx.TableCell({
-  children: [
-    new import_docx.Paragraph({
-      alignment: right ? import_docx.AlignmentType.RIGHT : import_docx.AlignmentType.LEFT,
-      children: [new import_docx.TextRun({ text, bold, size: 18 })]
-    })
-  ]
-});
+var cell = (text, bold = false, right = false) =>
+  new import_docx.TableCell({
+    children: [
+      new import_docx.Paragraph({
+        alignment: right ? import_docx.AlignmentType.RIGHT : import_docx.AlignmentType.LEFT,
+        children: [new import_docx.TextRun({ text, bold, size: 18 })],
+      }),
+    ],
+  });
 async function toDocx(r) {
-  const para = (text, o = {}) => new import_docx.Paragraph({
-    spacing: { after: 80 },
-    children: [new import_docx.TextRun({ text, bold: o.bold, size: o.size })]
-  });
-  const kv = (rows) => new import_docx.Table({
-    width: { size: 100, type: import_docx.WidthType.PERCENTAGE },
-    rows: rows.map(
-      (x) => new import_docx.TableRow({ children: [cell(x.label), cell(`\u20B9${inr(x.amount)}`, false, true)] })
-    )
-  });
+  const para = (text, o = {}) =>
+    new import_docx.Paragraph({
+      spacing: { after: 80 },
+      children: [new import_docx.TextRun({ text, bold: o.bold, size: o.size })],
+    });
+  const kv = (rows) =>
+    new import_docx.Table({
+      width: { size: 100, type: import_docx.WidthType.PERCENTAGE },
+      rows: rows.map(
+        (x) =>
+          new import_docx.TableRow({
+            children: [cell(x.label), cell(`\u20B9${inr(x.amount)}`, false, true)],
+          }),
+      ),
+    });
   const txTable = new import_docx.Table({
     width: { size: 100, type: import_docx.WidthType.PERCENTAGE },
     rows: [
       new import_docx.TableRow({
         tableHeader: true,
         children: ["Date", "Type", "Amount (\u20B9)", "Project", "Category", "Party / note"].map(
-          (h) => cell(h, true)
-        )
+          (h) => cell(h, true),
+        ),
       }),
       ...r.rows.map(
-        (x) => new import_docx.TableRow({
-          children: [
-            cell(x.date),
-            cell(x.type),
-            cell(inr(x.amount), false, true),
-            cell(x.project),
-            cell(x.category),
-            cell([x.party, x.note].filter(Boolean).join(" \u2014 "))
-          ]
-        })
-      )
-    ]
+        (x) =>
+          new import_docx.TableRow({
+            children: [
+              cell(x.date),
+              cell(x.type),
+              cell(inr(x.amount), false, true),
+              cell(x.project),
+              cell(x.category),
+              cell([x.party, x.note].filter(Boolean).join(" \u2014 ")),
+            ],
+          }),
+      ),
+    ],
   });
   const doc = new import_docx.Document({
     creator: "Wealthspan",
@@ -1229,10 +1323,10 @@ async function toDocx(r) {
           kv(r.totals),
           ...r.breakdowns.flatMap((b) => [para(b.title, { bold: true, size: 24 }), kv(b.lines)]),
           para("Transactions", { bold: true, size: 26 }),
-          txTable
-        ]
-      }
-    ]
+          txTable,
+        ],
+      },
+    ],
   });
   return Buffer.from(await import_docx.Packer.toBuffer(doc));
 }
@@ -1242,7 +1336,7 @@ function toPdf(r) {
     const doc = new import_pdfkit.default({
       size: "A4",
       margin: 40,
-      info: { Title: r.title, Author: "Wealthspan" }
+      info: { Title: r.title, Author: "Wealthspan" },
     });
     const chunks = [];
     doc.on("data", (c) => chunks.push(c));
@@ -1256,13 +1350,22 @@ function toPdf(r) {
     const pair = (label, value) => {
       ensure(16);
       const y = doc.y;
-      doc.font("Helvetica").fontSize(10).text(label, left, y, { width: width * 0.65 });
+      doc
+        .font("Helvetica")
+        .fontSize(10)
+        .text(label, left, y, { width: width * 0.65 });
       doc.text(value, left + width * 0.65, y, { width: width * 0.35, align: "right" });
       doc.x = left;
       doc.y = Math.max(doc.y, y + 14);
     };
     doc.font("Helvetica-Bold").fontSize(18).text(r.title);
-    doc.font("Helvetica").fontSize(10).fillColor("#555").text(`Period: ${r.period}   |   Generated on ${r.generatedOn}`).fillColor("#000").moveDown();
+    doc
+      .font("Helvetica")
+      .fontSize(10)
+      .fillColor("#555")
+      .text(`Period: ${r.period}   |   Generated on ${r.generatedOn}`)
+      .fillColor("#000")
+      .moveDown();
     doc.font("Helvetica-Bold").fontSize(13).text("Summary").moveDown(0.3);
     r.totals.forEach((t) => pair(t.label, rs(t.amount)));
     for (const b of r.breakdowns) {
@@ -1279,7 +1382,7 @@ function toPdf(r) {
       { h: "Type", w: 0.1, a: "left" },
       { h: "Amount", w: 0.15, a: "right" },
       { h: "Category", w: 0.21, a: "left" },
-      { h: "Party / note", w: 0.4, a: "left" }
+      { h: "Party / note", w: 0.4, a: "left" },
     ];
     const line = (vals, bold) => {
       ensure(16);
@@ -1290,7 +1393,7 @@ function toPdf(r) {
       cols.forEach((c, i) => {
         doc.text(vals[i], x + (i === 3 ? 8 : 0), y, {
           width: width * c.w - 4 - (i === 3 ? 8 : 0),
-          align: c.a
+          align: c.a,
         });
         maxY = Math.max(maxY, doc.y);
         x += width * c.w;
@@ -1300,12 +1403,18 @@ function toPdf(r) {
     };
     line(
       cols.map((c) => c.h),
-      true
+      true,
     );
     for (const x of r.rows)
       line(
-        [x.date, x.type, rs(x.amount), x.category, [x.party, x.note].filter(Boolean).join(" \u2014 ")],
-        false
+        [
+          x.date,
+          x.type,
+          rs(x.amount),
+          x.category,
+          [x.party, x.note].filter(Boolean).join(" \u2014 "),
+        ],
+        false,
       );
     if (!r.rows.length) doc.font("Helvetica").fontSize(10).text("No transactions in this period.");
     doc.end();
@@ -1317,7 +1426,14 @@ var import_exceljs2 = __toESM(require("exceljs"), 1);
 
 // src/features/files/index.ts
 async function renderFile(format, report) {
-  const body = format === "csv" ? toCsv(report) : format === "xlsx" ? await toXlsx(report) : format === "docx" ? await toDocx(report) : await toPdf(report);
+  const body =
+    format === "csv"
+      ? toCsv(report)
+      : format === "xlsx"
+        ? await toXlsx(report)
+        : format === "docx"
+          ? await toDocx(report)
+          : await toPdf(report);
   return { body, mime: FILE_MIME[format], fileName: fileName(format, report) };
 }
 
@@ -1361,23 +1477,22 @@ function rateLimit(opts2) {
     h.n += 1;
     if (h.n > opts2.max) {
       res.setHeader("Retry-After", String(Math.max(1, Math.ceil((h.reset - t) / 1e3))));
-      return void res.status(429).json({ error: "rate_limited", message: "Too many requests. Please slow down." });
+      return void res
+        .status(429)
+        .json({ error: "rate_limited", message: "Too many requests. Please slow down." });
     }
     next();
   };
 }
 var jsonErrors = () => (err, _req, res, _next) => {
-  const status = Number(
-    err?.status ?? err?.statusCode ?? 500
-  );
+  const status = Number(err?.status ?? err?.statusCode ?? 500);
   if (status === 413)
     return void res.status(413).json({ error: "too_large", message: "That request is too large." });
   if (status >= 400 && status < 500)
-    return void res.status(400).json({ error: "bad_request", message: "That request could not be read." });
-  console.error(
-    "unhandled error:",
-    String(err?.message ?? typeof err).slice(0, 200)
-  );
+    return void res
+      .status(400)
+      .json({ error: "bad_request", message: "That request could not be read." });
+  console.error("unhandled error:", String(err?.message ?? typeof err).slice(0, 200));
   res.status(500).json({ error: "server", message: "Something went wrong. Try again." });
 };
 var notFound = () => (_req, res) => {
@@ -1393,11 +1508,14 @@ app.use(
   rateLimit({
     windowMs: 6e4,
     max: 5,
-    key: (req) => String(req.headers["x-forwarded-for"] ?? req.ip ?? "anon").split(",")[0].trim()
-  })
+    key: (req) =>
+      String(req.headers["x-forwarded-for"] ?? req.ip ?? "anon")
+        .split(",")[0]
+        .trim(),
+  }),
 );
 var DATE2 = /^\d{4}-\d{2}-\d{2}$/;
-var q = (v) => typeof v === "string" && v ? v : void 0;
+var q = (v) => (typeof v === "string" && v ? v : void 0);
 var date = (v) => {
   const s = q(v);
   return s && DATE2.test(s) ? s : void 0;
@@ -1418,16 +1536,20 @@ app.get("/export", async (req, res) => {
   }
   const format = FILE_FORMATS.find((f) => f === req.query.format);
   if (!format)
-    return res.status(400).json({ error: "validation", message: `format must be one of: ${FILE_FORMATS.join(", ")}` });
+    return res
+      .status(400)
+      .json({ error: "validation", message: `format must be one of: ${FILE_FORMATS.join(", ")}` });
   const from = date(req.query.from);
   const to = date(req.query.to);
-  if (req.query.from && !from || req.query.to && !to)
-    return res.status(400).json({ error: "validation", message: "Dates must look like 2026-04-01." });
+  if ((req.query.from && !from) || (req.query.to && !to))
+    return res
+      .status(400)
+      .json({ error: "validation", message: "Dates must look like 2026-04-01." });
   try {
     const projectId = q(req.query.projectId);
     const [list, summary] = await Promise.all([
       svc.listTransactions(userId, { from, to, projectId, limit: 200 }),
-      svc.getSummary(userId, { from, to, projectId })
+      svc.getSummary(userId, { from, to, projectId }),
     ]);
     const transactions = [...list.items];
     while (transactions.length < list.total) {
@@ -1436,7 +1558,7 @@ app.get("/export", async (req, res) => {
         to,
         projectId,
         limit: 200,
-        offset: transactions.length
+        offset: transactions.length,
       });
       if (!next.items.length) break;
       transactions.push(...next.items);
@@ -1444,7 +1566,7 @@ app.get("/export", async (req, res) => {
     const [projects, accounts, events] = await Promise.all([
       catalog.list("projects", userId),
       catalog.list("accounts", userId),
-      catalog.list("events", userId)
+      catalog.list("events", userId),
     ]);
     const map = (rows) => Object.fromEntries(rows.map((r) => [r.id, r.name]));
     const names = { projects: map(projects), accounts: map(accounts), events: map(events) };
@@ -1454,10 +1576,7 @@ app.get("/export", async (req, res) => {
     res.setHeader("Cache-Control", "no-store");
     res.send(out.body);
   } catch (e) {
-    console.error(
-      "files error:",
-      String(e?.message ?? typeof e).slice(0, 300)
-    );
+    console.error("files error:", String(e?.message ?? typeof e).slice(0, 300));
     res.status(500).json({ error: "server", message: "Could not make the file. Try again." });
   }
 });
@@ -1474,8 +1593,13 @@ app.get("/sheet", async (req, res) => {
   }
   const key = SHEET_KEYS.find((k) => k === req.query.sheet);
   if (!key)
-    return res.status(400).json({ error: "validation", message: `sheet must be one of: ${SHEET_KEYS.join(", ")}` });
-  const month = typeof req.query.month === "string" && /^\d{4}-\d{2}$/.test(req.query.month) ? req.query.month : "all";
+    return res
+      .status(400)
+      .json({ error: "validation", message: `sheet must be one of: ${SHEET_KEYS.join(", ")}` });
+  const month =
+    typeof req.query.month === "string" && /^\d{4}-\d{2}$/.test(req.query.month)
+      ? req.query.month
+      : "all";
   const projectId = q(req.query.projectId);
   if (projectId && !/^\d{1,20}$/.test(projectId))
     return res.status(400).json({ error: "validation", message: "Bad project." });
@@ -1496,7 +1620,7 @@ app.get("/sheet", async (req, res) => {
           projectId,
           type,
           limit: 200,
-          offset: all.length
+          offset: all.length,
         });
         if (!next.items.length) break;
         all.push(...next.items);
@@ -1506,7 +1630,9 @@ app.get("/sheet", async (req, res) => {
       const list = await catalog.list(def.source, userId);
       const { from, to } = monthRange(month);
       rows = list.filter(
-        (r) => (!projectId || r.projectId === projectId) && (!from || recordDate(r) >= from && recordDate(r) <= to)
+        (r) =>
+          (!projectId || r.projectId === projectId) &&
+          (!from || (recordDate(r) >= from && recordDate(r) <= to)),
       );
     }
     const refs = ["projects", "accounts", "events", "loans", "investments"];
@@ -1517,20 +1643,18 @@ app.get("/sheet", async (req, res) => {
       const items = await catalog.list(ref, userId);
       names[ref] = Object.fromEntries(items.map((i) => [i.id, i.name ?? i.lender ?? i.id]));
     }
-    const title = key === "project" && projectId ? names.projects?.[projectId] ?? def.title : def.title;
+    const title =
+      key === "project" && projectId ? (names.projects?.[projectId] ?? def.title) : def.title;
     const body = await buildSheetXlsx(def, rows, names, title);
     res.setHeader(
       "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
     res.setHeader("Content-Disposition", `attachment; filename="${sheetFileName(def, month)}"`);
     res.setHeader("Cache-Control", "no-store");
     res.send(body);
   } catch (e) {
-    console.error(
-      "sheet error:",
-      String(e?.message ?? typeof e).slice(0, 300)
-    );
+    console.error("sheet error:", String(e?.message ?? typeof e).slice(0, 300));
     res.status(500).json({ error: "server", message: "Could not make the file. Try again." });
   }
 });

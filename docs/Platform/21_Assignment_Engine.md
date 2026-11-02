@@ -14,11 +14,11 @@ The AI accountant reads and writes the same sheets as the user.
 
 The chatbot never touches the database; it calls fixed tools, and the server decides confirmation from `CHATBOT_TOOL_POLICY` (`packages/constants/src/finance.ts`):
 
-| Level | Tools | Behaviour |
-| --- | --- | --- |
-| none | search, summary, list_*, generate_file | runs at once |
-| undo | create_* | runs, shows Undo |
-| confirm | update_*, delete_*, conclude/reopen event | shows the change, waits for the user |
+| Level   | Tools                                     | Behaviour                            |
+| ------- | ----------------------------------------- | ------------------------------------ |
+| none    | search, summary, list_*, generate_file    | runs at once                         |
+| undo    | create_*                                  | runs, shows Undo                     |
+| confirm | update__, delete__, conclude/reopen event | shows the change, waits for the user |
 
 More than 3 rows in one call always needs confirmation. Lifecycle: `32_Assignment_Lifecycle.md`.
 

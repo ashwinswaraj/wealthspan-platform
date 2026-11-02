@@ -1,7 +1,7 @@
 # @wealthspan/sdk
 
 Public SDK package — the only thing in this monorepo meant to be consumed
-by *external* code outside the Wealthspan apps themselves (integration
+by _external_ code outside the Wealthspan apps themselves (integration
 partners, third-party tooling). Everything else under `packages/` is
 internal-only (`"private": true` and workspace-scoped).
 

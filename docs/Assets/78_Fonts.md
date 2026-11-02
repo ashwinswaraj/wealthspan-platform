@@ -10,11 +10,11 @@ confirmed in `apps/web/src/styles.css`'s `--font-*` variables.
 
 ## Details
 
-| Role | Font | CSS variable |
-| --- | --- | --- |
+| Role                      | Font    | CSS variable      |
+| ------------------------- | ------- | ----------------- |
 | Headline (display, h1–h4) | Manrope | `--font-headline` |
-| Body | Inter | `--font-body` |
-| Label | Inter | `--font-label` |
+| Body                      | Inter   | `--font-body`     |
+| Label                     | Inter   | `--font-label`    |
 
 Both are sans-serif; body and label share the same typeface (Inter),
 headline uses a distinct one (Manrope) for visual hierarchy. See

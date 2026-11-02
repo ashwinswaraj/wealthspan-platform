@@ -3,7 +3,10 @@ import { getSession } from "../../../src/features/auth/controller";
 import type { AuthContext } from "../../../src/features/auth/types";
 
 const req = new Request("http://localhost/auth/session");
-const ctx = (user: Awaited<ReturnType<AuthContext["getCurrentUser"]>>, admin = false): AuthContext => ({
+const ctx = (
+  user: Awaited<ReturnType<AuthContext["getCurrentUser"]>>,
+  admin = false,
+): AuthContext => ({
   getCurrentUser: async () => user,
   isAdmin: () => admin,
 });

@@ -1,6 +1,6 @@
 # Seeding the first admin
 
-There is no seed script: Wealthspan admins are *pinned*, not stored.
+There is no seed script: Wealthspan admins are _pinned_, not stored.
 
 1. In `apps/api/catalyst/functions/finance/catalyst-config.json` set `ADMIN_EMAILS` (the admin's email) and
    `ADMIN_USER_IDS` (the admin's Catalyst user id: Console → Cloud Scale → Authentication → Users).

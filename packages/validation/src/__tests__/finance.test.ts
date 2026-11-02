@@ -45,31 +45,77 @@ describe("amount and date", () => {
 describe("transactions", () => {
   it("accepts a complete expense and income", () => {
     expect(validateTransactionInput(okExpense)).toEqual({});
-    expect(validateTransactionInput({ ...okExpense, type: "income", source: "Shop sales", category: "Business Sales" })).toEqual({});
+    expect(
+      validateTransactionInput({
+        ...okExpense,
+        type: "income",
+        source: "Shop sales",
+        category: "Business Sales",
+      }),
+    ).toEqual({});
   });
   it("payment mode is required and must be from the fixed list", () => {
-    expect(validateTransactionInput({ ...okExpense, paymentMode: "" }).paymentMode).toBe("Payment mode is required.");
-    expect(validateTransactionInput({ ...okExpense, paymentMode: "GPay maybe" }).paymentMode).toMatch(/valid payment mode/);
+    expect(validateTransactionInput({ ...okExpense, paymentMode: "" }).paymentMode).toBe(
+      "Payment mode is required.",
+    );
+    expect(
+      validateTransactionInput({ ...okExpense, paymentMode: "GPay maybe" }).paymentMode,
+    ).toMatch(/valid payment mode/);
   });
   it("account, project and category are required for income/expense", () => {
-    const e = validateTransactionInput({ type: "expense", amount: "10", date: "2026-10-05", paymentMode: "cash" });
+    const e = validateTransactionInput({
+      type: "expense",
+      amount: "10",
+      date: "2026-10-05",
+      paymentMode: "cash",
+    });
     expect(Object.keys(e).sort()).toEqual(["accountId", "category", "projectId"]);
   });
   it("transfer needs two different accounts and no project/category", () => {
-    expect(validateTransactionInput({ type: "transfer", amount: "5000", date: "2026-10-20", fromAccountId: "bank", toAccountId: "card" })).toEqual({});
-    expect(validateTransactionInput({ type: "transfer", amount: "5000", date: "2026-10-20", fromAccountId: "bank", toAccountId: "bank" }).toAccountId).toMatch(/different/);
-    const e = validateTransactionInput({ type: "transfer", amount: "5000", date: "2026-10-20", fromAccountId: "a", toAccountId: "b", projectId: "p1", category: "Shopping" });
+    expect(
+      validateTransactionInput({
+        type: "transfer",
+        amount: "5000",
+        date: "2026-10-20",
+        fromAccountId: "bank",
+        toAccountId: "card",
+      }),
+    ).toEqual({});
+    expect(
+      validateTransactionInput({
+        type: "transfer",
+        amount: "5000",
+        date: "2026-10-20",
+        fromAccountId: "bank",
+        toAccountId: "bank",
+      }).toAccountId,
+    ).toMatch(/different/);
+    const e = validateTransactionInput({
+      type: "transfer",
+      amount: "5000",
+      date: "2026-10-20",
+      fromAccountId: "a",
+      toAccountId: "b",
+      projectId: "p1",
+      category: "Shopping",
+    });
     expect(e.projectId).toBeDefined();
     expect(e.category).toBeDefined();
   });
   it("links go only where they belong", () => {
-    expect(validateTransactionInput({ ...okExpense, type: "income", eventId: "e1" }).eventId).toBeDefined();
+    expect(
+      validateTransactionInput({ ...okExpense, type: "income", eventId: "e1" }).eventId,
+    ).toBeDefined();
     expect(validateTransactionInput({ ...okExpense, source: "Salary" }).source).toBeDefined();
     expect(validateTransactionInput({ ...okExpense, loanId: "l1" })).toEqual({});
-    expect(validateTransactionInput({ ...okExpense, investmentId: "i1" }).investmentId).toBeDefined();
+    expect(
+      validateTransactionInput({ ...okExpense, investmentId: "i1" }).investmentId,
+    ).toBeDefined();
   });
   it("rejects an unknown type", () => {
-    expect(validateTransactionInput({ ...okExpense, type: "sale" }).type).toMatch(/income, expense or transfer/);
+    expect(validateTransactionInput({ ...okExpense, type: "sale" }).type).toMatch(
+      /income, expense or transfer/,
+    );
   });
 });
 
@@ -92,17 +138,53 @@ describe("projects, accounts, loans, events", () => {
     });
   });
   it("account", () => {
-    expect(validateAccountInput({ name: "HDFC savings", kind: "bank", openingBalance: "12000" })).toEqual({});
-    expect(validateAccountInput({ name: "Cash", kind: "cash", creditLimit: "5000" }).creditLimit).toMatch(/only for credit cards/);
-    expect(validateAccountInput({ name: "SBI card", kind: "credit_card", creditLimit: "100000" })).toEqual({});
+    expect(
+      validateAccountInput({ name: "HDFC savings", kind: "bank", openingBalance: "12000" }),
+    ).toEqual({});
+    expect(
+      validateAccountInput({ name: "Cash", kind: "cash", creditLimit: "5000" }).creditLimit,
+    ).toMatch(/only for credit cards/);
+    expect(
+      validateAccountInput({ name: "SBI card", kind: "credit_card", creditLimit: "100000" }),
+    ).toEqual({});
   });
   it("loan", () => {
-    expect(validateLoanInput({ projectId: "p", lender: "SBI", principal: "50000", emi: "3000", emiDayOfMonth: 10, interestRatePct: 11 })).toEqual({});
-    const e = validateLoanInput({ projectId: "p", lender: "SBI", principal: "0", emiDayOfMonth: 40, interestRatePct: 120 });
+    expect(
+      validateLoanInput({
+        projectId: "p",
+        lender: "SBI",
+        principal: "50000",
+        emi: "3000",
+        emiDayOfMonth: 10,
+        interestRatePct: 11,
+      }),
+    ).toEqual({});
+    const e = validateLoanInput({
+      projectId: "p",
+      lender: "SBI",
+      principal: "0",
+      emiDayOfMonth: 40,
+      interestRatePct: 120,
+    });
     expect(Object.keys(e).sort()).toEqual(["emiDayOfMonth", "interestRatePct", "principal"]);
   });
   it("event", () => {
-    expect(validateEventInput({ projectId: "p", name: "Diwali 2026", budget: "50000", startDate: "2026-10-20", endDate: "2026-11-02" })).toEqual({});
-    expect(validateEventInput({ projectId: "p", name: "Diwali", startDate: "2026-11-02", endDate: "2026-10-20" }).endDate).toMatch(/before/);
+    expect(
+      validateEventInput({
+        projectId: "p",
+        name: "Diwali 2026",
+        budget: "50000",
+        startDate: "2026-10-20",
+        endDate: "2026-11-02",
+      }),
+    ).toEqual({});
+    expect(
+      validateEventInput({
+        projectId: "p",
+        name: "Diwali",
+        startDate: "2026-11-02",
+        endDate: "2026-10-20",
+      }).endDate,
+    ).toMatch(/before/);
   });
 });

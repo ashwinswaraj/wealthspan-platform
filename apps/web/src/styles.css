@@ -1,4 +1,3 @@
-
 @import "tailwindcss" source(none);
 @source "../src";
 @source "../../admin/src";
@@ -298,8 +297,12 @@
 
 /* Skeleton shimmer — subtle grey left-to-right sweep, 1.5s loop */
 @keyframes skeletonShimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 .skeleton-shimmer {
   background-image: linear-gradient(
@@ -312,7 +315,9 @@
   animation: skeletonShimmer 1.5s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .skeleton-shimmer { animation: none; }
+  .skeleton-shimmer {
+    animation: none;
+  }
 }
 
 /* Wealthspan app (/app) */
@@ -348,10 +353,22 @@
   margin-block: auto;
 }
 @keyframes wealthspan-arc-draw {
-  0% { stroke-dashoffset: 1; opacity: 1; }
-  55% { stroke-dashoffset: 0; opacity: 1; }
-  85% { stroke-dashoffset: 0; opacity: 1; }
-  100% { stroke-dashoffset: 0; opacity: 0; }
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  55% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  85% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
 }
 .wealthspan-arc-draw {
   stroke-dasharray: 1;

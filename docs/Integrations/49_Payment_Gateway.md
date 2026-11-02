@@ -7,6 +7,7 @@
 ## What exists today
 
 Manual UPI flow (`apps/api/src/features/subscription`):
+
 1. User picks `pro_monthly` (Rs. 199) or `pro_annual` (Rs. 1,999) and pays by UPI outside the app.
 2. User submits plan, amount and the 12-digit UTR (`POST /subscription/payments`). The amount must match the plan; a UTR can only be used once.
 3. An admin approves or rejects it in the admin panel (`/admin/payments/:id/approve|reject`). Approval creates the subscription exactly once (unique `sub_key`).

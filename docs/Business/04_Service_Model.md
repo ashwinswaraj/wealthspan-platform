@@ -8,14 +8,14 @@ What Wealthspan delivers to a subscriber and how.
 
 ## What the user gets
 
-| Capability | How | Status |
-| --- | --- | --- |
-| Projects, one per business / income source | Catalog routes `/projects` | Built (API) |
-| Five sections per project as Excel-style sheets | `SHEETS` in `packages/constants/src/sheets.ts`; `apps/web/src/features/sheets` | Built |
-| Accounts with computed balances | `/accounts`, `packages/utils/src/finance.ts` | Built (API) |
-| AI accountant chat | `apps/api/src/features/chat` (Sarvam) | Endpoint built; tools Planned |
-| Exports: PDF, Excel, CSV, Word | `GET /server/files/export` | Built |
-| Summary and reports (calendar or April–March year) | `GET /summary` | Built |
+| Capability                                         | How                                                                            | Status                        |
+| -------------------------------------------------- | ------------------------------------------------------------------------------ | ----------------------------- |
+| Projects, one per business / income source         | Catalog routes `/projects`                                                     | Built (API)                   |
+| Five sections per project as Excel-style sheets    | `SHEETS` in `packages/constants/src/sheets.ts`; `apps/web/src/features/sheets` | Built                         |
+| Accounts with computed balances                    | `/accounts`, `packages/utils/src/finance.ts`                                   | Built (API)                   |
+| AI accountant chat                                 | `apps/api/src/features/chat` (Sarvam)                                          | Endpoint built; tools Planned |
+| Exports: PDF, Excel, CSV, Word                     | `GET /server/files/export`                                                     | Built                         |
+| Summary and reports (calendar or April–March year) | `GET /summary`                                                                 | Built                         |
 
 ## Delivery
 

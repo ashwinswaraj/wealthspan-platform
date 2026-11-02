@@ -22,30 +22,30 @@ The entry point for understanding Wealthspan: what it is, how it is built and wh
 
 ## Architecture in one view
 
-| Layer | What |
-| --- | --- |
-| `apps/web` | TanStack Start SPA, served under `/app/` via Catalyst Web Client Hosting |
-| `apps/admin` | Admin panel: users, subscriptions, catalog, plans, roles |
-| `apps/api` | Catalyst Advanced I/O functions: `finance` (transactions, catalog, subscription, admin), `chat`, `files` |
-| Data | Zoho Catalyst Data Store (ZCQL); every row keyed by `user_id` |
-| Auth | Catalyst Cloud Scale Embedded Authentication (Google / Zoho / email) |
-| Monorepo | pnpm + Turborepo; shared logic in `packages/*` (money maths only in `@wealthspan/utils`) |
+| Layer        | What                                                                                                     |
+| ------------ | -------------------------------------------------------------------------------------------------------- |
+| `apps/web`   | TanStack Start SPA, served under `/app/` via Catalyst Web Client Hosting                                 |
+| `apps/admin` | Admin panel: users, subscriptions, catalog, plans, roles                                                 |
+| `apps/api`   | Catalyst Advanced I/O functions: `finance` (transactions, catalog, subscription, admin), `chat`, `files` |
+| Data         | Zoho Catalyst Data Store (ZCQL); every row keyed by `user_id`                                            |
+| Auth         | Catalyst Cloud Scale Embedded Authentication (Google / Zoho / email)                                     |
+| Monorepo     | pnpm + Turborepo; shared logic in `packages/*` (money maths only in `@wealthspan/utils`)                 |
 
 There is no custom auth function; sign-in is Catalyst-hosted.
 
 ## What is shipped vs planned
 
-| Area | Status |
-| --- | --- |
-| Transactions API, catalog routes (projects, accounts, events, loans, investments), summary | Built in code; not yet verified on live Catalyst |
-| Sheets (Excel-style grids) in web | Built (`apps/web/src/features/sheets`) |
-| Chat endpoint with Sarvam and a daily quota (40 messages/user) | Built |
-| Chatbot tools (create / update / delete / confirm flow) | Planned: policy defined in `CHATBOT_TOOL_POLICY`, tools not built |
-| File exports: PDF, Excel, CSV, Word | Built (`features/files`) |
-| Subscriptions: free 30-day "Go" trial, Pro monthly / annual, manual UPI payment review | Built; payment gateway TBD |
-| Admin panel | Built (users directory, subscriptions, payments, ledger, audit) |
-| SMS reading, bank auto-connect, Account Aggregator | Phase 2 |
-| GST / tax filing, multi-user roles, forecasts | Phase 3 |
+| Area                                                                                       | Status                                                            |
+| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| Transactions API, catalog routes (projects, accounts, events, loans, investments), summary | Built in code; not yet verified on live Catalyst                  |
+| Sheets (Excel-style grids) in web                                                          | Built (`apps/web/src/features/sheets`)                            |
+| Chat endpoint with Sarvam and a daily quota (40 messages/user)                             | Built                                                             |
+| Chatbot tools (create / update / delete / confirm flow)                                    | Planned: policy defined in `CHATBOT_TOOL_POLICY`, tools not built |
+| File exports: PDF, Excel, CSV, Word                                                        | Built (`features/files`)                                          |
+| Subscriptions: free 30-day "Go" trial, Pro monthly / annual, manual UPI payment review     | Built; payment gateway TBD                                        |
+| Admin panel                                                                                | Built (users directory, subscriptions, payments, ledger, audit)   |
+| SMS reading, bank auto-connect, Account Aggregator                                         | Phase 2                                                           |
+| GST / tax filing, multi-user roles, forecasts                                              | Phase 3                                                           |
 
 ## Terminology
 

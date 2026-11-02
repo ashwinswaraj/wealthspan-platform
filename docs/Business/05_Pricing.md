@@ -6,11 +6,11 @@
 
 Plans and prices are defined only in `PLANS` in `apps/api/src/features/subscription/types.ts`. Prices are in paise.
 
-| Plan id | Name | Price | Access |
-| --- | --- | --- | --- |
-| `trial` | 1 month free trial ("Go") | Rs. 0 | 30 days |
-| `pro_monthly` | Pro, monthly | Rs. 199 | 30 days |
-| `pro_annual` | Pro, annual | Rs. 1,999 | 365 days |
+| Plan id       | Name                      | Price     | Access   |
+| ------------- | ------------------------- | --------- | -------- |
+| `trial`       | 1 month free trial ("Go") | Rs. 0     | 30 days  |
+| `pro_monthly` | Pro, monthly              | Rs. 199   | 30 days  |
+| `pro_annual`  | Pro, annual               | Rs. 1,999 | 365 days |
 
 Tiers shown in admin: **Free / Go / Pro** (`trial` is Go; paid plans are Pro).
 

@@ -6,20 +6,20 @@ Base: `/server/<function>`. Login required everywhere (401 otherwise). Writes ne
 
 ## finance
 
-| Route | Purpose |
-|---|---|
-| `GET /me` | 200 if logged in |
-| `GET /transactions?from&to&projectId&accountId&type&limit&offset` | list |
-| `POST /transactions`, `PATCH|DELETE /transactions/:id` | create / edit / soft delete |
-| `GET /summary?from&to&projectId` | totals computed by `packages/utils` |
-| `GET|POST /projects|accounts|events|loans|investments`, `PATCH|DELETE /<entity>/:id` | catalog (409 if still in use) |
-| `POST /events/:id/conclude|reopen`, `/loans/:id/close|reopen`, `/projects|accounts/:id/archive|unarchive` | state changes |
-| `GET /subscription` | plan, `active`, `endsOn`, `daysLeft`, `trialUsed` |
-| `POST /subscription/trial` | start the free 1-month trial (409 if already used) |
-| `GET|POST /subscription/payments` | my payment submissions / submit plan + 12-digit UTR + amount |
-| `GET /admin/me` | am I an admin (and, if listed but unpinned, my user id) |
-| `GET /admin/overview|users|payments|ledger|audit|health` | admins only (403 otherwise) |
-| `POST /admin/payments/:id/approve|reject` | admins only, optional `note` |
+| Route                                                             | Purpose                                                 |
+| ----------------------------------------------------------------- | ------------------------------------------------------- |
+| `GET /me`                                                         | 200 if logged in                                        |
+| `GET /transactions?from&to&projectId&accountId&type&limit&offset` | list                                                    |
+| `POST /transactions`, `PATCH                                      | DELETE /transactions/:id`                               | create / edit / soft delete                                  |
+| `GET /summary?from&to&projectId`                                  | totals computed by `packages/utils`                     |
+| `GET                                                              | POST /projects                                          | accounts                                                     | events               | loans      | investments`, `PATCH | DELETE /<entity>/:id`       | catalog (409 if still in use) |
+| `POST /events/:id/conclude                                        | reopen`, `/loans/:id/close                              | reopen`, `/projects                                          | accounts/:id/archive | unarchive` | state changes        |
+| `GET /subscription`                                               | plan, `active`, `endsOn`, `daysLeft`, `trialUsed`       |
+| `POST /subscription/trial`                                        | start the free 1-month trial (409 if already used)      |
+| `GET                                                              | POST /subscription/payments`                            | my payment submissions / submit plan + 12-digit UTR + amount |
+| `GET /admin/me`                                                   | am I an admin (and, if listed but unpinned, my user id) |
+| `GET /admin/overview                                              | users                                                   | payments                                                     | ledger               | audit      | health`              | admins only (403 otherwise) |
+| `POST /admin/payments/:id/approve                                 | reject`                                                 | admins only, optional `note`                                 |
 
 Limits: 90 writes/min and 300 reads/min per user (per instance).
 
@@ -29,10 +29,10 @@ Limits: 90 writes/min and 300 reads/min per user (per instance).
 
 ## files
 
-| Route | Purpose |
-|---|---|
-| `GET /export?format=csv|xlsx|docx|pdf&from&to&projectId` | report file (PDF uses "Rs.") |
-| `GET /sheet?sheet=<key>&month=YYYY-MM|all&projectId` | one sheet as `.xlsx`; keys: income, expense, debt-loan, savings-investing, festivals-functions, accounts, project |
+| Route                                 | Purpose        |
+| ------------------------------------- | -------------- |
+| `GET /export?format=csv               | xlsx           | docx                                                                                                              | pdf&from&to&projectId` | report file (PDF uses "Rs.") |
+| `GET /sheet?sheet=<key>&month=YYYY-MM | all&projectId` | one sheet as `.xlsx`; keys: income, expense, debt-loan, savings-investing, festivals-functions, accounts, project |
 
 Limit: 5 requests/min per client address.
 
