@@ -87,6 +87,15 @@ app.use(async (req: Req, res, next) => {
     const userId = user?.user_id ?? user?.userId;
     if (!userId)
       console.error(
+        "auth: debug x-zc headers =",
+        Object.keys(req.headers)
+          .filter((k) => k.startsWith("x-zc"))
+          .join(","),
+        "; user raw =",
+        JSON.stringify(user ?? null)?.slice(0, 200),
+      );
+    if (!userId)
+      console.error(
         "auth: no user id; user keys =",
         user ? Object.keys(user).join(",") : "none",
         "; has session headers =",
