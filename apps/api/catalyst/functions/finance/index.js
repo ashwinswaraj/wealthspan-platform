@@ -1861,10 +1861,13 @@ app.use(async (req, res, next) => {
   try {
     const c = catalyst.initialize(req);
     let user;
-    try {
-      user = await c.userManagement().getCurrentUser();
-    } catch (e) {
-      console.error("auth: getCurrentUser failed", e instanceof Error ? e.message : e);
+    for (const scope of ["user", "admin"]) {
+      try {
+        user = await catalyst.initialize(req, { scope }).userManagement().getCurrentUser();
+      } catch (e) {
+        console.error(`auth: getCurrentUser (${scope}) failed`, e instanceof Error ? e.message : e);
+      }
+      if (user?.user_id ?? user?.userId) break;
     }
     const userId = user?.user_id ?? user?.userId;
     if (!userId)

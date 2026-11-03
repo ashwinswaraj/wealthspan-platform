@@ -75,10 +75,14 @@ app.use(async (req: Req, res, next) => {
   try {
     const c = catalyst.initialize(req);
     let user: Record<string, unknown> | undefined;
-    try {
-      user = await c.userManagement().getCurrentUser();
-    } catch (e) {
-      console.error("auth: getCurrentUser failed", e instanceof Error ? e.message : e);
+    // The logged-in user is only visible to an SDK initialised in USER scope; the default (admin) scope returns nothing.
+    for (const scope of ["user", "admin"] as const) {
+      try {
+        user = await catalyst.initialize(req, { scope }).userManagement().getCurrentUser();
+      } catch (e) {
+        console.error(`auth: getCurrentUser (${scope}) failed`, e instanceof Error ? e.message : e);
+      }
+      if (user?.user_id ?? user?.userId) break;
     }
     const userId = user?.user_id ?? user?.userId;
     if (!userId)
