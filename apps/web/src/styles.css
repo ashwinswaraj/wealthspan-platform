@@ -375,3 +375,50 @@
   stroke-dashoffset: 1;
   animation: wealthspan-arc-draw 3.2s ease-in-out infinite;
 }
+
+/* Login arc animation (same motion as the original wobble) */
+@keyframes ws-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+@keyframes ws-glow {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(1.05);
+  }
+}
+@keyframes ws-dot {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.18);
+  }
+}
+.ws-bob {
+  animation: ws-bob 4.2s ease-in-out infinite;
+}
+.ws-glow {
+  animation: ws-glow 5.4s ease-in-out infinite;
+}
+.ws-dot {
+  animation: ws-dot 4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ws-bob,
+  .ws-glow,
+  .ws-dot {
+    animation: none;
+  }
+}
