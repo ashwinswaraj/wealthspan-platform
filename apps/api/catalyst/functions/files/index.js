@@ -1410,7 +1410,7 @@ app.get("/export", async (req, res) => {
   let catalog;
   try {
     const c = catalyst.initialize(req);
-    const user = await c.userManagement().getCurrentUser();
+    const user = await catalyst.initialize(req, { scope: "user" }).userManagement().getCurrentUser() || await c.userManagement().getCurrentUser();
     userId = String(user?.user_id ?? user?.userId ?? "");
     if (!userId) throw new Error("no user");
     svc = createFinanceService({ store: createCatalystFinanceStore(c) });
@@ -1468,7 +1468,7 @@ app.get("/sheet", async (req, res) => {
   let c;
   try {
     c = catalyst.initialize(req);
-    const user = await c.userManagement().getCurrentUser();
+    const user = await catalyst.initialize(req, { scope: "user" }).userManagement().getCurrentUser() || await c.userManagement().getCurrentUser();
     userId = String(user?.user_id ?? user?.userId ?? "");
     if (!userId) throw new Error("no user");
   } catch {
