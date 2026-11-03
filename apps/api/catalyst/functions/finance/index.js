@@ -1867,6 +1867,13 @@ app.use(async (req, res, next) => {
       console.error("auth: getCurrentUser failed", e instanceof Error ? e.message : e);
     }
     const userId = user?.user_id ?? user?.userId;
+    if (!userId)
+      console.error(
+        "auth: no user id; user keys =",
+        user ? Object.keys(user).join(",") : "none",
+        "; has session headers =",
+        Boolean(req.headers["x-zc-user-cred-token"] || req.headers.cookie)
+      );
     if (!userId) return res.status(401).json({ error: "unauthorized", message: "Please log in." });
     req.userId = String(userId);
     req.email = String(user?.email_id ?? user?.emailId ?? "");
