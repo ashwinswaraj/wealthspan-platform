@@ -85,7 +85,30 @@ app.use(async (req: Req, res, next) => {
       if (user?.user_id ?? user?.userId) break;
     }
     const userId = user?.user_id ?? user?.userId;
-    if (!userId)
+    if (!userId) {
+      // Ask Catalyst directly and log exactly what it answers (status + body), then use it if it holds a user.
+      try {
+        const um = catalyst.initialize(req, { scope: "user" }).userManagement();
+        const resp = await um.requester.send({
+          method: "GET",
+          path: "/project-user/current",
+          catalyst: true,
+          user: "user",
+        });
+        const body = resp.data;
+        console.error(
+          "auth: raw /project-user/current",
+          resp.statusCode,
+          JSON.stringify(body)?.slice(0, 300),
+        );
+        const raw = body?.data ?? body;
+        if (raw && (raw.user_id ?? raw.userId)) user = raw;
+      } catch (e) {
+        console.error("auth: raw call failed", e instanceof Error ? e.message : e);
+      }
+    }
+    const userId2 = user?.user_id ?? user?.userId;
+    if (!userId2)
       console.error(
         "auth: debug x-zc headers =",
         Object.keys(req.headers)
@@ -94,15 +117,15 @@ app.use(async (req: Req, res, next) => {
         "; user raw =",
         JSON.stringify(user ?? null)?.slice(0, 200),
       );
-    if (!userId)
+    if (!userId2)
       console.error(
         "auth: no user id; user keys =",
         user ? Object.keys(user).join(",") : "none",
         "; has session headers =",
         Boolean(req.headers["x-zc-user-cred-token"] || req.headers.cookie),
       );
-    if (!userId) return res.status(401).json({ error: "unauthorized", message: "Please log in." });
-    req.userId = String(userId);
+    if (!userId2) return res.status(401).json({ error: "unauthorized", message: "Please log in." });
+    req.userId = String(userId2);
     req.email = String(user?.email_id ?? user?.emailId ?? "");
     req.name = [user?.first_name, user?.last_name].filter(Boolean).join(" ");
     req.c = c;
