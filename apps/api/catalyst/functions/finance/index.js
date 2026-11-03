@@ -1857,6 +1857,18 @@ app.use(import_express.default.json({ limit: "32kb" }));
 var list = (v) => String(v ?? "").split(",");
 var ADMIN_EMAILS = () => list(process.env.ADMIN_EMAILS);
 var ADMIN_USER_IDS = () => list(process.env.ADMIN_USER_IDS);
+async function userFromGateway(req, c) {
+  const id3 = String(req.headers["x-zc-user-id"] ?? "");
+  const hasCred = Boolean(req.headers["x-zc-user-cred-token"]);
+  if (!/^\d{6,24}$/.test(id3) || !hasCred) return void 0;
+  try {
+    const details = await c.userManagement().getUserDetails(id3);
+    return { ...details ?? {}, user_id: id3 };
+  } catch (e) {
+    console.error("auth: getUserDetails failed", e instanceof Error ? e.message : e);
+    return { user_id: id3 };
+  }
+}
 app.use(async (req, res, next) => {
   try {
     const c = catalyst.initialize(req);
@@ -1891,6 +1903,7 @@ app.use(async (req, res, next) => {
         console.error("auth: raw call failed", e instanceof Error ? e.message : e);
       }
     }
+    if (!(user?.user_id ?? user?.userId)) user = await userFromGateway(req, c);
     const userId2 = user?.user_id ?? user?.userId;
     if (!userId2)
       console.error(

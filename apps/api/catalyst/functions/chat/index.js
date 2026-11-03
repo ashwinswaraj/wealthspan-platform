@@ -487,6 +487,10 @@ var notFound = () => (_req, res) => {
 
 // catalyst/functions/chat/src/entry.ts
 var catalyst = require("zcatalyst-sdk-node");
+var gatewayUserId = (req) => {
+  const id = String(req.headers["x-zc-user-id"] ?? "");
+  return /^\d{6,24}$/.test(id) && req.headers["x-zc-user-cred-token"] ? id : "";
+};
 var app = (0, import_express.default)();
 hardenApp(app);
 app.use(requestGuard());
@@ -507,7 +511,7 @@ app.post("/chat", async (req, res) => {
   try {
     c = catalyst.initialize(req);
     const user = await catalyst.initialize(req, { scope: "user" }).userManagement().getCurrentUser() || await c.userManagement().getCurrentUser();
-    userId = String(user?.user_id ?? user?.userId ?? "");
+    userId = String(user?.user_id ?? user?.userId ?? gatewayUserId(req));
     if (!userId) throw new Error("no user");
   } catch {
     return res.status(401).json({ error: "unauthorized", message: "Please log in." });
