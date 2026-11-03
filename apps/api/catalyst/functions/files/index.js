@@ -1388,6 +1388,10 @@ var notFound = () => (_req, res) => {
 
 // catalyst/functions/files/src/entry.ts
 var catalyst = require("zcatalyst-sdk-node");
+var gatewayUserId = (req) => {
+  const id3 = String(req.headers["x-zc-user-id"] ?? "");
+  return /^\d{6,24}$/.test(id3) && req.headers["x-zc-user-cred-token"] ? id3 : "";
+};
 var app = (0, import_express.default)();
 hardenApp(app);
 app.use(requestGuard());
@@ -1411,7 +1415,7 @@ app.get("/export", async (req, res) => {
   try {
     const c = catalyst.initialize(req);
     const user = await catalyst.initialize(req, { scope: "user" }).userManagement().getCurrentUser() || await c.userManagement().getCurrentUser();
-    userId = String(user?.user_id ?? user?.userId ?? "");
+    userId = String(user?.user_id ?? user?.userId ?? gatewayUserId(req));
     if (!userId) throw new Error("no user");
     svc = createFinanceService({ store: createCatalystFinanceStore(c) });
     catalog = createCatalystCatalogStore(c);
@@ -1469,7 +1473,7 @@ app.get("/sheet", async (req, res) => {
   try {
     c = catalyst.initialize(req);
     const user = await catalyst.initialize(req, { scope: "user" }).userManagement().getCurrentUser() || await c.userManagement().getCurrentUser();
-    userId = String(user?.user_id ?? user?.userId ?? "");
+    userId = String(user?.user_id ?? user?.userId ?? gatewayUserId(req));
     if (!userId) throw new Error("no user");
   } catch {
     return res.status(401).json({ error: "unauthorized", message: "Please log in." });

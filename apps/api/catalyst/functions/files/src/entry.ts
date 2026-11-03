@@ -29,6 +29,12 @@ import {
   requestGuard,
 } from "../../../../src/middleware/security";
 
+/** Catalyst's gateway has authenticated the call and passes the user id; /project-user/current returns null for this app. */
+const gatewayUserId = (req: { headers: Record<string, unknown> }): string => {
+  const id = String(req.headers["x-zc-user-id"] ?? "");
+  return /^\d{6,24}$/.test(id) && req.headers["x-zc-user-cred-token"] ? id : "";
+};
+
 const app = express();
 hardenApp(app);
 app.use(requestGuard());
@@ -59,7 +65,7 @@ app.get("/export", async (req, res) => {
     const user =
       (await catalyst.initialize(req, { scope: "user" }).userManagement().getCurrentUser()) ||
       (await c.userManagement().getCurrentUser());
-    userId = String(user?.user_id ?? user?.userId ?? "");
+    userId = String(user?.user_id ?? user?.userId ?? gatewayUserId(req));
     if (!userId) throw new Error("no user");
     svc = createFinanceService({ store: createCatalystFinanceStore(c) });
     catalog = createCatalystCatalogStore(c);
@@ -131,7 +137,7 @@ app.get("/sheet", async (req, res) => {
     const user =
       (await catalyst.initialize(req, { scope: "user" }).userManagement().getCurrentUser()) ||
       (await c.userManagement().getCurrentUser());
-    userId = String(user?.user_id ?? user?.userId ?? "");
+    userId = String(user?.user_id ?? user?.userId ?? gatewayUserId(req));
     if (!userId) throw new Error("no user");
   } catch {
     return res.status(401).json({ error: "unauthorized", message: "Please log in." });

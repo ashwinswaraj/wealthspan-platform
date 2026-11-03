@@ -71,6 +71,27 @@ const list = (v: string | undefined) => String(v ?? "").split(",");
 const ADMIN_EMAILS = () => list(process.env.ADMIN_EMAILS);
 const ADMIN_USER_IDS = () => list(process.env.ADMIN_USER_IDS);
 
+/**
+ * Catalyst answers /project-user/current with `data: null` for this app, although its gateway has already
+ * authenticated the request (the function is protected, so an anonymous call never reaches this code) and
+ * passes the user's id in `x-zc-user-id`. Use that id, then read the profile (e-mail, name) as admin.
+ */
+async function userFromGateway(
+  req: express.Request,
+  c: { userManagement(): { getUserDetails(id: string): Promise<Record<string, unknown>> } },
+) {
+  const id = String(req.headers["x-zc-user-id"] ?? "");
+  const hasCred = Boolean(req.headers["x-zc-user-cred-token"]);
+  if (!/^\d{6,24}$/.test(id) || !hasCred) return undefined;
+  try {
+    const details = await c.userManagement().getUserDetails(id);
+    return { ...(details ?? {}), user_id: id } as Record<string, unknown>;
+  } catch (e) {
+    console.error("auth: getUserDetails failed", e instanceof Error ? e.message : e);
+    return { user_id: id } as Record<string, unknown>;
+  }
+}
+
 app.use(async (req: Req, res, next) => {
   try {
     const c = catalyst.initialize(req);
@@ -107,6 +128,7 @@ app.use(async (req: Req, res, next) => {
         console.error("auth: raw call failed", e instanceof Error ? e.message : e);
       }
     }
+    if (!(user?.user_id ?? user?.userId)) user = await userFromGateway(req, c);
     const userId2 = user?.user_id ?? user?.userId;
     if (!userId2)
       console.error(
