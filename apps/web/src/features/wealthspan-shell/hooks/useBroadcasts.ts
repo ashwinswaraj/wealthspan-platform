@@ -41,5 +41,17 @@ export function useBroadcasts() {
       /* private window: the dot just reappears next visit */
     }
   }, [list]);
-  return { broadcasts: list, hasUnread: list.length > 0 && list[0].id !== seen, markSeen };
+  const seenAt = list.findIndex((b) => b.id === seen);
+  const unreadCount = seenAt === -1 ? list.length : seenAt;
+  const isUnread = (b: Broadcast) => {
+    const at = list.findIndex((x) => x.id === b.id);
+    return seenAt === -1 ? true : at < seenAt;
+  };
+  return {
+    broadcasts: list,
+    hasUnread: unreadCount > 0,
+    unreadCount,
+    isUnread,
+    markSeen,
+  };
 }

@@ -49,10 +49,7 @@ export default function AppHome() {
         displayName="there"
         onOpenMenu={() => setDrawer(true)}
         onUpgrade={() => setUpgrade(true)}
-        onNotifications={() => {
-          setInbox(true);
-          news.markSeen();
-        }}
+        onNotifications={() => setInbox(true)}
         hasUnread={news.hasUnread}
         onAsk={() => undefined}
         onVoice={() => undefined}
@@ -74,7 +71,15 @@ export default function AppHome() {
         onOpenSettings={() => undefined}
       />
       {inbox ? (
-        <NotificationsSheet broadcasts={news.broadcasts} onClose={() => setInbox(false)} />
+        <NotificationsSheet
+          broadcasts={news.broadcasts}
+          isUnread={news.isUnread}
+          onMarkAllRead={news.markSeen}
+          onClose={() => {
+            news.markSeen();
+            setInbox(false);
+          }}
+        />
       ) : null}
       {upgrade ? <UpgradeScreen onBack={() => setUpgrade(false)} /> : null}
       {sheet ? (
