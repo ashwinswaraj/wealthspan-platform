@@ -257,7 +257,7 @@ app.get(
 /** Is there a valid login? Used by the app to decide between the login screen and the app. */
 app.get(
   "/me",
-  wrap(async (req) => ({ userId: req.userId })),
+  wrap(async (req) => ({ userId: req.userId, email: req.email ?? "", name: req.name ?? "" })),
 );
 
 /* ---- projects, accounts, events, loans, investments ---- */

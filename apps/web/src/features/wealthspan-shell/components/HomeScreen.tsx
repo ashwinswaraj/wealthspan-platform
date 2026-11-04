@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { GREETINGS, timeGreeting } from "../lib/prompts";
+import { AttachMenu } from "./AttachMenu";
 import { ChatInputBar } from "./ChatInputBar";
 import { Greeting } from "./Greeting";
 import { HomeTopBar } from "./HomeTopBar";
@@ -29,6 +30,7 @@ export function HomeScreen({
 }: HomeScreenProps) {
   const [text, setText] = useState("");
   const [promo, setPromo] = useState(true);
+  const [attach, setAttach] = useState(false);
   const line = useMemo(() => {
     const pool = [timeGreeting(new Date().getHours()), ...GREETINGS];
     return pool[Math.floor(Math.random() * pool.length)];
@@ -60,11 +62,12 @@ export function HomeScreen({
             </div>
           )}
         </main>
+        {attach ? <AttachMenu onPick={() => undefined} onClose={() => setAttach(false)} /> : null}
         <ChatInputBar
           value={text}
           onChange={setText}
           onSubmit={() => send(text)}
-          onAttach={() => undefined}
+          onAttach={() => setAttach((a) => !a)}
           onMic={() => undefined}
           onVoice={onVoice}
         />
