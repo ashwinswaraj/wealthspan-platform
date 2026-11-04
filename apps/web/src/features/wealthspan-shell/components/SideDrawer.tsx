@@ -122,7 +122,6 @@ export function SideDrawer({
                 href={`#${s.key}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  if (!activeProjectId) return setHint("Add or pick a project first.");
                   setHint(null);
                   onOpenSection(s.key);
                 }}

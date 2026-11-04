@@ -46,6 +46,7 @@ export function SheetScreen({
   const [infoOpen, setInfoOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [recording, setRecording] = useState(false);
 
   const months = useMemo(() => monthOptions(), []);
   const monthLabel = months.find((m) => m.value === month)?.label ?? "All Months";
@@ -68,6 +69,9 @@ export function SheetScreen({
     refs.ready &&
     refs.options.accounts.length === 0;
 
+  const showEmpty =
+    !data.isLoading && !data.isError && refs.ready && rows.length === 0 && !recording;
+  const noun = def.title.toLowerCase();
   const totals = columnTotals(def.columns, rows);
   const net = sheetKey === "project" ? incomeExpenseNet(rows) : null;
   const downloadUrl = apiUrl(
@@ -148,17 +152,21 @@ export function SheetScreen({
 
         <div className="flex-1 overflow-y-auto no-scrollbar flex flex-col">
           <section
-            className="w-full px-5 sm:px-6 pt-2 pb-3 flex items-center justify-between gap-3 shrink-0 relative z-40"
+            className="w-full px-5 sm:px-6 pt-3.5 pb-3 flex items-center justify-between gap-3 shrink-0 relative z-40"
             data-purpose="date-filter-container"
           >
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search rows"
-              aria-label="Search rows"
-              className="min-w-0 flex-1 h-9 px-4 rounded-full bg-white border border-[#ebebeb] shadow-sm text-xs font-medium text-gray-800 placeholder:text-gray-400 outline-none focus:border-gray-400"
-            />
+            {showEmpty ? (
+              <span />
+            ) : (
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search rows"
+                aria-label="Search rows"
+                className="min-w-0 flex-1 h-9 px-4 rounded-full bg-white border border-[#ebebeb] shadow-sm text-xs font-medium text-gray-800 placeholder:text-gray-400 outline-none focus:border-gray-400"
+              />
+            )}
             <div className="relative">
               <button
                 className={pill}
@@ -273,7 +281,7 @@ export function SheetScreen({
               {error}
             </p>
           ) : null}
-          {needsAccount ? (
+          {needsAccount && !showEmpty ? (
             <p className="mx-5 sm:mx-6 mb-3 rounded-2xl bg-amber-50 border border-amber-100 px-4 py-2.5 text-xs text-amber-900">
               Add an account first (Cash, Bank, Card or Wallet) so entries know where the money
               moved.{" "}
@@ -287,7 +295,45 @@ export function SheetScreen({
             </p>
           ) : null}
 
-          {data.isLoading || !refs.ready ? (
+          {showEmpty ? (
+            <div className="flex-1 flex flex-col items-center justify-center px-8 pb-0 pt-4 text-center">
+              <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mb-6">
+                <svg
+                  className="w-9 h-9 text-gray-900"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="8" x2="16" y1="13" y2="13" />
+                  <line x1="8" x2="16" y1="17" y2="17" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold text-gray-950 tracking-tight mb-2">No Records</h2>
+              <p className="text-[13px] text-gray-600 leading-relaxed max-w-[250px] mb-7">
+                No {noun} details found for <b className="text-gray-950">{monthLabel}</b>. Start by
+                recording a detailed entry in the table ledger.
+              </p>
+              <button
+                type="button"
+                onClick={() => setRecording(true)}
+                className="w-full max-w-[320px] h-12 rounded-full bg-black text-white text-[13px] font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition cursor-pointer"
+              >
+                <span className="text-lg leading-none">+</span> Record {noun} entry
+              </button>
+              <button
+                type="button"
+                onClick={() => setMonthOpen(true)}
+                className="mt-5 text-[13px] font-semibold text-gray-600 hover:text-black cursor-pointer"
+              >
+                Select another month
+              </button>
+            </div>
+          ) : data.isLoading || !refs.ready ? (
             <p className="text-center text-xs text-gray-500 py-16">Loading your sheet…</p>
           ) : data.isError ? (
             <p className="text-center text-xs text-gray-600 py-16 px-6">
