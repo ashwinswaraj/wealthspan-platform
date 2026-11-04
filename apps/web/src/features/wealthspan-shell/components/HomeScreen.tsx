@@ -4,6 +4,7 @@ import { ChatInputBar } from "./ChatInputBar";
 import { Greeting } from "./Greeting";
 import { HomeTopBar } from "./HomeTopBar";
 import { PromptWheel } from "./PromptWheel";
+import { WelcomeCarousel } from "./WelcomeCarousel";
 
 interface HomeScreenProps {
   displayName: string;
@@ -27,6 +28,7 @@ export function HomeScreen({
   hasUnread = false,
 }: HomeScreenProps) {
   const [text, setText] = useState("");
+  const [promo, setPromo] = useState(true);
   const line = useMemo(() => {
     const pool = [timeGreeting(new Date().getHours()), ...GREETINGS];
     return pool[Math.floor(Math.random() * pool.length)];
@@ -49,10 +51,14 @@ export function HomeScreen({
           hasUnread={hasUnread}
         />
         <main className="relative z-0 isolate flex-1 min-h-0 flex flex-col justify-end w-full max-w-full px-4 sm:px-5 pb-2 -mt-[56px] sm:-mt-[60px] -mb-[68px] sm:-mb-[74px] overflow-hidden">
-          <div className="w-full flex flex-col justify-end items-start pt-6 sm:pt-8 pb-[74px] sm:pb-[80px] transition-all duration-300 relative select-none z-0 isolate">
-            <Greeting line={line} name={displayName} />
-            <PromptWheel onPick={(t) => setText(t)} />
-          </div>
+          {promo ? (
+            <WelcomeCarousel onClose={() => setPromo(false)} />
+          ) : (
+            <div className="w-full flex flex-col justify-end items-start pt-6 sm:pt-8 pb-[74px] sm:pb-[80px] transition-all duration-300 relative select-none z-0 isolate">
+              <Greeting line={line} name={displayName} />
+              <PromptWheel onPick={(t) => setText(t)} />
+            </div>
+          )}
         </main>
         <ChatInputBar
           value={text}

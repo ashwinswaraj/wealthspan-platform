@@ -6,6 +6,7 @@ import {
   HomeScreen,
   NotificationsSheet,
   SideDrawer,
+  UpgradeScreen,
   useBroadcasts,
 } from "@/features/wealthspan-shell";
 import type { Project } from "@/features/projects";
@@ -18,6 +19,7 @@ export default function AppHome() {
   const [project, setProject] = useState<Project | null>(null);
   const [sheet, setSheet] = useState<SheetTarget | null>(null);
   const [inbox, setInbox] = useState(false);
+  const [upgrade, setUpgrade] = useState(false);
   const news = useBroadcasts();
 
   if (session.status === "loading")
@@ -46,7 +48,7 @@ export default function AppHome() {
       <HomeScreen
         displayName="there"
         onOpenMenu={() => setDrawer(true)}
-        onUpgrade={() => undefined}
+        onUpgrade={() => setUpgrade(true)}
         onNotifications={() => {
           setInbox(true);
           news.markSeen();
@@ -74,6 +76,7 @@ export default function AppHome() {
       {inbox ? (
         <NotificationsSheet broadcasts={news.broadcasts} onClose={() => setInbox(false)} />
       ) : null}
+      {upgrade ? <UpgradeScreen onBack={() => setUpgrade(false)} /> : null}
       {sheet ? (
         <SheetScreen
           target={sheet}
