@@ -2016,7 +2016,7 @@ app.get(
 );
 app.get(
   "/me",
-  wrap(async (req) => ({ userId: req.userId }))
+  wrap(async (req) => ({ userId: req.userId, email: req.email ?? "", name: req.name ?? "" }))
 );
 var ENTITIES = ["projects", "accounts", "events", "loans", "investments"];
 for (const entity of ENTITIES) {

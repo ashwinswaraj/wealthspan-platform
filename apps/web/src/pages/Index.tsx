@@ -46,7 +46,7 @@ export default function AppHome() {
   return (
     <>
       <HomeScreen
-        displayName="there"
+        displayName={session.displayName}
         onOpenMenu={() => setDrawer(true)}
         onUpgrade={() => setUpgrade(true)}
         onNotifications={() => setInbox(true)}
@@ -57,7 +57,10 @@ export default function AppHome() {
       <SideDrawer
         open={drawer}
         onClose={() => setDrawer(false)}
-        user={{ name: "Ashwin", subtitle: "Personal Finance & Wealth Tracker" }}
+        user={{
+          name: session.fullName || session.displayName,
+          subtitle: "Personal Finance & Wealth Tracker",
+        }}
         activeProjectId={project?.id ?? null}
         onSelectProject={(p) => {
           setProject(p);
