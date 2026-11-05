@@ -1,10 +1,13 @@
 name: deploy-staging
 
 # Deploys the Catalyst functions and client (apps/api/catalyst) with the Catalyst CLI.
-# Runs only manually. Requires repository secrets: CATALYST_TOKEN, CATALYST_PROJECT_ID.
-# After every deploy, re-set SARVAM_API_KEY in the Catalyst console (a deploy wipes variables
-# that are not in catalyst-config.json).
+# Runs on every push to main (and manually). Requires repository secrets: CATALYST_TOKEN,
+# CATALYST_PROJECT_ID and SARVAM_API_KEY. A deploy wipes function variables that are not in
+# catalyst-config.json, so the Sarvam key is written into the chat function's config inside the
+# runner only (never committed) right before deploying.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -32,6 +35,16 @@ jobs:
         run: pnpm build:client
       - name: Install Catalyst CLI
         run: npm i -g zcatalyst-cli
+      - name: Set the Sarvam key for the chat function (runner only)
+        env:
+          SARVAM_API_KEY: ${{ secrets.SARVAM_API_KEY }}
+        run: |
+          f=apps/api/catalyst/functions/chat/catalyst-config.json
+          if [ -n "$SARVAM_API_KEY" ]; then
+            node -e 'const fs=require("fs");const f=process.argv[1];const c=JSON.parse(fs.readFileSync(f,"utf8"));c.deployment.env_variables={...(c.deployment.env_variables||{}),SARVAM_API_KEY:process.env.SARVAM_API_KEY};fs.writeFileSync(f,JSON.stringify(c,null,2))' "$f"
+          else
+            echo "SARVAM_API_KEY secret is not set: chat will not work until it is."
+          fi
       - name: Deploy
         working-directory: apps/api/catalyst
         run: catalyst deploy --project ${{ secrets.CATALYST_PROJECT_ID }} --dc in --token ${{ secrets.CATALYST_TOKEN }}
