@@ -91,6 +91,10 @@ WEALTHSPAN/
 │           │   │   ├── components/
 │           │   │   ├── hooks/
 │           │   │   └── lib/
+│           │   ├── wealthspan-chat/
+│           │   │   ├── components/
+│           │   │   ├── hooks/
+│           │   │   └── lib/
 │           │   └── wealthspan-shell/
 │           │       ├── components/
 │           │       ├── hooks/
