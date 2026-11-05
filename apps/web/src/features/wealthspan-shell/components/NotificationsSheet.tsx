@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Broadcast } from "../hooks/useBroadcasts";
+import { readMuted, writeMuted, type Broadcast } from "../hooks/useBroadcasts";
 
 type Filter = "all" | "unread" | Broadcast["severity"];
 
@@ -65,6 +65,8 @@ export function NotificationsSheet({
   // Keep what was unread when the page opened, so cards don't flip while the person is reading.
   const [unreadIds] = useState(() => new Set(broadcasts.filter(isUnread).map((b) => b.id)));
   const [markedAll, setMarkedAll] = useState(false);
+  const [prefs, setPrefs] = useState(false);
+  const [dot, setDot] = useState(() => !readMuted());
   const unread = (b: Broadcast) => !markedAll && unreadIds.has(b.id);
   const shown = broadcasts.filter((b) =>
     filter === "all" ? true : filter === "unread" ? unread(b) : b.severity === filter,
@@ -236,6 +238,47 @@ export function NotificationsSheet({
             </div>
           )}
         </main>
+        {prefs ? (
+          <div
+            className="absolute inset-0 z-40 flex items-end bg-black/40"
+            onClick={() => setPrefs(false)}
+          >
+            <div
+              className="w-full rounded-t-[28px] bg-white dark:bg-[#16191f] p-6 pb-8 space-y-5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-lg font-bold text-gray-950 dark:text-white">
+                Notification Preferences
+              </h2>
+              <label className="flex items-center justify-between gap-4 cursor-pointer">
+                <span>
+                  <span className="block text-sm font-semibold text-gray-950 dark:text-white">
+                    Red dot for new announcements
+                  </span>
+                  <span className="block text-xs text-gray-500">
+                    Shown on the bell when the Wealthspan team posts something new.
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={dot}
+                  onChange={(e) => {
+                    setDot(e.target.checked);
+                    writeMuted(!e.target.checked);
+                  }}
+                  className="w-5 h-5 accent-black"
+                />
+              </label>
+              <button
+                type="button"
+                onClick={() => setPrefs(false)}
+                className="w-full h-12 rounded-full bg-black dark:bg-white text-white dark:text-black text-sm font-semibold cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        ) : null}
         <footer className="w-full pb-3.5 sm:pb-4 pt-2 px-5 sm:px-6 z-30 shrink-0 select-none sticky bottom-0 relative">
           <div
             className="absolute inset-x-0 bottom-0 -top-4 pointer-events-none z-10 bg-gradient-to-t from-[#f9f9f9]/95 dark:from-[#0d0f12]/95 from-0% via-[#f9f9f9]/85 dark:via-[#0d0f12]/85 via-45% via-[#f9f9f9]/45 dark:via-[#0d0f12]/45 via-75% via-[#f9f9f9]/15 dark:via-[#0d0f12]/15 via-90% to-transparent backdrop-blur-[4px]"

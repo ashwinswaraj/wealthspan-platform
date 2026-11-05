@@ -20,6 +20,22 @@ const readSeen = () => {
   }
 };
 
+const MUTE_KEY = "wealthspan:muteBellDot";
+export const readMuted = () => {
+  try {
+    return window.localStorage.getItem(MUTE_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+export const writeMuted = (muted: boolean) => {
+  try {
+    window.localStorage.setItem(MUTE_KEY, muted ? "1" : "0");
+  } catch {
+    /* private window: the choice lasts until the page closes */
+  }
+};
+
 /** Announcements from the admin for this user's plan, plus whether the newest one is still unread. */
 export function useBroadcasts() {
   const q = useQuery({
@@ -49,7 +65,7 @@ export function useBroadcasts() {
   };
   return {
     broadcasts: list,
-    hasUnread: unreadCount > 0,
+    hasUnread: unreadCount > 0 && !readMuted(),
     unreadCount,
     isUnread,
     markSeen,

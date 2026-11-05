@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChatThread, useChat, useSpeechInput } from "@/features/wealthspan-chat";
 import { GREETINGS, timeGreeting } from "../lib/prompts";
 import { AttachMenu } from "./AttachMenu";
 import { ChatInputBar } from "./ChatInputBar";
@@ -12,8 +13,6 @@ interface HomeScreenProps {
   onOpenMenu: () => void;
   onUpgrade: () => void;
   onNotifications: () => void;
-  onAsk: (text: string) => void;
-  onVoice: () => void;
   /** Red dot on the bell: an announcement the user has not opened yet. */
   hasUnread?: boolean;
 }
@@ -24,8 +23,6 @@ export function HomeScreen({
   onOpenMenu,
   onUpgrade,
   onNotifications,
-  onAsk,
-  onVoice,
   hasUnread = false,
 }: HomeScreenProps) {
   const [text, setText] = useState("");
@@ -36,12 +33,45 @@ export function HomeScreen({
     return pool[Math.floor(Math.random() * pool.length)];
   }, []);
 
-  const send = (t: string) => {
+  const chat = useChat();
+  const speech = useSpeechInput();
+  const [files, setFiles] = useState<File[]>([]);
+  const [notice, setNotice] = useState("");
+  const [recording, setRecording] = useState(false);
+  const autoSend = useRef(false);
+  const startedAt = useRef(0);
+
+  const send = async (t: string) => {
     const v = t.trim();
-    if (!v) return;
+    if ((!v && !files.length) || chat.pending) return;
+    const parts = await Promise.all(files.map(describe));
     setText("");
-    onAsk(v);
+    setFiles([]);
+    setNotice("");
+    chat.send([v, ...parts].filter(Boolean).join("\n\n"));
   };
+
+  const beginVoice = (andSend: boolean) => {
+    autoSend.current = andSend;
+    setNotice("");
+    startedAt.current = Date.now();
+    if (speech.start()) setRecording(true);
+  };
+
+  // When the recognizer stops (stop button, silence, or an error), put what it heard into the bar, or send it.
+  useEffect(() => {
+    if (!recording || speech.listening) return;
+    if (Date.now() - startedAt.current < 400) return;
+    setRecording(false);
+    const heard = speech.text.trim();
+    if (heard) {
+      if (autoSend.current) chat.send([text, heard].filter(Boolean).join(" "));
+      else setText((t) => [t, heard].filter(Boolean).join(" "));
+      if (autoSend.current) setText("");
+    }
+    if (speech.error) setNotice(speech.error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speech.listening]);
 
   return (
     <div className="bg-[#ffffff] dark:bg-[#212121] text-[#0d0d0d] dark:text-[#ececec] flex flex-col h-[100dvh] w-full select-none antialiased font-sans overflow-hidden transition-colors duration-200 selection:bg-neutral-300 selection:text-black dark:selection:bg-neutral-600 dark:selection:text-white">
@@ -53,7 +83,15 @@ export function HomeScreen({
           hasUnread={hasUnread}
         />
         <main className="relative z-0 isolate flex-1 min-h-0 flex flex-col justify-end w-full max-w-full px-4 sm:px-5 pb-2 -mt-[56px] sm:-mt-[60px] -mb-[68px] sm:-mb-[74px] overflow-hidden">
-          {promo ? (
+          {chat.messages.length > 0 ? (
+            <ChatThread
+              messages={chat.messages}
+              pending={chat.pending}
+              onRetry={chat.retry}
+              onNewChat={chat.reset}
+              onUpgrade={onUpgrade}
+            />
+          ) : promo ? (
             <WelcomeCarousel onClose={() => setPromo(false)} />
           ) : (
             <div className="w-full flex flex-col justify-end items-start pt-6 sm:pt-8 pb-[74px] sm:pb-[80px] transition-all duration-300 relative select-none z-0 isolate">
@@ -62,16 +100,52 @@ export function HomeScreen({
             </div>
           )}
         </main>
-        {attach ? <AttachMenu onPick={() => undefined} onClose={() => setAttach(false)} /> : null}
+        {attach ? (
+          <AttachMenu
+            onPick={(f) => setFiles((cur) => [...cur, ...f].slice(0, 4))}
+            onClose={() => setAttach(false)}
+          />
+        ) : null}
         <ChatInputBar
           value={text}
           onChange={setText}
-          onSubmit={() => send(text)}
+          onSubmit={() => {
+            if (recording) {
+              autoSend.current = true;
+              speech.stop();
+              return;
+            }
+            void send(text);
+          }}
           onAttach={() => setAttach((a) => !a)}
-          onMic={() => undefined}
-          onVoice={onVoice}
+          onMic={() => beginVoice(false)}
+          onVoice={() => beginVoice(true)}
+          attachments={files}
+          onRemoveAttachment={(i) => setFiles((f) => f.filter((_, j) => j !== i))}
+          recording={recording}
+          heard={speech.text}
+          onCancelRecording={() => {
+            speech.cancel();
+            setRecording(false);
+          }}
+          onStopRecording={() => {
+            autoSend.current = false;
+            speech.stop();
+          }}
+          notice={notice || (recording ? speech.error : "")}
+          disabled={chat.pending}
         />
       </div>
     </div>
   );
+}
+
+const TEXTY = /\.(txt|csv|json|md|tsv)$/i;
+/** What the assistant receives for a picked file: the text of small text files, otherwise just the name. */
+async function describe(f: File): Promise<string> {
+  if ((f.type.startsWith("text/") || TEXTY.test(f.name)) && f.size < 200_000) {
+    const body = (await f.text()).slice(0, 1400);
+    return `[File ${f.name}]\n${body}`;
+  }
+  return `[Attached ${f.type.startsWith("image/") ? "image" : "file"}: ${f.name}. Reading this type of file is not available yet.]`;
 }
