@@ -51,8 +51,6 @@ export default function AppHome() {
         onUpgrade={() => setUpgrade(true)}
         onNotifications={() => setInbox(true)}
         hasUnread={news.hasUnread}
-        onAsk={() => undefined}
-        onVoice={() => undefined}
       />
       <SideDrawer
         open={drawer}

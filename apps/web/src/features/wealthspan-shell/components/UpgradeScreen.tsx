@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { api, ApiError } from "@/services/api";
 
 type Tab = "go" | "pro";
 type Billing = "monthly" | "annual";
@@ -47,6 +49,36 @@ const tick = (cls: string) => (
 export function UpgradeScreen({ onBack }: { onBack: () => void }) {
   const [tab, setTab] = useState<Tab>("go");
   const [billing, setBilling] = useState<Billing>("monthly");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  const qc = useQueryClient();
+
+  const startTrial = async () => {
+    setBusy(true);
+    setMsg("");
+    try {
+      await api("finance", "/subscription/trial", { method: "POST", body: {} });
+      await qc.invalidateQueries({ queryKey: ["subscription"] });
+      onBack();
+    } catch (e) {
+      // 409 means the trial was already started: that is fine, the plan is active.
+      if (e instanceof ApiError && e.status === 409) setMsg("Your free trial was already used.");
+      else setMsg(e instanceof ApiError ? e.message : "Something went wrong. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  const restore = async () => {
+    setBusy(true);
+    try {
+      const e = await api<{ active: boolean }>("finance", "/subscription");
+      setMsg(e.active ? "Your plan is active." : "No active plan found on this account.");
+    } catch (err) {
+      setMsg(err instanceof ApiError ? err.message : "Something went wrong. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
   const plan = PLANS[tab];
   const rows = tab === "go" ? GO_ROWS : PRO_ROWS;
   const name = tab === "go" ? "Go" : "Pro";
@@ -245,18 +277,33 @@ export function UpgradeScreen({ onBack }: { onBack: () => void }) {
             <button
               id="upgradeActionBtn"
               type="button"
-              onClick={onBack}
-              className="w-full py-3.5 px-6 rounded-full font-semibold text-base sm:text-[16.5px] transition-all shadow-md cursor-pointer flex flex-col items-center justify-center active:scale-[0.98] bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-900 dark:hover:bg-neutral-200 active:bg-neutral-700"
+              disabled={busy}
+              onClick={() =>
+                tab === "go" && m
+                  ? void startTrial()
+                  : setMsg("Online payment opens soon. Start with the free Go trial.")
+              }
+              className="disabled:opacity-60 w-full py-3.5 px-6 rounded-full font-semibold text-base sm:text-[16.5px] transition-all shadow-md cursor-pointer flex flex-col items-center justify-center active:scale-[0.98] bg-black dark:bg-white text-white dark:text-black hover:bg-neutral-900 dark:hover:bg-neutral-200 active:bg-neutral-700"
             >
               <span className="leading-tight text-[17px] tracking-tight">{cta}</span>
               {ctaSub ? (
                 <span className="text-[11.5px] opacity-80 font-normal mt-0.5">{ctaSub}</span>
               ) : null}
             </button>
+            {msg ? (
+              <p
+                role="status"
+                className="text-center text-[12.5px] text-neutral-600 dark:text-neutral-300 mt-2"
+              >
+                {msg}
+              </p>
+            ) : null}
             <div className="text-center mt-2">
               <button
                 id="restoreSubscriptionBtn"
                 type="button"
+                disabled={busy}
+                onClick={() => void restore()}
                 className="font-medium text-[14px] sm:text-[15px] text-neutral-900 dark:text-neutral-200 hover:text-black dark:hover:text-white active:opacity-75 transition-opacity cursor-pointer"
               >
                 Restore subscription
