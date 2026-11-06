@@ -71,7 +71,7 @@ export function SheetScreen({
 
   const showEmpty =
     !data.isLoading && !data.isError && refs.ready && rows.length === 0 && !recording;
-  const noun = def.title.toLowerCase();
+  const noun = ledgerNoun(def.title);
   const totals = columnTotals(def.columns, rows);
   const net = sheetKey === "project" ? incomeExpenseNet(rows) : null;
   const downloadUrl = apiUrl(
@@ -369,4 +369,13 @@ export function SheetScreen({
       </main>
     </div>
   );
+}
+
+/** How the empty state names a section ("No savings & investment details found…"), as in the original design. */
+function ledgerNoun(title: string): string {
+  const t = title.toLowerCase();
+  if (t.includes("debt") || t.includes("loan") || t.includes("emi")) return "debt / EMI";
+  if (t.includes("saving") || t.includes("invest")) return "savings & investment";
+  if (t.includes("festival") || t.includes("function")) return "festival / function";
+  return t;
 }
