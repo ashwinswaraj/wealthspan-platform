@@ -13,6 +13,7 @@ import { Toaster as Sonner } from "@wealthspan/ui/components/sonner";
 import { Toaster } from "@wealthspan/ui/components/toaster";
 import { TooltipProvider } from "@wealthspan/ui/components/tooltip";
 import ConnectionPill from "@/components/ConnectionPill";
+import { THEME_BOOT_SCRIPT, useTheme } from "@/features/wealthspan-shell";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
@@ -28,6 +29,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     ],
     scripts: [
+      { children: THEME_BOOT_SCRIPT },
       {
         type: "application/ld+json",
         children: JSON.stringify({
@@ -102,6 +104,7 @@ function useFrameGuard() {
 
 function RootComponent() {
   useFrameGuard();
+  useTheme();
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>

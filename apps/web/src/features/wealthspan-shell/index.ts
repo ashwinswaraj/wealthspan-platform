@@ -1,4 +1,5 @@
 export { HomeScreen } from "./components/HomeScreen";
+export { THEME_BOOT_SCRIPT, useTheme, type ThemePreference } from "./lib/theme";
 export { WelcomeCarousel } from "./components/WelcomeCarousel";
 export { UpgradeScreen } from "./components/UpgradeScreen";
 export { SideDrawer } from "./components/SideDrawer";
